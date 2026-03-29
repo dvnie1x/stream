@@ -1727,10 +1727,11 @@ body.night #ctx-cursor-item.active-cursor{background:rgba(255,255,255,.10);borde
   <div class="sync-dot grey" id="sync-dot"></div>
   <div style="flex:1">
     <div id="sync-title" style="font-weight:500;font-size:13px">Sync across devices</div>
-    <div id="sync-sub" style="font-size:11px;color:var(--t3);margin-top:2px">Enter your email to get a magic link</div>
+    <div id="sync-sub" style="font-size:11px;color:var(--t3);margin-top:2px">Enter your email to receive a 6-digit code</div>
   </div>
   <input id="sync-email" type="email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')sbDoLogin()">
-  <button class="btn bd" onclick="sbDoLogin()" style="flex-shrink:0;padding:7px 14px;font-size:12px" id="sync-btn">Send link</button>
+  <input id="sync-otp" type="number" placeholder="123456" style="display:none;width:80px" onkeydown="if(event.key==='Enter')sbVerifyCode()">
+  <button class="btn bd" onclick="sbDoLogin()" style="flex-shrink:0;padding:7px 14px;font-size:12px" id="sync-btn">Send code</button>
   <div class="db" onclick="closeSyncBadge()" style="flex-shrink:0">✕</div>
 </div>
 
@@ -3884,8 +3885,10 @@ function setSyncStatus(connected,email){
     dot.className='sync-dot grey';
     title.textContent='Sync across devices';
     sub.textContent='Enter your email to get a magic link';
-    btn.textContent='Send link';btn.onclick=sbDoLogin;
+    btn.textContent='Send code';btn.onclick=sbDoLogin;
     inp.style.display='';
+    const otpInp=document.getElementById('sync-otp');
+    if(otpInp)otpInp.style.display='none';
     if(sb){sb.style.color='';sb.title='Sync';}
     if(mobileSyncDot){mobileSyncDot.style.opacity='0';mobileSyncDot.style.background='';}
     if(mobileSyncBtn){mobileSyncBtn.style.color='';}
@@ -3900,21 +3903,40 @@ async function sbDoLogin(){
   const ok=await sbSendMagicLink(email);
   if(ok){
     document.getElementById('sync-title').textContent='Check your email';
-    document.getElementById('sync-sub').textContent='Click the magic link — then come back here.';
-    btn.textContent='Waiting…';
-    // Poll for session (user clicked link in another tab)
-    let attempts=0;
-    const poll=setInterval(async()=>{
-      attempts++;if(attempts>60){clearInterval(poll);btn.disabled=false;btn.textContent='Send link';return;}
-      const sess=await sbGetSession();
-      if(sess?.access_token){
-        clearInterval(poll);
-        await sbActivateSession(sess);
-      }
-    },3000);
+    document.getElementById('sync-sub').textContent='Enter the 6-digit code from your email';
+    // Show OTP input, hide email input
+    window._sbLoginEmail=email;
+    document.getElementById('sync-email').style.display='none';
+    const otpInp=document.getElementById('sync-otp');
+    otpInp.style.display='';
+    setTimeout(()=>otpInp.focus(),100);
+    btn.textContent='Verify';btn.disabled=false;
+    btn.onclick=sbVerifyCode;
   }else{
     document.getElementById('sync-sub').textContent='Something went wrong. Try again.';
-    btn.disabled=false;btn.textContent='Send link';
+    btn.disabled=false;btn.textContent='Send code';
+  }
+}
+
+async function sbVerifyCode(){
+  const email=document.getElementById('sync-email').value.trim()||window._sbLoginEmail||'';
+  const token=document.getElementById('sync-otp').value.trim();
+  if(!token)return;
+  const btn=document.getElementById('sync-btn');
+  btn.textContent='Verifying…';btn.disabled=true;
+  // Store email for reuse in case input was hidden
+  window._sbLoginEmail=email||window._sbLoginEmail;
+  const emailToUse=document.getElementById('sync-email').value.trim()||window._sbLoginEmail;
+  const d=await sbVerifyOTP(emailToUse,token);
+  if(d?.access_token){
+    // Reset UI
+    document.getElementById('sync-email').style.display='';
+    document.getElementById('sync-otp').style.display='none';
+    document.getElementById('sync-otp').value='';
+    await sbActivateSession(d);
+  }else{
+    document.getElementById('sync-sub').textContent='Invalid code. Try again.';
+    btn.disabled=false;btn.textContent='Verify';
   }
 }
 
@@ -3922,7 +3944,6 @@ async function sbActivateSession(sess){
   sbAuthToken=sess.access_token;
   sbUserId=sess.user?.id;
   localStorage.setItem('sb_session',JSON.stringify(sess));
-  // Pull remote data, then push local if remote is empty
   const remote=await sbLoadAll();
   const hasRemote=remote&&Object.keys(remote).length>0;
   if(hasRemote){
