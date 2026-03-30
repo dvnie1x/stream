@@ -282,6 +282,8 @@ body.night .sr-item:hover{background:rgba(255,255,255,.07)}
   }
   /* On mobile, hide pg-dash completely — pg-mobile replaces it */
   #pg-dash{display:none!important}
+  /* Prevent any other .pg from overlaying pg-mobile */
+  body:has(#pg-mobile.act) .pg:not(#pg-mobile){display:none!important}
   body:has(#pg-mobile.act) #page-stack{overflow:hidden!important}
 
   /* ── TWO-PANEL PAGER ─────────────────────────────────── */
@@ -5394,7 +5396,8 @@ const isMobile=()=>window.innerWidth<=640;
 // Show/hide mobile nav based on screen size
 function checkMobileNav(){
   const nav=document.getElementById('mobile-nav');
-  if(nav)nav.style.display=isMobile()?'flex':'none';
+  // Hide bottom nav entirely on mobile — pg-mobile is the full mobile experience
+  if(nav)nav.style.display='none';
 }
 checkMobileNav();
 window.addEventListener('resize',checkMobileNav);
@@ -5943,6 +5946,8 @@ function syncMobileNav(){
   stack.addEventListener('touchend',e=>{
     if(!swiping)return;
     swiping=false;
+    // Don't trigger desktop page swipes when mobile home is active
+    if(document.getElementById('pg-mobile')?.classList.contains('act'))return;
     const dx=e.changedTouches[0].clientX-tx;
     const dy=e.changedTouches[0].clientY-ty;
     // Only trigger for predominantly horizontal swipes > 60px
