@@ -309,8 +309,8 @@ body.night .sr-item:hover{background:rgba(255,255,255,.07)}
     align-items:center;justify-content:space-between;
     padding:calc(env(safe-area-inset-top,0px) + 56px) 28px calc(env(safe-area-inset-bottom,0px) + 36px);
     overflow:hidden;
-    /* Lock it — no scroll, no bounce */
-    touch-action:none;
+    /* Allow horizontal swipe to tiles, block vertical bounce */
+    touch-action:pan-x;
     overscroll-behavior:none;
     -webkit-overflow-scrolling:auto;
     /* Dark gradient background */
@@ -5466,7 +5466,14 @@ function mhPagerSetup(){
   // Block all vertical scroll/bounce on the hero panel
   const hero=document.getElementById('mh-panel-hero');
   if(hero){
-    hero.addEventListener('touchmove',e=>{e.preventDefault();},{passive:false});
+    let _hx=0,_hy=0;
+    hero.addEventListener('touchstart',e=>{_hx=e.touches[0].clientX;_hy=e.touches[0].clientY;},{passive:true});
+    hero.addEventListener('touchmove',e=>{
+      const dx=Math.abs(e.touches[0].clientX-_hx);
+      const dy=Math.abs(e.touches[0].clientY-_hy);
+      // Only block vertical moves (bounce) — allow horizontal swipe through
+      if(dy>dx)e.preventDefault();
+    },{passive:false});
   }
   // Double-tap anywhere on mobile page opens quick-add
   let _lastTap=0;
