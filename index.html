@@ -1564,6 +1564,93 @@ body.night #ctx-cursor-item.active-cursor{background:rgba(255,255,255,.10);borde
 .sync-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .sync-dot.green{background:#16a34a}
 .sync-dot.grey{background:var(--t3)}
+
+/* ── AUTH MODAL ────────────────────────────────────────── */
+#sb-modal{
+  position:fixed;inset:0;z-index:10000;
+  display:flex;align-items:center;justify-content:center;
+}
+#sb-modal-bg{
+  position:absolute;inset:0;
+  background:rgba(0,0,0,.35);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  animation:sbBgIn .25s ease both;
+}
+@keyframes sbBgIn{from{opacity:0}to{opacity:1}}
+#sb-modal-box{
+  position:relative;z-index:1;
+  width:min(420px,calc(100vw - 32px));
+  background:rgba(252,252,254,.92);
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:28px;
+  padding:36px 32px 32px;
+  box-shadow:0 32px 80px rgba(0,0,0,.22),0 1.5px 0 rgba(255,255,255,.95) inset;
+  backdrop-filter:blur(32px) saturate(1.6);-webkit-backdrop-filter:blur(32px) saturate(1.6);
+  overflow:hidden;
+  animation:sbBoxIn .35s cubic-bezier(.34,1.1,.64,1) both;
+}
+body.night #sb-modal-box{
+  background:rgba(16,17,24,.92);
+  border-color:rgba(255,255,255,.1);
+  box-shadow:0 32px 80px rgba(0,0,0,.55),0 1px 0 rgba(255,255,255,.07) inset;
+}
+@keyframes sbBoxIn{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+/* Decorative orbs */
+.sb-orb{position:absolute;border-radius:50%;pointer-events:none}
+.sb-orb-1{width:260px;height:260px;top:-80px;right:-80px;background:radial-gradient(circle,rgba(99,132,255,.2) 0%,transparent 70%)}
+.sb-orb-2{width:200px;height:200px;bottom:-60px;left:-60px;background:radial-gradient(circle,rgba(147,51,234,.15) 0%,transparent 70%)}
+/* Logo */
+.sb-logo{font-size:36px;font-weight:700;letter-spacing:-.04em;color:var(--text);line-height:1;margin-bottom:4px;position:relative;z-index:1}
+.sb-logo-dot{color:rgba(99,132,255,.9)}
+.sb-tagline{font-size:11px;font-family:'Geist Mono',monospace;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:28px;position:relative;z-index:1}
+/* Mode tabs */
+.sb-tabs{display:flex;background:rgba(0,0,0,.05);border-radius:12px;padding:3px;margin-bottom:24px;position:relative;z-index:1}
+body.night .sb-tabs{background:rgba(255,255,255,.07)}
+.sb-tab{flex:1;padding:9px;border-radius:9px;font-size:13px;font-weight:500;border:none;background:transparent;color:var(--t2);font-family:'Geist',sans-serif;cursor:pointer;transition:all .18s}
+.sb-tab.on{background:var(--glass-bd);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.1)}
+body.night .sb-tab.on{background:rgba(255,255,255,.12)}
+/* Fields */
+.sb-form{position:relative;z-index:1}
+.sb-field{margin-bottom:14px}
+.sb-label{display:block;font-size:11px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:6px;font-weight:600}
+.sb-inp-wrap{position:relative}
+.sb-inp{
+  width:100%;padding:13px 16px;
+  border:1px solid var(--border);border-radius:14px;
+  font-family:'Geist',sans-serif;font-size:15px;
+  background:rgba(255,255,255,.65);color:var(--text);
+  outline:none;transition:border-color .15s,box-shadow .15s;
+  box-sizing:border-box;
+}
+body.night .sb-inp{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);color:var(--text)}
+.sb-inp:focus{border-color:rgba(99,132,255,.6);box-shadow:0 0 0 3px rgba(99,132,255,.12)}
+.sb-inp-wrap .sb-inp{padding-right:44px}
+.sb-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t3);cursor:pointer;padding:4px;display:flex;align-items:center}
+.sb-eye:hover{color:var(--t2)}
+/* Error */
+.sb-error{font-size:12px;color:#dc2626;font-family:'Geist Mono',monospace;min-height:18px;margin-bottom:10px}
+/* Submit */
+.sb-btn{
+  width:100%;padding:15px;border-radius:16px;
+  background:var(--text);color:#fff;border:none;
+  font-family:'Geist',sans-serif;font-size:15px;font-weight:600;
+  cursor:pointer;transition:opacity .15s,transform .15s;
+  letter-spacing:-.01em;
+}
+body.night .sb-btn{background:rgba(240,240,255,.92);color:#111}
+.sb-btn:hover{opacity:.88}
+.sb-btn:active{transform:scale(.98)}
+.sb-btn:disabled{opacity:.5;cursor:default}
+/* Close */
+.sb-close{
+  position:absolute;top:16px;right:16px;
+  width:30px;height:30px;border-radius:50%;border:none;
+  background:rgba(0,0,0,.06);color:var(--t2);
+  font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+body.night .sb-close{background:rgba(255,255,255,.1)}
+.sb-close:hover{background:rgba(0,0,0,.12)}
 .le{display:flex;align-items:center;gap:12px;padding:11px 13px;background:rgba(255,255,255,.5);border-radius:9px;border:1px solid rgba(230,230,238,.8);margin-bottom:6px;border-left-width:3px}
 .le-ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
 .le-sj{font-size:13px;font-weight:500}
@@ -2452,12 +2539,51 @@ body.night #ctx-cursor-item.active-cursor{background:rgba(255,255,255,.10);borde
   <div class="sync-dot grey" id="sync-dot"></div>
   <div style="flex:1">
     <div id="sync-title" style="font-weight:500;font-size:13px">Sync across devices</div>
-    <div id="sync-sub" style="font-size:11px;color:var(--t3);margin-top:2px">Enter your email to receive a 6-digit code</div>
+    <div id="sync-sub" style="font-size:11px;color:var(--t3);margin-top:2px">Sign in to sync your data</div>
   </div>
-  <input id="sync-email" type="email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')sbDoLogin()">
-  <input id="sync-otp" type="number" placeholder="123456" style="display:none;width:80px" onkeydown="if(event.key==='Enter')sbVerifyCode()">
-  <button class="btn bd" onclick="sbDoLogin()" style="flex-shrink:0;padding:7px 14px;font-size:12px" id="sync-btn">Send code</button>
+  <button class="btn bd" onclick="sbOpenModal()" style="flex-shrink:0;padding:7px 14px;font-size:12px">Sign in</button>
   <div class="db" onclick="closeSyncBadge()" style="flex-shrink:0">✕</div>
+</div>
+
+<!-- Full-screen auth modal -->
+<div id="sb-modal" style="display:none">
+  <div id="sb-modal-bg" onclick="sbCloseModal()"></div>
+  <div id="sb-modal-box">
+    <!-- Decorative orbs -->
+    <div class="sb-orb sb-orb-1"></div>
+    <div class="sb-orb sb-orb-2"></div>
+    <!-- Logo -->
+    <div class="sb-logo">stream<span class="sb-logo-dot">.</span></div>
+    <div class="sb-tagline">sync across devices</div>
+    <!-- Mode toggle -->
+    <div class="sb-tabs">
+      <button class="sb-tab on" id="sb-tab-in" onclick="sbSetMode('in')">Sign in</button>
+      <button class="sb-tab" id="sb-tab-up" onclick="sbSetMode('up')">Create account</button>
+    </div>
+    <!-- Form -->
+    <div class="sb-form">
+      <div class="sb-field">
+        <label class="sb-label">Email</label>
+        <input class="sb-inp" id="sb-email" type="email" placeholder="you@example.com" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('sb-pass').focus()">
+      </div>
+      <div class="sb-field">
+        <label class="sb-label" id="sb-pass-label">Password</label>
+        <div class="sb-inp-wrap">
+          <input class="sb-inp" id="sb-pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')sbSubmit()">
+          <button class="sb-eye" onclick="sbTogglePass()" tabindex="-1">
+            <svg id="sb-eye-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="sb-field" id="sb-pass2-field" style="display:none">
+        <label class="sb-label">Confirm password</label>
+        <input class="sb-inp" id="sb-pass2" type="password" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter')sbSubmit()">
+      </div>
+      <div class="sb-error" id="sb-error"></div>
+      <button class="sb-btn" id="sb-submit" onclick="sbSubmit()">Sign in</button>
+    </div>
+    <button class="sb-close" onclick="sbCloseModal()">✕</button>
+  </div>
 </div>
 
 <script>
@@ -3084,17 +3210,22 @@ function sv(k,v){
 }
 
 // Auth: send magic link
-async function sbSendMagicLink(email){
-  const r=await sbFetch('/auth/v1/otp',{method:'POST',body:JSON.stringify({email,create_user:true})});
-  return r.ok;
+// Auth: sign in with email+password
+async function sbSignIn(email,password){
+  const r=await sbFetch('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});
+  if(!r.ok){const e=await r.json();return{error:e.error_description||e.msg||'Invalid email or password'};}
+  return await r.json();
 }
 
-// Auth: verify OTP token from URL hash or manual entry
-async function sbVerifyOTP(email,token){
-  const r=await sbFetch('/auth/v1/verify',{method:'POST',body:JSON.stringify({type:'email',email,token})});
-  if(!r.ok)return null;
+// Auth: sign up with email+password
+async function sbSignUp(email,password){
+  const r=await sbFetch('/auth/v1/signup',{method:'POST',body:JSON.stringify({email,password})});
   const d=await r.json();
-  return d;
+  if(!r.ok){return{error:d.error_description||d.msg||'Sign up failed'};}
+  // Auto sign-in after sign-up
+  if(d.access_token)return d;
+  // Email confirmation required — sign in immediately
+  return sbSignIn(email,password);
 }
 
 // Auth: get session from Supabase (checks stored token)
@@ -3104,7 +3235,6 @@ async function sbGetSession(){
   try{
     const sess=JSON.parse(stored);
     if(sess.expires_at&&Date.now()/1000>sess.expires_at-60){
-      // Token expired — try refresh
       const r=await sbFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:sess.refresh_token})});
       if(!r.ok){localStorage.removeItem('sb_session');return null;}
       const fresh=await r.json();
@@ -4591,95 +4721,96 @@ const QUOTES=[
 })();
 
 /* ════ SYNC UI ═══════════════════════════════════════════ */
+let _sbMode='in'; // 'in' or 'up'
+
 function toggleSyncBadge(){
   const b=document.getElementById('sync-badge');
-  b.classList.toggle('show');
-  if(b.classList.contains('show')&&!sbUserId){
-    setTimeout(()=>document.getElementById('sync-email').focus(),100);
-  }
+  if(sbUserId){b.classList.toggle('show');}
+  else{sbOpenModal();}
 }
 function closeSyncBadge(){document.getElementById('sync-badge').classList.remove('show');}
+
+function sbOpenModal(){
+  const m=document.getElementById('sb-modal');
+  if(m){m.style.display='flex';setTimeout(()=>document.getElementById('sb-email')?.focus(),200);}
+}
+function sbCloseModal(){
+  const m=document.getElementById('sb-modal');
+  if(m)m.style.display='none';
+  document.getElementById('sb-error').textContent='';
+}
+function sbSetMode(mode){
+  _sbMode=mode;
+  document.getElementById('sb-tab-in').classList.toggle('on',mode==='in');
+  document.getElementById('sb-tab-up').classList.toggle('on',mode==='up');
+  document.getElementById('sb-pass2-field').style.display=mode==='up'?'':'none';
+  document.getElementById('sb-submit').textContent=mode==='in'?'Sign in':'Create account';
+  document.getElementById('sb-pass-label').textContent=mode==='in'?'Password':'Choose a password';
+  document.getElementById('sb-error').textContent='';
+  const passEl=document.getElementById('sb-pass');
+  if(passEl)passEl.setAttribute('autocomplete',mode==='in'?'current-password':'new-password');
+}
+function sbTogglePass(){
+  const p=document.getElementById('sb-pass');
+  p.type=p.type==='password'?'text':'password';
+}
+
+async function sbSubmit(){
+  const email=document.getElementById('sb-email').value.trim();
+  const pass=document.getElementById('sb-pass').value;
+  const errEl=document.getElementById('sb-error');
+  const btn=document.getElementById('sb-submit');
+  if(!email||!pass){errEl.textContent='Please fill in all fields.';return;}
+  if(_sbMode==='up'){
+    const pass2=document.getElementById('sb-pass2').value;
+    if(pass!==pass2){errEl.textContent='Passwords do not match.';return;}
+    if(pass.length<6){errEl.textContent='Password must be at least 6 characters.';return;}
+  }
+  btn.disabled=true;
+  btn.textContent=_sbMode==='in'?'Signing in…':'Creating account…';
+  errEl.textContent='';
+  const result=_sbMode==='in'?await sbSignIn(email,pass):await sbSignUp(email,pass);
+  btn.disabled=false;
+  btn.textContent=_sbMode==='in'?'Sign in':'Create account';
+  if(result.error){errEl.textContent=result.error;return;}
+  if(result.access_token){
+    sbCloseModal();
+    await sbActivateSession(result);
+  }else{
+    errEl.textContent='Something went wrong. Try again.';
+  }
+}
 
 function setSyncStatus(connected,email){
   const dot=document.getElementById('sync-dot');
   const title=document.getElementById('sync-title');
   const sub=document.getElementById('sync-sub');
-  const btn=document.getElementById('sync-btn');
-  const inp=document.getElementById('sync-email');
+  const syncBadgeBtn=document.getElementById('sync-badge')?.querySelector('.btn');
   const sb=document.getElementById('syncbtn');
   const mobileSyncDot=document.getElementById('mobile-sync-dot');
   const mobileSyncBtn=document.getElementById('mobile-syncbtn');
   const mhDot=document.getElementById('mh-sync-dot');
   const mhLbl=document.getElementById('mh-sync-lbl');
   if(connected){
-    dot.className='sync-dot green';
-    title.textContent='Synced';
-    sub.textContent=email||'Data syncs across all your devices';
-    btn.textContent='Sign out';btn.onclick=sbSignOut;
-    inp.style.display='none';
-    if(sb){sb.style.color='#16a34a';sb.title='Synced';}
+    if(dot)dot.className='sync-dot green';
+    if(title)title.textContent='Synced';
+    if(sub)sub.textContent=email||'Data syncs across your devices';
+    if(syncBadgeBtn){syncBadgeBtn.textContent='Sign out';syncBadgeBtn.onclick=sbSignOut;}
+    if(sb){sb.style.color='#16a34a';}
     if(mobileSyncDot){mobileSyncDot.style.opacity='1';mobileSyncDot.style.background='#16a34a';}
-    if(mobileSyncBtn){mobileSyncBtn.style.color='#16a34a';}
+    if(mobileSyncBtn)mobileSyncBtn.style.color='#16a34a';
     if(mhDot)mhDot.classList.add('on');
     if(mhLbl)mhLbl.textContent=email?email.split('@')[0]:'synced';
   }else{
-    dot.className='sync-dot grey';
-    title.textContent='Sync across devices';
-    sub.textContent='Enter your email to get a magic link';
-    btn.textContent='Send code';btn.onclick=sbDoLogin;
-    inp.style.display='';
-    const otpInp=document.getElementById('sync-otp');
-    if(otpInp)otpInp.style.display='none';
-    if(sb){sb.style.color='';sb.title='Sync';}
+    if(dot)dot.className='sync-dot grey';
+    if(title)title.textContent='Sync across devices';
+    if(sub)sub.textContent='Sign in to sync your data';
+    if(syncBadgeBtn){syncBadgeBtn.textContent='Sign in';syncBadgeBtn.onclick=sbOpenModal;}
+    if(sb){sb.style.color='';}
     if(mobileSyncDot){mobileSyncDot.style.opacity='0';mobileSyncDot.style.background='';}
-    if(mobileSyncBtn){mobileSyncBtn.style.color='';}
+    if(mobileSyncBtn)mobileSyncBtn.style.color='';
     if(mhDot)mhDot.classList.remove('on');
     if(mhLbl)mhLbl.textContent='sync';
-  }
-}
-
-async function sbDoLogin(){
-  const email=document.getElementById('sync-email').value.trim();
-  if(!email)return;
-  const btn=document.getElementById('sync-btn');
-  btn.textContent='Sending…';btn.disabled=true;
-  const ok=await sbSendMagicLink(email);
-  if(ok){
-    document.getElementById('sync-title').textContent='Check your email';
-    document.getElementById('sync-sub').textContent='Enter the 6-digit code from your email';
-    // Show OTP input, hide email input
-    window._sbLoginEmail=email;
-    document.getElementById('sync-email').style.display='none';
-    const otpInp=document.getElementById('sync-otp');
-    otpInp.style.display='';
-    setTimeout(()=>otpInp.focus(),100);
-    btn.textContent='Verify';btn.disabled=false;
-    btn.onclick=sbVerifyCode;
-  }else{
-    document.getElementById('sync-sub').textContent='Something went wrong. Try again.';
-    btn.disabled=false;btn.textContent='Send code';
-  }
-}
-
-async function sbVerifyCode(){
-  const email=document.getElementById('sync-email').value.trim()||window._sbLoginEmail||'';
-  const token=document.getElementById('sync-otp').value.trim();
-  if(!token)return;
-  const btn=document.getElementById('sync-btn');
-  btn.textContent='Verifying…';btn.disabled=true;
-  // Store email for reuse in case input was hidden
-  window._sbLoginEmail=email||window._sbLoginEmail;
-  const emailToUse=document.getElementById('sync-email').value.trim()||window._sbLoginEmail;
-  const d=await sbVerifyOTP(emailToUse,token);
-  if(d?.access_token){
-    // Reset UI
-    document.getElementById('sync-email').style.display='';
-    document.getElementById('sync-otp').style.display='none';
-    document.getElementById('sync-otp').value='';
-    await sbActivateSession(d);
-  }else{
-    document.getElementById('sync-sub').textContent='Invalid code. Try again.';
-    btn.disabled=false;btn.textContent='Verify';
   }
 }
 
@@ -4695,7 +4826,7 @@ async function sbActivateSession(sess){
     showToast('Synced ✓');
   }else{
     await sbPushAll();
-    showToast('Data uploaded ✓');
+    showToast('Account created ✓');
   }
   setSyncStatus(true,sess.user?.email);
   closeSyncBadge();
@@ -4706,8 +4837,10 @@ async function sbSignOut(){
   sbAuthToken=null;sbUserId=null;
   localStorage.removeItem('sb_session');
   setSyncStatus(false,null);
+  closeSyncBadge();
   showToast('Signed out');
 }
+
 
 /* ════ TIMETABLE CELL EDIT ═══════════════════════════════ */
 // All available icons for the picker (key = icon id, value = svg inner)
