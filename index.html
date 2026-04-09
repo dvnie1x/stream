@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="stream.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23f2f3f6'/><text x='8' y='24' font-family='Arial,sans-serif' font-size='22' font-weight='700' fill='%230f0f0f'>s</text><circle cx='25.5' cy='22' r='3' fill='%236366f1'/></svg>">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
 <!-- Open Graph / Discord embed -->
@@ -248,7 +249,7 @@ body.night .sr-item:hover{background:rgba(255,255,255,.07)}
 
 /* Desktop: hide mobile page entirely */
 @media(min-width:641px){
-  #pg-mobile{display:none!important}
+  #pg-mobile,#mh-sheet,#mh-bg{display:none!important}
 }
 
 @media(max-width:640px){
@@ -659,8 +660,9 @@ body.night .sr-item:hover{background:rgba(255,255,255,.07)}
     transform:translateY(100%);
     transition:transform .28s cubic-bezier(.32,0,.67,0);
     backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    visibility:hidden;
   }
-  #mh-sheet.on{transform:translateY(0);transition:transform .34s cubic-bezier(.34,1.1,.64,1)}
+  #mh-sheet.on{transform:translateY(0);transition:transform .34s cubic-bezier(.34,1.1,.64,1);visibility:visible}
   .mh-handle{width:36px;height:4px;border-radius:2px;background:var(--border);
     margin:14px auto 16px;opacity:.5}
   .mh-stabs{display:flex;background:rgba(0,0,0,.05);border-radius:11px;padding:3px;margin-bottom:16px}
@@ -1532,8 +1534,9 @@ body.night .home-timer{
 /* ══ FRIENDS PAGE ══════════════════════════════════════ */
 /* Root fills the entire page, no pg-wrap used */
 .fr-root{display:flex;flex-direction:column;height:100%;min-height:100vh;padding:36px 44px 40px;box-sizing:border-box}
-.fr-header{display:flex;align-items:flex-start;margin-bottom:24px;flex-shrink:0}
+.fr-header{display:flex;align-items:center;margin-bottom:24px;flex-shrink:0;position:relative}
 .fr-title-block{display:flex;flex-direction:column}
+#fr-profile-pill{position:absolute;left:50%;transform:translateX(-50%)}
 .fr-title{font-size:28px;font-weight:700;letter-spacing:-.04em;line-height:1}
 .fr-sub{font-size:12px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-top:5px}
 /* 2-col body */
@@ -1661,28 +1664,51 @@ body.night #fr-add-box{background:rgba(20,22,30,.92);border-color:rgba(255,255,2
 .fr-add-modal-h{font-size:17px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px;color:var(--text)}
 .fr-add-modal-p{font-size:12px;color:var(--t3);margin-bottom:20px}
 
-/* ── Friend requests section ─────────────────────────── */
-#fr-requests-section{display:none;margin-bottom:12px}
-#fr-requests-section.has-requests{display:block}
-.fr-req-card{background:linear-gradient(135deg,rgba(99,102,241,.07),rgba(139,92,246,.05));border:1.5px solid rgba(99,102,241,.22);border-radius:16px;padding:14px 16px}
-body.night .fr-req-card{background:linear-gradient(135deg,rgba(99,102,241,.14),rgba(139,92,246,.09));border-color:rgba(99,102,241,.32)}
-.fr-req-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.fr-req-label{font-size:10px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--accent,#6366f1);font-weight:600}
-.fr-req-count{background:var(--accent,#6366f1);color:#fff;border-radius:99px;min-width:17px;height:17px;font-size:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;padding:0 4px}
-.fr-req-row{display:flex;align-items:center;gap:10px;padding:7px 0;animation:reqIn .3s cubic-bezier(.34,1.26,.64,1) both;overflow:hidden;max-height:60px;transition:max-height .28s ease,opacity .2s,padding .2s}
-.fr-req-row+.fr-req-row{border-top:1px solid rgba(99,102,241,.12)}
-.fr-req-row.removing{opacity:0;max-height:0!important;padding:0!important}
+/* ── Requests toggle button ──────────────────────────── */
+.fr-req-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px 18px;background:var(--glass);backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);border:1px solid var(--glass-bd);border-radius:16px;cursor:none;transition:background .18s,border-color .18s,border-radius .22s;text-align:left;font-family:'Geist',sans-serif;box-shadow:var(--sh)}
+.fr-req-toggle:hover{background:rgba(255,255,255,.88);border-color:var(--borders)}
+body.night .fr-req-toggle{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
+body.night .fr-req-toggle:hover{background:rgba(255,255,255,.11)}
+.fr-req-toggle.open{border-radius:16px 16px 0 0;border-bottom-color:transparent}
+.fr-req-toggle-left{display:flex;align-items:center;gap:8px;color:var(--text)}
+.fr-req-toggle-icon{color:var(--t3);display:flex;align-items:center}
+.fr-req-toggle-label{font-size:13px;font-weight:600;color:var(--text)}
+.fr-req-toggle-badge{background:var(--accent,#6366f1);color:#fff;border-radius:99px;min-width:18px;height:18px;font-size:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;padding:0 5px;letter-spacing:0;animation:badgePop .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes badgePop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.fr-req-toggle-chevron{color:var(--t3);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;align-items:center}
+.fr-req-toggle.open .fr-req-toggle-chevron{transform:rotate(180deg)}
+@keyframes reqGlow{0%,100%{box-shadow:var(--sh)}60%{box-shadow:0 0 0 3px rgba(99,102,241,.28),var(--sh)}}
+.fr-req-toggle.has-incoming{animation:reqGlow 2.2s ease-in-out infinite}
+/* Expandable requests panel */
+.fr-req-panel{background:var(--glass);backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);border:1px solid var(--glass-bd);border-top:none;border-radius:0 0 16px 16px;overflow:hidden;box-shadow:var(--sh);max-height:0;transition:max-height .38s cubic-bezier(.4,0,.2,1)}
+.fr-req-panel.open{max-height:700px}
+body.night .fr-req-panel{background:rgba(18,20,28,.78);border-color:rgba(255,255,255,.08)}
+.fr-req-panel-inner{padding:4px 16px 16px}
+.fr-req-section-h{font-size:9px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--t3);font-weight:600;padding:10px 0 6px;display:flex;align-items:center;gap:6px}
+.fr-req-section-h::after{content:'';flex:1;height:1px;background:var(--border);opacity:.5}
+.fr-req-divider{height:1px;background:var(--border);margin:4px 0;opacity:.4}
+/* Shared row styles */
+.fr-req-row,.fr-req-out-row{display:flex;align-items:center;gap:10px;padding:7px 0;overflow:hidden;max-height:64px;transition:max-height .28s ease,opacity .22s,padding .22s}
 @keyframes reqIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
-.fr-req-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 0 0 2px rgba(99,102,241,.35)}
+.fr-req-row{animation:reqIn .3s cubic-bezier(.34,1.26,.64,1) both}
+.fr-req-out-row{animation:reqIn .3s cubic-bezier(.34,1.26,.64,1) both}
+.fr-req-row+.fr-req-row,.fr-req-out-row+.fr-req-out-row{border-top:1px solid rgba(0,0,0,.06)}
+body.night .fr-req-row+.fr-req-row,body.night .fr-req-out-row+.fr-req-out-row{border-top-color:rgba(255,255,255,.07)}
+.fr-req-row.removing,.fr-req-out-row.removing{opacity:0;max-height:0!important;padding:0!important}
+.fr-req-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
 .fr-req-info{flex:1;min-width:0}
 .fr-req-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fr-req-time{font-size:10px;font-family:'Geist Mono',monospace;color:var(--t3);margin-top:1px}
 .fr-req-btns{display:flex;gap:5px;flex-shrink:0}
 .fr-req-accept{display:flex;align-items:center;gap:4px;padding:5px 10px;font-size:11px;font-weight:600;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:none;transition:all .14s;font-family:'Geist',sans-serif}
-.fr-req-accept:hover{background:#15803d;transform:scale(1.05)}
+.fr-req-accept:hover{background:#15803d;transform:scale(1.04)}
 .fr-req-decline{display:flex;align-items:center;gap:4px;padding:5px 9px;font-size:11px;font-weight:500;background:rgba(0,0,0,.06);color:var(--t2);border:1px solid var(--border);border-radius:8px;cursor:none;transition:all .14s;font-family:'Geist',sans-serif}
 .fr-req-decline:hover{background:rgba(229,62,62,.1);color:#e53e3e;border-color:rgba(229,62,62,.3)}
 body.night .fr-req-decline{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1)}
+.fr-req-cancel{display:flex;align-items:center;padding:5px 10px;font-size:11px;font-weight:500;background:rgba(0,0,0,.06);color:var(--t2);border:1px solid var(--border);border-radius:8px;cursor:none;transition:all .14s;font-family:'Geist',sans-serif;white-space:nowrap}
+.fr-req-cancel:hover{background:rgba(229,62,62,.09);color:#e53e3e;border-color:rgba(229,62,62,.3)}
+body.night .fr-req-cancel{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1)}
+.fr-req-empty{font-size:11px;color:var(--t3);font-family:'Geist Mono',monospace;text-align:center;padding:10px 0 4px;opacity:.75}
 
 /* Profile setup prompt */
 .fr-setup-banner{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(139,92,246,.08));border:1.5px solid rgba(99,102,241,.2);border-radius:14px;padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px}
@@ -1886,8 +1912,8 @@ body.night .fr-emoji-opt:hover{background:rgba(255,255,255,.1)}
 .ev-stag{font-size:10px;padding:2px 7px;border-radius:20px;background:rgba(17,17,17,.07);color:var(--t2);font-family:'Geist Mono',monospace;margin-top:4px;display:inline-block}
 
 /* MODALS */
-.modal-bg{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.14);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .22s ease}
-.modal-bg.open{opacity:1;pointer-events:all}
+.modal-bg{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.14);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .22s ease;visibility:hidden}
+.modal-bg.open{opacity:1;pointer-events:all;visibility:visible}
 .modal-box{background:rgba(248,248,252,.76);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,.9);box-shadow:0 24px 64px rgba(0,0,0,.16),0 1.5px 0 rgba(255,255,255,.92) inset;border-radius:22px;padding:28px;width:380px;transform:scale(.93) translateY(10px);transition:transform .26s cubic-bezier(.34,1.5,.64,1)}
 .modal-bg.open .modal-box{transform:scale(1) translateY(0)}
 .mt{font-size:16px;font-weight:600;letter-spacing:-.02em;margin-bottom:6px}
@@ -1956,6 +1982,49 @@ body.night .fr-emoji-opt:hover{background:rgba(255,255,255,.1)}
 /* ── STUDY WIDGETS LAYOUT ─────────────────────────────────── */
 .study-widgets{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 @media(max-width:900px){.study-widgets{grid-template-columns:1fr}}
+
+/* ── LOG STATS (sparkline + donut) ──────────────────────── */
+#log-stats:empty{display:none}
+.log-stats-inner{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding-bottom:16px;margin-bottom:14px;border-bottom:1px solid var(--border)}
+@media(max-width:700px){.log-stats-inner{grid-template-columns:1fr}}
+.log-stat-lbl{font-size:9px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.13em;color:var(--t3);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.log-stat-cur{color:var(--accent,#6366f1);font-weight:600;margin-left:auto;text-transform:none;letter-spacing:0;font-size:10px}
+.log-spark-svg{width:100%;height:52px;display:block}
+.log-spark-labels{display:flex;justify-content:space-between;font-size:9px;font-family:'Geist Mono',monospace;color:var(--t3);margin-top:4px;opacity:.7}
+.log-donut-wrap{display:flex;align-items:center;gap:12px}
+.log-donut-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text);letter-spacing:-.03em;pointer-events:none}
+.log-donut-legend{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.log-legend-row{display:flex;align-items:center;gap:6px;overflow:hidden}
+.log-legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.log-legend-lbl{font-family:'Geist Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.log-legend-val{font-size:10px;font-weight:600;color:var(--text);flex-shrink:0;font-family:'Geist Mono',monospace;letter-spacing:-.02em}
+
+/* ── COMMAND PALETTE ─────────────────────────────────────── */
+#cmd-overlay{position:fixed;inset:0;z-index:9850;background:rgba(0,0,0,.36);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:none;align-items:flex-start;justify-content:center;padding-top:16vh;opacity:0;transition:opacity .18s ease;visibility:hidden}
+#cmd-overlay.open{opacity:1;visibility:visible}
+#cmd-box{width:min(520px,92vw);background:rgba(251,251,254,.95);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,.88);box-shadow:0 28px 72px rgba(0,0,0,.2),0 0 0 1px rgba(0,0,0,.04);border-radius:20px;overflow:hidden;transform:translateY(-14px) scale(.96);transition:transform .24s cubic-bezier(.34,1.2,.64,1),opacity .18s;opacity:0}
+#cmd-overlay.open #cmd-box{transform:none;opacity:1}
+body.night #cmd-box{background:rgba(16,18,26,.97);border-color:rgba(255,255,255,.1);box-shadow:0 28px 72px rgba(0,0,0,.5)}
+.cmd-header{display:flex;align-items:center;gap:11px;padding:13px 16px;border-bottom:1px solid var(--border)}
+.cmd-header-icon{opacity:.35;flex-shrink:0}
+#cmd-input{flex:1;border:none;background:transparent;font-family:'Geist',sans-serif;font-size:15px;color:var(--text);outline:none;cursor:none}
+#cmd-input::placeholder{color:var(--t3)}
+.cmd-esc-hint{font-size:10px;font-family:'Geist Mono',monospace;color:var(--t3);background:rgba(0,0,0,.06);border:1px solid var(--border);border-radius:5px;padding:2px 7px;flex-shrink:0}
+body.night .cmd-esc-hint{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12)}
+#cmd-list{max-height:380px;overflow-y:auto;padding:6px 6px 8px}
+.cmd-section-lbl{font-size:9px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--t3);padding:8px 10px 3px;user-select:none}
+.cmd-item{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:11px;cursor:none;transition:background .1s;color:var(--text);user-select:none}
+.cmd-item.sel,.cmd-item:hover{background:rgba(99,102,241,.1)}
+body.night .cmd-item.sel,body.night .cmd-item:hover{background:rgba(99,102,241,.16)}
+.cmd-icon{width:32px;height:32px;border-radius:9px;background:rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;transition:background .1s}
+body.night .cmd-icon{background:rgba(255,255,255,.07)}
+.cmd-item.sel .cmd-icon,.cmd-item:hover .cmd-icon{background:rgba(99,102,241,.14)}
+.cmd-item-body{flex:1;min-width:0}
+.cmd-item-label{font-size:13px;font-weight:500;letter-spacing:-.01em}
+.cmd-item-sub{font-size:11px;font-family:'Geist Mono',monospace;color:var(--t3);margin-top:1px}
+.cmd-item-kbd{font-size:10px;font-family:'Geist Mono',monospace;color:var(--t3);background:rgba(0,0,0,.055);border:1px solid var(--border);border-radius:5px;padding:2px 6px;flex-shrink:0}
+body.night .cmd-item-kbd{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.11)}
+@keyframes cmdItemIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
 /* Shared hero card chrome */
 .sw-widget,.ft-widget{position:relative;overflow:hidden;display:flex;flex-direction:column}
@@ -2251,16 +2320,27 @@ body.night .sb-close{background:rgba(255,255,255,.1)}
 #kbd-toast kbd{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:2px 7px;font-family:'Geist Mono',monospace;font-size:11px}
 
 /* SHORTCUTS */
-#sco{position:fixed;inset:0;z-index:8900;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.15);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .22s}
-#sco.show{opacity:1;pointer-events:all}
-#scob{background:rgba(248,248,252,.74);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,.9);box-shadow:0 24px 64px rgba(0,0,0,.16),0 1.5px 0 rgba(255,255,255,.9) inset;border-radius:22px;padding:28px 32px;min-width:320px;transform:scale(.95);transition:transform .24s cubic-bezier(.34,1.5,.64,1)}
-#sco.show #scob{transform:scale(1)}
-.sc-title{font-size:16px;font-weight:600;letter-spacing:-.02em;margin-bottom:16px}
-.sc-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06)}
-.sc-row:last-child{border-bottom:none}
-.sc-desc{font-size:13px;color:var(--t2)}
-.sc-keys{display:flex;gap:4px}
-.sc-keys kbd{background:rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.12);border-radius:5px;padding:2px 8px;font-family:'Geist Mono',monospace;font-size:11px}
+#sco{position:fixed;inset:0;z-index:8900;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .2s;visibility:hidden}
+#sco.show{opacity:1;pointer-events:all;visibility:visible}
+#scob{background:rgba(249,249,252,.96);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,.88);box-shadow:0 28px 72px rgba(0,0,0,.18);border-radius:22px;padding:0;width:min(480px,94vw);overflow:hidden;transform:scale(.95) translateY(8px);transition:transform .26s cubic-bezier(.34,1.3,.64,1)}
+#sco.show #scob{transform:scale(1) translateY(0)}
+body.night #scob{background:rgba(16,18,26,.97);border-color:rgba(255,255,255,.1)}
+.sc-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px}
+.sc-title{font-size:15px;font-weight:700;letter-spacing:-.03em;color:var(--text)}
+.sc-close{width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.07);border:none;display:flex;align-items:center;justify-content:center;cursor:none;color:var(--t2);transition:all .12s}
+.sc-close:hover{background:rgba(0,0,0,.12);color:var(--text)}
+body.night .sc-close{background:rgba(255,255,255,.1)}
+body.night .sc-close:hover{background:rgba(255,255,255,.16)}
+.sc-body{padding:0 16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.sc-section{margin-bottom:4px}
+.sc-section-h{font-size:9px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--t3);padding:10px 8px 5px}
+.sc-row{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:8px;gap:8px;transition:background .1s}
+.sc-row:hover{background:rgba(0,0,0,.035)}
+body.night .sc-row:hover{background:rgba(255,255,255,.05)}
+.sc-desc{font-size:12px;color:var(--t2);flex:1;min-width:0}
+.sc-keys{display:flex;gap:3px;flex-shrink:0}
+.sc-keys kbd{background:rgba(0,0,0,.055);border:1px solid rgba(0,0,0,.1);border-bottom-width:2px;border-radius:6px;padding:2px 7px;font-family:'Geist Mono',monospace;font-size:10px;color:var(--text);line-height:1.4}
+body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.15);color:var(--text)}
 
 .es{text-align:center;padding:22px;color:var(--t3);font-size:13px}
 .ei{font-size:18px;margin-bottom:6px;opacity:.32}
@@ -2559,21 +2639,49 @@ body.night .sb-close{background:rgba(255,255,255,.1)}
 
 <div id="sco" onclick="closeSC()">
   <div id="scob" onclick="event.stopPropagation()">
-    <div class="sc-title">Keyboard Shortcuts</div>
-    <div class="sc-row"><span class="sc-desc">Dashboard</span><div class="sc-keys"><kbd>Alt</kbd><kbd>1</kbd></div></div>
-    <div class="sc-row"><span class="sc-desc">Calendar</span><div class="sc-keys"><kbd>Alt</kbd><kbd>2</kbd></div></div>
-    <div class="sc-row"><span class="sc-desc">Timetable</span><div class="sc-keys"><kbd>Alt</kbd><kbd>3</kbd></div></div>
-    <div class="sc-row"><span class="sc-desc">Study Log</span><div class="sc-keys"><kbd>Alt</kbd><kbd>4</kbd></div></div>
-    <div class="sc-row"><span class="sc-desc">Add reminder</span><div class="sc-keys"><kbd>Alt</kbd><kbd>R</kbd></div></div>
-    <div class="sc-row"><span class="sc-desc">Add event (today)</span><div class="sc-keys"><kbd>Alt</kbd><kbd>E</kbd></div></div>
-    <div class="sc-row"><span class="sc-desc">Prev/next month</span><div class="sc-keys"><kbd>Alt</kbd><kbd>←</kbd><kbd>→</kbd></div></div>
-    <div class="sc-row"><span class="sc-desc">Navigate pages</span><div class="sc-keys"><kbd>↑</kbd><kbd>↓</kbd></div></div>
-    <div class="sc-row"><span class="sc-desc">Study tabs</span><div class="sc-keys"><kbd>←</kbd><kbd>→</kbd></div></div>
-    <div class="sc-row"><span class="sc-desc">Stopwatch start/stop</span><div class="sc-keys"><kbd>Space</kbd></div></div>
-    <div class="sc-row"><span class="sc-desc">Search</span><div class="sc-keys"><kbd>Alt</kbd><kbd>K</kbd></div></div>
-    <div class="sc-row"><span class="sc-desc">Pin sidebar</span><div class="sc-keys"><kbd>P</kbd></div></div>
-    <div class="sc-row"><span class="sc-desc">Close / dismiss</span><div class="sc-keys"><kbd>Esc</kbd></div></div>
-    <div class="sc-row"><span class="sc-desc">Show shortcuts</span><div class="sc-keys"><kbd>?</kbd></div></div>
+    <div class="sc-head">
+      <div class="sc-title">Keyboard Shortcuts</div>
+      <button class="sc-close" onclick="closeSC()">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="sc-body">
+      <div class="sc-section">
+        <div class="sc-section-h">Navigate</div>
+        <div class="sc-row"><span class="sc-desc">Dashboard</span><div class="sc-keys"><kbd>Alt</kbd><kbd>1</kbd></div></div>
+        <div class="sc-row"><span class="sc-desc">Calendar</span><div class="sc-keys"><kbd>Alt</kbd><kbd>2</kbd></div></div>
+        <div class="sc-row"><span class="sc-desc">Timetable</span><div class="sc-keys"><kbd>Alt</kbd><kbd>3</kbd></div></div>
+        <div class="sc-row"><span class="sc-desc">Study</span><div class="sc-keys"><kbd>Alt</kbd><kbd>4</kbd></div></div>
+        <div class="sc-row"><span class="sc-desc">Friends</span><div class="sc-keys"><kbd>Alt</kbd><kbd>5</kbd></div></div>
+        <div class="sc-row"><span class="sc-desc">Cycle pages</span><div class="sc-keys"><kbd>↑</kbd><kbd>↓</kbd></div></div>
+        <div class="sc-row"><span class="sc-desc">Prev / next month</span><div class="sc-keys"><kbd>Alt</kbd><kbd>←</kbd><kbd>→</kbd></div></div>
+      </div>
+      <div class="sc-section">
+        <div class="sc-section-h">Actions</div>
+        <div class="sc-row"><span class="sc-desc">Command palette</span><div class="sc-keys"><kbd>J</kbd></div></div>
+        <div class="sc-row"><span class="sc-desc">Search</span><div class="sc-keys"><kbd>Alt</kbd><kbd>K</kbd></div></div>
+        <div class="sc-row"><span class="sc-desc">Add reminder</span><div class="sc-keys"><kbd>Alt</kbd><kbd>R</kbd></div></div>
+        <div class="sc-row"><span class="sc-desc">Add event</span><div class="sc-keys"><kbd>Alt</kbd><kbd>E</kbd></div></div>
+        <div class="sc-row"><span class="sc-desc">Stopwatch</span><div class="sc-keys"><kbd>Space</kbd></div></div>
+        <div class="sc-row"><span class="sc-desc">Study tabs</span><div class="sc-keys"><kbd>←</kbd><kbd>→</kbd></div></div>
+        <div class="sc-row"><span class="sc-desc">Pin sidebar</span><div class="sc-keys"><kbd>P</kbd></div></div>
+        <div class="sc-row"><span class="sc-desc">Show shortcuts</span><div class="sc-keys"><kbd>?</kbd></div></div>
+        <div class="sc-row"><span class="sc-desc">Close / dismiss</span><div class="sc-keys"><kbd>Esc</kbd></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Command palette -->
+<div id="cmd-overlay" onclick="if(event.target===this)closeCmd()">
+  <div id="cmd-box">
+    <div class="cmd-header">
+      <svg class="cmd-header-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      <input id="cmd-input" placeholder="Jump to page, add something…" autocomplete="off" spellcheck="false"
+        oninput="renderCmdList()" onkeydown="cmdKeyNav(event)">
+      <kbd class="cmd-esc-hint">esc</kbd>
+    </div>
+    <div id="cmd-list"></div>
   </div>
 </div>
 
@@ -3077,7 +3185,8 @@ body.night .sb-close{background:rgba(255,255,255,.1)}
       <!-- Recent sessions — full width -->
       <div class="glass card">
         <div class="ch">recent sessions</div>
-        <div id="log-list" style="max-height:360px;overflow-y:auto"><div class="es"><div class="ei">—</div>No sessions logged yet.</div></div>
+        <div id="log-stats"></div>
+        <div id="log-list" style="max-height:320px;overflow-y:auto"><div class="es"><div class="ei">—</div>No sessions logged yet.</div></div>
       </div>
     </div>
 
@@ -3134,12 +3243,12 @@ body.night .sb-close{background:rgba(255,255,255,.1)}
       <div class="fr-title-block">
         <div class="fr-title">Friends</div>
         <div class="fr-sub" id="fr-sub-line">leaderboard</div>
-        <div id="fr-profile-pill" class="fr-profile-pill" onclick="frOpenSetup()" title="Your profile" style="margin-top:10px;align-self:flex-start">
-          <div class="fr-avatar" id="fr-avatar-pill">?</div>
-          <div>
-            <div class="fr-pill-name" id="fr-pill-name">Set up profile</div>
-            <div class="fr-pill-sub" id="fr-pill-sub">click to configure</div>
-          </div>
+      </div>
+      <div id="fr-profile-pill" class="fr-profile-pill" onclick="frOpenSetup()" title="Your profile">
+        <div class="fr-avatar" id="fr-avatar-pill">?</div>
+        <div>
+          <div class="fr-pill-name" id="fr-pill-name">Set up profile</div>
+          <div class="fr-pill-sub" id="fr-pill-sub">click to configure</div>
         </div>
       </div>
     </div>
@@ -3205,16 +3314,6 @@ body.night .sb-close{background:rgba(255,255,255,.1)}
 
       <!-- Right sidebar: profile + requests + add friend -->
       <div class="fr-sidebar">
-        <!-- Incoming friend requests -->
-        <div id="fr-requests-section">
-          <div class="fr-req-card">
-            <div class="fr-req-header">
-              <span class="fr-req-label">Requests</span>
-              <span class="fr-req-count" id="fr-req-count">0</span>
-            </div>
-            <div id="fr-req-list"></div>
-          </div>
-        </div>
 
         <div class="glass card" id="fr-profile-card">
           <div class="ch">your profile</div>
@@ -3233,6 +3332,31 @@ body.night .sb-close{background:rgba(255,255,255,.1)}
           </div>
           <div id="lb-search-result"></div>
           <div id="lb-add-msg" style="font-size:12px;color:var(--t3);margin-top:6px;min-height:16px"></div>
+        </div>
+
+        <!-- Requests toggle + expandable panel -->
+        <div style="display:flex;flex-direction:column">
+          <button class="fr-req-toggle" id="fr-req-toggle" onclick="frToggleRequests()">
+            <div class="fr-req-toggle-left">
+              <span class="fr-req-toggle-icon">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="15" height="15"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0H4m8-5v5"/></svg>
+              </span>
+              <span class="fr-req-toggle-label">Requests</span>
+              <span class="fr-req-toggle-badge" id="fr-req-badge" style="display:none">0</span>
+            </div>
+            <span class="fr-req-toggle-chevron">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="13" height="13"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </span>
+          </button>
+          <div class="fr-req-panel" id="fr-req-panel">
+            <div class="fr-req-panel-inner">
+              <div class="fr-req-section-h">Incoming</div>
+              <div id="fr-req-incoming-list"><div class="fr-req-empty">loading…</div></div>
+              <div class="fr-req-divider"></div>
+              <div class="fr-req-section-h">Outgoing</div>
+              <div id="fr-req-outgoing-list"><div class="fr-req-empty">loading…</div></div>
+            </div>
+          </div>
         </div>
         <!-- Activity feed -->
         <div class="glass card">
@@ -4005,6 +4129,37 @@ function getCurNxt(){
   return{cur,nxt,weekend:false};
 }
 
+/* ════ TAB TITLE ════════════════════════════════════════ */
+function updateTabTitle(){
+  const pad=n=>String(n).padStart(2,'0');
+  // Focus timer running
+  if(ftRunning&&!ftPaused){
+    const m=Math.floor(ftRemSecs/60),s=ftRemSecs%60;
+    document.title=`${pad(m)}:${pad(s)} | stream.`;
+    return;
+  }
+  // Stopwatch running
+  if(swRunning){
+    const ms=swElapsed+(Date.now()-swStart);
+    const sec=Math.floor(ms/1000),min=Math.floor(sec/60),hr=Math.floor(min/60);
+    document.title=`${pad(hr)}:${pad(min%60)}:${pad(sec%60)} | stream.`;
+    return;
+  }
+  // Neither: show time to next period
+  try{
+    const{cur,nxt,weekend}=getCurNxt();
+    if(!weekend&&nxt){
+      const now=new Date(),nm=toM(now.getHours(),now.getMinutes())+now.getSeconds()/60;
+      const rem=toM(...nxt.s)-nm;
+      const rm=Math.floor(rem),rs=Math.round((rem-rm)*60);
+      const label=nxt.subj||nxt.l||'next period';
+      document.title=`${pad(rm)}:${pad(rs)} to ${label} | stream.`;
+      return;
+    }
+  }catch(e){}
+  document.title='stream.';
+}
+
 /* ════ TICK ══════════════════════════════════════════════ */
 function tick(){
   const now=new Date(),h=now.getHours(),nm=toM(h,now.getMinutes())+now.getSeconds()/60;
@@ -4047,6 +4202,7 @@ function tick(){
     T.textContent='done';L.textContent='school ended';P.textContent='See you tomorrow';R.textContent='';G.style.width='100%';if(!pinnedSubj)updateSubjTile(null);
   }
   if(curPage==='cal')renderExamList();
+  updateTabTitle();
 }
 setInterval(tick,1000);
 
@@ -4809,6 +4965,7 @@ function swTick(){
   const ms=swElapsed+(Date.now()-swStart);
   document.getElementById('sw-display').textContent=swFmt(ms);
   swUpdateArc(ms);
+  updateTabTitle();
 }
 function swUpdateArc(ms){
   const arc=document.getElementById('sw-arc-path');if(!arc)return;
@@ -4863,6 +5020,7 @@ function swStop(){
   const cb=document.getElementById('sw-cancel-btn');if(cb)cb.style.display='none';
   document.getElementById('sw-panel')?.classList.remove('sw-running');
   swFloatHide();
+  updateTabTitle();
 }
 
 function swCancel(){
@@ -4876,6 +5034,7 @@ function swCancel(){
   const cb=document.getElementById('sw-cancel-btn');if(cb)cb.style.display='none';
   document.getElementById('sw-panel')?.classList.remove('sw-running');
   swFloatHide();
+  updateTabTitle();
 }
 
 /* ════ FLOATING STOPWATCH WIDGET ════════════════════════ */
@@ -5008,7 +5167,7 @@ function swFsStop(){
 
 /* ════ FOCUS TIMER ══════════════════════════════════════ */
 let ftDurMins=25,ftAtm='sakura',ftRunning=false,ftPaused=false;
-let ftTotalSecs=0,ftRemSecs=0,ftTimer=null,ftAnimFrame=null;
+let ftTotalSecs=0,ftRemSecs=0,ftEndTime=0,ftTimer=null,ftAnimFrame=null;
 let ftBreakEnabled=true,ftSoundEnabled=true,ftAutoLog=true;
 let ftBreakShown=false,ftBreakAt=20*60; // show break nudge after 20 min
 let ftCanvas=null,ftCtx=null,ftParticles=[];
@@ -5041,6 +5200,7 @@ function ftBegin(){
   if(slider)ftDurMins=+slider.value;
   ftTotalSecs=ftDurMins*60;
   ftRemSecs=ftTotalSecs;
+  ftEndTime=Date.now()+ftTotalSecs*1000;
   ftRunning=true;ftPaused=false;ftBreakShown=false;
 
   // open fullscreen
@@ -5095,7 +5255,7 @@ function ftStartTimer(){
   if(ftTimer)clearInterval(ftTimer);
   ftTimer=setInterval(()=>{
     if(ftPaused||!ftRunning)return;
-    ftRemSecs--;
+    ftRemSecs=Math.max(0,Math.round((ftEndTime-Date.now())/1000));
     // break nudge
     if(ftBreakEnabled&&!ftBreakShown&&ftRemSecs<=ftTotalSecs-ftBreakAt&&ftTotalSecs>ftBreakAt){
       ftBreakShown=true;
@@ -5103,6 +5263,7 @@ function ftStartTimer(){
     }
     if(ftRemSecs<=0){ftRemSecs=0;ftDone();return;}
     ftUpdateDisplay();
+    updateTabTitle();
   },1000);
 }
 
@@ -5127,12 +5288,14 @@ function ftTogglePause(){
     icon.innerHTML='<polygon points="5,3 19,12 5,21"/>';
     lbl.textContent='Resume';status.textContent='paused';
   }else{
+    ftEndTime=Date.now()+ftRemSecs*1000; // re-anchor end time on resume
     icon.innerHTML='<rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/>';
     lbl.textContent='Pause';status.textContent='focusing';
   }
 }
 function ftSkip5(){
   ftRemSecs=Math.min(ftTotalSecs,ftRemSecs+300);
+  ftEndTime=Date.now()+ftRemSecs*1000;
   ftUpdateDisplay();
 }
 function ftEnd(){
@@ -5155,6 +5318,7 @@ function ftExit(){
   document.getElementById('focus-fs').classList.remove('open');
   document.body.style.overflow='';
   ftParticles=[];
+  updateTabTitle();
 }
 function ftDone(){
   ftRunning=false;
@@ -5353,7 +5517,132 @@ function ftDrawAurora(W,H,t){
 window.addEventListener('resize',()=>{
   if(document.getElementById('focus-fs').classList.contains('open'))ftResizeCanvas();
 });
+/* ════ LOG STATS ═════════════════════════════════════════ */
+function renderLogStats(){
+  const el=document.getElementById('log-stats');if(!el)return;
+  if(!logs.length){el.innerHTML='';return;}
+
+  // Sparkline: last 8 weeks (index 0=oldest, 7=current)
+  const now=new Date();
+  const weekData=[];
+  for(let w=7;w>=0;w--){
+    const wStart=new Date(now);
+    wStart.setDate(wStart.getDate()-((wStart.getDay()+6)%7)-w*7);
+    wStart.setHours(0,0,0,0);
+    const wEnd=new Date(wStart);wEnd.setDate(wEnd.getDate()+7);
+    const mins=logs.filter(l=>{const d=new Date(l.date+'T00:00');return d>=wStart&&d<wEnd;}).reduce((s,l)=>s+l.mins,0);
+    weekData.push(mins);
+  }
+  const maxMins=Math.max(...weekData,1);
+  const H=52,bW=18,gap=8,n=weekData.length,totalW=n*(bW+gap)-gap;
+  const bars=weekData.map((m,i)=>{
+    const bH=Math.max(3,Math.round(m/maxMins*(H-8)));
+    const isCur=i===7;
+    const col=isCur?'var(--accent,#6366f1)':m>0?'var(--t3)':'var(--border)';
+    const op=isCur?'.95':m>0?'.45':'.25';
+    return`<rect x="${i*(bW+gap)}" y="${H-bH}" width="${bW}" height="${bH}" rx="4" fill="${col}" opacity="${op}"><title>${(m/60).toFixed(1)}h</title></rect>`;
+  }).join('');
+
+  // Donut: subject breakdown
+  const subMins={};
+  logs.forEach(l=>{const s=l.subj||'other';subMins[s]=(subMins[s]||0)+l.mins;});
+  const sorted=Object.entries(subMins).sort((a,b)=>b[1]-a[1]);
+  const totalMins=sorted.reduce((s,[,m])=>s+m,0);
+  const totalH=(totalMins/60).toFixed(1);
+  const R=26,CX=36,CY=36,CIRC=2*Math.PI*R;
+  let off=0;
+  const arcs=sorted.map(([subj,m])=>{
+    const len=(m/totalMins)*CIRC;
+    const col=subjColour(subj)||'#9898a4';
+    const a=`<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${col}" stroke-width="8" stroke-dasharray="${len.toFixed(2)} ${(CIRC-len).toFixed(2)}" stroke-dashoffset="${(-off+CIRC/4).toFixed(2)}" stroke-linecap="butt"/>`;
+    off+=len;return a;
+  }).join('');
+  const legend=sorted.slice(0,4).map(([subj,m])=>{
+    const col=subjColour(subj)||'#9898a4';
+    return`<div class="log-legend-row"><div class="log-legend-dot" style="background:${col}"></div><div class="log-legend-lbl">${esc(subj)}</div><div class="log-legend-val">${(m/60).toFixed(1)}h</div></div>`;
+  }).join('');
+
+  el.innerHTML=`<div class="log-stats-inner">
+    <div>
+      <div class="log-stat-lbl">weekly hours<span class="log-stat-cur">${(weekData[7]/60).toFixed(1)}h this week</span></div>
+      <svg viewBox="0 0 ${totalW} ${H}" class="log-spark-svg" preserveAspectRatio="none">${bars}</svg>
+      <div class="log-spark-labels"><span>8w ago</span><span>now</span></div>
+    </div>
+    <div>
+      <div class="log-stat-lbl">by subject<span class="log-stat-cur">${totalH}h total</span></div>
+      <div class="log-donut-wrap">
+        <div style="position:relative;flex-shrink:0;width:72px;height:72px">
+          <svg width="72" height="72" viewBox="0 0 72 72">
+            <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="var(--border)" stroke-width="8"/>
+            ${arcs}
+          </svg>
+          <div class="log-donut-center">${totalH}h</div>
+        </div>
+        <div class="log-donut-legend">${legend}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ════ COMMAND PALETTE ═══════════════════════════════════ */
+const CMD_DEFS=[
+  {icon:'🏠',label:'Dashboard',sub:'go to dashboard',section:'Navigate',action:()=>{const n=document.querySelector('.ni[data-page="dash"]');if(n)goTo('dash',n);}},
+  {icon:'📅',label:'Calendar',sub:'go to calendar',section:'Navigate',action:()=>{const n=document.querySelector('.ni[data-page="cal"]');if(n)goTo('cal',n);}},
+  {icon:'📋',label:'Timetable',sub:'go to timetable',section:'Navigate',action:()=>{const n=document.querySelector('.ni[data-page="tt"]');if(n)goTo('tt',n);}},
+  {icon:'📚',label:'Study',sub:'go to study log',section:'Navigate',action:()=>{const n=document.querySelector('.ni[data-page="study"]');if(n)goTo('study',n);}},
+  {icon:'👥',label:'Friends',sub:'leaderboard & friends',section:'Navigate',action:()=>{const n=document.querySelector('.ni[data-page="friends"]');if(n)goTo('friends',n);}},
+  {icon:'🔔',label:'Add Reminder',sub:'create a new reminder',section:'Add',action:()=>openRM()},
+  {icon:'📝',label:'Add Homework',sub:'log a homework task',section:'Add',action:()=>openHWModal()},
+  {icon:'📆',label:'Add Event',sub:'add to calendar',section:'Add',action:()=>{const n=document.querySelector('.ni[data-page="cal"]');if(n)goTo('cal',n);setTimeout(()=>openQM(new Date().toISOString().split('T')[0]),380);}},
+  {icon:'🔍',label:'Search',sub:'search everything',section:'Add',action:()=>openSearch()},
+  {icon:'🌙',label:'Toggle Night Mode',sub:'switch light / dark',section:'Settings',action:()=>toggleNight()},
+  {icon:'⚙️',label:'Settings',sub:'open settings panel',section:'Settings',action:()=>openSettings()},
+];
+let _cmdSel=0,_cmdFiltered=CMD_DEFS;
+
+function openCmd(){
+  const ov=document.getElementById('cmd-overlay');if(!ov)return;
+  ov.style.display='flex';
+  _cmdSel=0;_cmdFiltered=CMD_DEFS;
+  renderCmdList();
+  requestAnimationFrame(()=>{
+    ov.classList.add('open');
+    const inp=document.getElementById('cmd-input');
+    if(inp){inp.value='';inp.focus();}
+  });
+}
+function closeCmd(){
+  const ov=document.getElementById('cmd-overlay');if(!ov)return;
+  ov.classList.remove('open');
+  setTimeout(()=>ov.style.display='none',200);
+}
+function renderCmdList(){
+  const list=document.getElementById('cmd-list');if(!list)return;
+  const q=(document.getElementById('cmd-input')?.value||'').trim().toLowerCase();
+  _cmdFiltered=q?CMD_DEFS.filter(c=>c.label.toLowerCase().includes(q)||c.sub.toLowerCase().includes(q)):CMD_DEFS;
+  if(_cmdSel>=_cmdFiltered.length)_cmdSel=0;
+  if(!_cmdFiltered.length){list.innerHTML='<div style="padding:28px;text-align:center;font-size:13px;color:var(--t3)">No commands found</div>';return;}
+  let html='',lastSec='';
+  _cmdFiltered.forEach((c,i)=>{
+    if(!q&&c.section!==lastSec){lastSec=c.section;html+=`<div class="cmd-section-lbl">${esc(c.section)}</div>`;}
+    html+=`<div class="cmd-item${i===_cmdSel?' sel':''}" id="cmd-i-${i}" onclick="cmdRun(${i})" style="animation:cmdItemIn .18s ${i*0.03}s both">
+      <div class="cmd-icon">${c.icon}</div>
+      <div class="cmd-item-body"><div class="cmd-item-label">${esc(c.label)}</div><div class="cmd-item-sub">${esc(c.sub)}</div></div>
+    </div>`;
+  });
+  list.innerHTML=html;
+}
+function cmdRun(i){const c=_cmdFiltered[i];if(!c)return;closeCmd();setTimeout(()=>c.action(),180);}
+function cmdKeyNav(e){
+  if(e.key==='j'&&!e.target.value){closeCmd();return;}
+  if(e.key==='ArrowDown'){e.preventDefault();_cmdSel=Math.min(_cmdSel+1,_cmdFiltered.length-1);renderCmdList();document.getElementById(`cmd-i-${_cmdSel}`)?.scrollIntoView({block:'nearest'});}
+  else if(e.key==='ArrowUp'){e.preventDefault();_cmdSel=Math.max(_cmdSel-1,0);renderCmdList();document.getElementById(`cmd-i-${_cmdSel}`)?.scrollIntoView({block:'nearest'});}
+  else if(e.key==='Enter'){e.preventDefault();cmdRun(_cmdSel);}
+  else if(e.key==='Escape'){closeCmd();}
+}
+
 function renderLogList(){
+  renderLogStats();
   const el=document.getElementById('log-list');if(!el)return;
   const subs=[...new Set(logs.map(l=>l.subj))];
   el.innerHTML=logs.length?logs.map(l=>{
@@ -5533,7 +5822,7 @@ document.addEventListener('keydown',e=>{
     if(document.getElementById('settings-overlay')?.classList.contains('open')){closeSettings();return;}
     if(document.getElementById('fr-detail')?.classList.contains('open')){frCloseDetail();return;}
     if(document.getElementById('fr-add-modal')?.classList.contains('open')){frCloseAdd();return;}
-    closeQM();closeRM();closeSC();closeResetModal();closeICSModal();closeHWModal();closeTTEdit();closeSearch();return;
+    closeQM();closeRM();closeSC();closeResetModal();closeICSModal();closeHWModal();closeTTEdit();closeSearch();closeCmd();return;
   }
   // Space = toggle stopwatch (when on study page, stopwatch tab, not typing)
   if(e.key===' '&&!typing&&!modalOpen&&curPage==='study'&&curStudyTab==='log'){
@@ -5542,6 +5831,7 @@ document.addEventListener('keydown',e=>{
     swToggle();return;
   }
   if(!typing&&e.key==='?'){document.getElementById('sco').classList.toggle('show');return;}
+  if(!typing&&!modalOpen&&e.key==='j'){e.preventDefault();openCmd();return;}
 
   // Bare arrow keys cycle through pages (when not typing or in a modal)
   if(!typing&&!modalOpen&&!e[MOD_KEY]&&!e.metaKey&&!e.altKey){
@@ -6187,10 +6477,11 @@ function initFriendsTab(){
   frRenderPill();
   lbRenderProfile();
   lbRefresh();
-  // Check for incoming requests and accepted sent requests
+  // Check for incoming/outgoing requests and process accepted ones
   if(sbUserId){
-    renderFriendRequests();
+    renderRequestsPanel();
     lbProcessAccepted();
+    frStartRequestPolling();
   }
 }
 
@@ -6337,7 +6628,7 @@ async function lbAcceptRequest(reqId,from_id,from_username,rowEl){
       body:JSON.stringify({status:'accepted'})
     });
   }catch{}
-  setTimeout(()=>{renderFriendRequests();lbRefresh();},280);
+  setTimeout(()=>{renderRequestsPanel();lbRefresh();},280);
 }
 
 // Decline a request
@@ -6346,7 +6637,19 @@ async function lbDeclineRequest(reqId,rowEl){
   try{
     await sbFetch(`/rest/v1/friend_requests?id=eq.${reqId}`,{method:'DELETE'});
   }catch{}
-  setTimeout(renderFriendRequests,280);
+  setTimeout(renderRequestsPanel,280);
+}
+
+// Cancel an outgoing request
+async function lbCancelRequest(reqId,to_id,rowEl){
+  if(rowEl){rowEl.classList.add('removing');}
+  try{
+    await sbFetch(`/rest/v1/friend_requests?id=eq.${reqId}`,{method:'DELETE'});
+  }catch{}
+  let sent=JSON.parse(localStorage.getItem('st_fr_sent')||'[]');
+  sent=sent.filter(s=>s.to_id!==to_id);
+  localStorage.setItem('st_fr_sent',JSON.stringify(sent));
+  setTimeout(renderRequestsPanel,280);
 }
 
 // Fetch incoming pending requests for current user
@@ -6354,6 +6657,16 @@ async function lbGetIncomingRequests(){
   if(!sbUserId)return[];
   try{
     const r=await sbFetch(`/rest/v1/friend_requests?to_id=eq.${sbUserId}&status=eq.pending&select=id,from_id,from_username,created_at&order=created_at.desc`);
+    if(r.ok)return await r.json();
+  }catch{}
+  return[];
+}
+
+// Fetch outgoing pending requests sent by current user
+async function lbGetOutgoingRequests(){
+  if(!sbUserId)return[];
+  try{
+    const r=await sbFetch(`/rest/v1/friend_requests?from_id=eq.${sbUserId}&status=eq.pending&select=id,to_id,to_username,created_at&order=created_at.desc`);
     if(r.ok)return await r.json();
   }catch{}
   return[];
@@ -6383,24 +6696,50 @@ async function lbProcessAccepted(){
   }catch{}
 }
 
-// Render the incoming requests section
+// Toggle the requests panel open/closed
+let _frReqPanelOpen=false;
+function frToggleRequests(){
+  _frReqPanelOpen=!_frReqPanelOpen;
+  const btn=document.getElementById('fr-req-toggle');
+  const panel=document.getElementById('fr-req-panel');
+  if(btn)btn.classList.toggle('open',_frReqPanelOpen);
+  if(panel)panel.classList.toggle('open',_frReqPanelOpen);
+  if(_frReqPanelOpen)renderRequestsPanel();
+}
+
+// Render both incoming and outgoing into the panel + update badge
 let _lbPendingRequests=[];
-async function renderFriendRequests(){
-  const sec=document.getElementById('fr-requests-section');
-  const listEl=document.getElementById('fr-req-list');
-  const countEl=document.getElementById('fr-req-count');
-  if(!sec||!listEl)return;
-  _lbPendingRequests=await lbGetIncomingRequests();
-  if(!_lbPendingRequests.length){sec.classList.remove('has-requests');return;}
-  sec.classList.add('has-requests');
-  if(countEl)countEl.textContent=_lbPendingRequests.length;
+let _frReqPolling=null;
+async function renderRequestsPanel(){
+  if(!sbUserId){
+    // Not signed in — show empty states without hitting network
+    _updateReqIncoming([]);_updateReqOutgoing([]);return;
+  }
+  const[incoming,outgoing]=await Promise.all([lbGetIncomingRequests(),lbGetOutgoingRequests()]);
+  _lbPendingRequests=incoming;
+  // Badge + glow on toggle button
+  const badge=document.getElementById('fr-req-badge');
+  const toggleBtn=document.getElementById('fr-req-toggle');
+  if(badge){
+    const total=incoming.length;
+    badge.textContent=total;
+    badge.style.display=total>0?'inline-flex':'none';
+  }
+  if(toggleBtn)toggleBtn.classList.toggle('has-incoming',incoming.length>0);
+  _updateReqIncoming(incoming);
+  _updateReqOutgoing(outgoing);
+}
+
+function _updateReqIncoming(incoming){
+  const el=document.getElementById('fr-req-incoming-list');if(!el)return;
+  if(!incoming.length){el.innerHTML='<div class="fr-req-empty">no incoming requests</div>';return;}
   const hues=[231,341,189,152,275,32];
-  listEl.innerHTML=_lbPendingRequests.map((req,i)=>{
+  el.innerHTML=incoming.map((req,i)=>{
     const hue=hues[i%hues.length];
     const initials=req.from_username.slice(0,2).toUpperCase();
     const ago=frTimeAgo(req.created_at);
-    return`<div class="fr-req-row" id="fr-req-row-${req.id}" style="--req-delay:${i*0.07}s;animation-delay:var(--req-delay)">
-      <div class="fr-req-av" style="background:hsl(${hue},65%,52%)">${initials}</div>
+    return`<div class="fr-req-row" id="fr-req-row-${req.id}" style="animation-delay:${i*0.06}s">
+      <div class="fr-req-av" style="background:hsl(${hue},62%,50%)">${initials}</div>
       <div class="fr-req-info">
         <div class="fr-req-name">@${esc(req.from_username)}</div>
         <div class="fr-req-time">${ago}</div>
@@ -6416,6 +6755,33 @@ async function renderFriendRequests(){
       </div>
     </div>`;
   }).join('');
+}
+
+function _updateReqOutgoing(outgoing){
+  const el=document.getElementById('fr-req-outgoing-list');if(!el)return;
+  if(!outgoing.length){el.innerHTML='<div class="fr-req-empty">no outgoing requests</div>';return;}
+  const hues=[189,152,275,32,231,341];
+  el.innerHTML=outgoing.map((req,i)=>{
+    const hue=hues[i%hues.length];
+    const initials=req.to_username.slice(0,2).toUpperCase();
+    const ago=frTimeAgo(req.created_at);
+    return`<div class="fr-req-out-row" id="fr-req-out-${req.id}" style="animation-delay:${i*0.06}s">
+      <div class="fr-req-av" style="background:hsl(${hue},55%,58%);opacity:.8">${initials}</div>
+      <div class="fr-req-info">
+        <div class="fr-req-name">@${esc(req.to_username)}</div>
+        <div class="fr-req-time">${ago} · pending</div>
+      </div>
+      <button class="fr-req-cancel" onclick="lbCancelRequest('${req.id}','${req.to_id}',document.getElementById('fr-req-out-${req.id}'))">Cancel</button>
+    </div>`;
+  }).join('');
+}
+
+// Start background polling for requests (runs every 20s while on friends page)
+function frStartRequestPolling(){
+  if(_frReqPolling)clearInterval(_frReqPolling);
+  _frReqPolling=setInterval(()=>{
+    if(sbUserId&&curPage==='friends'){renderRequestsPanel();lbProcessAccepted();}
+  },20000);
 }
 
 function frTimeAgo(iso){
