@@ -974,6 +974,10 @@ body .btn,body .ni,body .ctx-item,body .cbn,body .rck,body .hw-check,body .stab,
 .ob-msg{font-size:12px;margin-top:8px;min-height:16px;text-align:center}
 /* account step error/success */
 #ob-auth-msg{font-size:12px;margin-top:8px;min-height:16px;color:#9898a4}
+/* auth mode tabs */
+.ob-auth-tabs{display:flex;background:rgba(0,0,0,.06);border-radius:10px;padding:3px;margin-bottom:20px}
+.ob-auth-tab{flex:1;padding:7px;font-size:12px;font-weight:500;text-align:center;border-radius:7px;cursor:none;transition:all .18s;color:#9898a4;user-select:none}
+.ob-auth-tab.act{background:#fff;color:#0f0f0f;box-shadow:0 1px 4px rgba(0,0,0,.12)}
 
 /* mobile: stack */
 @media(max-width:700px){
@@ -1656,6 +1660,29 @@ body.night .fr-row-rm:hover{background:rgba(229,62,62,.15);color:#fc8181}
 body.night #fr-add-box{background:rgba(20,22,30,.92);border-color:rgba(255,255,255,.1)}
 .fr-add-modal-h{font-size:17px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px;color:var(--text)}
 .fr-add-modal-p{font-size:12px;color:var(--t3);margin-bottom:20px}
+
+/* ── Friend requests section ─────────────────────────── */
+#fr-requests-section{display:none;margin-bottom:12px}
+#fr-requests-section.has-requests{display:block}
+.fr-req-card{background:linear-gradient(135deg,rgba(99,102,241,.07),rgba(139,92,246,.05));border:1.5px solid rgba(99,102,241,.22);border-radius:16px;padding:14px 16px}
+body.night .fr-req-card{background:linear-gradient(135deg,rgba(99,102,241,.14),rgba(139,92,246,.09));border-color:rgba(99,102,241,.32)}
+.fr-req-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.fr-req-label{font-size:10px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--accent,#6366f1);font-weight:600}
+.fr-req-count{background:var(--accent,#6366f1);color:#fff;border-radius:99px;min-width:17px;height:17px;font-size:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;padding:0 4px}
+.fr-req-row{display:flex;align-items:center;gap:10px;padding:7px 0;animation:reqIn .3s cubic-bezier(.34,1.26,.64,1) both;overflow:hidden;max-height:60px;transition:max-height .28s ease,opacity .2s,padding .2s}
+.fr-req-row+.fr-req-row{border-top:1px solid rgba(99,102,241,.12)}
+.fr-req-row.removing{opacity:0;max-height:0!important;padding:0!important}
+@keyframes reqIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+.fr-req-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 0 0 2px rgba(99,102,241,.35)}
+.fr-req-info{flex:1;min-width:0}
+.fr-req-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-req-time{font-size:10px;font-family:'Geist Mono',monospace;color:var(--t3);margin-top:1px}
+.fr-req-btns{display:flex;gap:5px;flex-shrink:0}
+.fr-req-accept{display:flex;align-items:center;gap:4px;padding:5px 10px;font-size:11px;font-weight:600;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:none;transition:all .14s;font-family:'Geist',sans-serif}
+.fr-req-accept:hover{background:#15803d;transform:scale(1.05)}
+.fr-req-decline{display:flex;align-items:center;gap:4px;padding:5px 9px;font-size:11px;font-weight:500;background:rgba(0,0,0,.06);color:var(--t2);border:1px solid var(--border);border-radius:8px;cursor:none;transition:all .14s;font-family:'Geist',sans-serif}
+.fr-req-decline:hover{background:rgba(229,62,62,.1);color:#e53e3e;border-color:rgba(229,62,62,.3)}
+body.night .fr-req-decline{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1)}
 
 /* Profile setup prompt */
 .fr-setup-banner{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(139,92,246,.08));border:1.5px solid rgba(99,102,241,.2);border-radius:14px;padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px}
@@ -2432,21 +2459,26 @@ body.night .sb-close{background:rgba(255,255,255,.1)}
       <!-- Step 3: account / sync -->
       <div class="ob-slide" id="ob-s3">
         <div class="ob-step-eye">Step 3 of 3</div>
-        <div class="ob-step-h">Sync your data.</div>
-        <div class="ob-step-p">Create an account to sync across devices, access the leaderboard, and never lose your data.</div>
+        <div class="ob-step-h" id="ob-s3-h">Sync your data.</div>
+        <div class="ob-step-p" id="ob-s3-p">Create an account to sync across devices, access the leaderboard, and never lose your data.</div>
+        <!-- Auth mode toggle -->
+        <div class="ob-auth-tabs">
+          <div class="ob-auth-tab act" id="ob-tab-create" onclick="obSetAuthMode('create')">New account</div>
+          <div class="ob-auth-tab" id="ob-tab-signin" onclick="obSetAuthMode('signin')">Sign in</div>
+        </div>
         <div class="ob-step">
           <label class="ob-label">Email</label>
           <input class="ob-inp" id="ob-email" type="email" placeholder="you@school.edu" autocomplete="email">
         </div>
         <div class="ob-step" style="margin-bottom:8px">
-          <label class="ob-label">Password</label>
-          <input class="ob-inp" id="ob-password" type="password" placeholder="Min. 6 characters" autocomplete="new-password"
-            onkeydown="if(event.key==='Enter')obCreateAccount()">
+          <label class="ob-label" id="ob-pw-label">Password <span id="ob-pw-hint" style="font-family:'Geist',sans-serif;text-transform:none;letter-spacing:0;font-size:10px;color:#b0b0ba">(min. 6 characters)</span></label>
+          <input class="ob-inp" id="ob-password" type="password" placeholder="Password" autocomplete="new-password"
+            onkeydown="if(event.key==='Enter')obSubmitAuth()">
         </div>
         <div id="ob-auth-msg"></div>
-        <button class="ob-btn" style="margin-top:12px" onclick="obCreateAccount()">
+        <button class="ob-btn" style="margin-top:12px" id="ob-auth-btn" onclick="obSubmitAuth()">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-          Create account &amp; launch
+          <span id="ob-auth-btn-lbl">Create account &amp; launch</span>
         </button>
         <button class="ob-btn-sec" onclick="obFinish()">Skip — use offline only</button>
       </div>
@@ -3151,8 +3183,19 @@ body.night .sb-close{background:rgba(255,255,255,.1)}
 
       </div>
 
-      <!-- Right sidebar: profile + add friend -->
+      <!-- Right sidebar: profile + requests + add friend -->
       <div class="fr-sidebar">
+        <!-- Incoming friend requests -->
+        <div id="fr-requests-section">
+          <div class="fr-req-card">
+            <div class="fr-req-header">
+              <span class="fr-req-label">Requests</span>
+              <span class="fr-req-count" id="fr-req-count">0</span>
+            </div>
+            <div id="fr-req-list"></div>
+          </div>
+        </div>
+
         <div class="glass card" id="fr-profile-card">
           <div class="ch">your profile</div>
           <div id="lb-profile-content"><div style="font-size:12px;color:var(--t3)">Loading…</div></div>
@@ -3189,8 +3232,8 @@ body.night .sb-close{background:rgba(255,255,255,.1)}
 <!-- Add friend modal -->
 <div id="fr-add-modal">
   <div id="fr-add-box">
-    <div class="fr-add-modal-h">Add a friend</div>
-    <div class="fr-add-modal-p">Search by their @username to add them to your leaderboard.</div>
+    <div class="fr-add-modal-h">Send friend request</div>
+    <div class="fr-add-modal-p">Search by @username — they'll get a request to accept.</div>
     <div class="fg">
       <label class="fl">Username</label>
       <div style="display:flex;gap:8px">
@@ -5628,26 +5671,30 @@ async function lbSearch(){
   const u=rows[0];
   if(u.user_id===sbUserId){resultEl.innerHTML='<span style="font-size:12px;color:var(--t3)">That\'s you!</span>';return;}
   const alreadyFriend=lbFriends.some(f=>f.user_id===u.user_id);
+  const sent=JSON.parse(localStorage.getItem('st_fr_sent')||'[]');
+  const alreadySent=sent.some(s=>s.to_id===u.user_id);
   const avgStr=u.stats?.avg!=null?`${u.stats.avg}% avg`:'no data yet';
+  let actionBtn='';
+  if(alreadyFriend)actionBtn='<span style="font-size:11px;font-family:\'Geist Mono\',monospace;color:var(--t3)">friends ✓</span>';
+  else if(alreadySent)actionBtn='<span style="font-size:11px;font-family:\'Geist Mono\',monospace;color:var(--t3)">requested ✓</span>';
+  else actionBtn=`<button class="btn bd fr-send-btn" onclick="lbSendRequest('${u.user_id}','${esc(u.username)}')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+    Request
+  </button>`;
   resultEl.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.5);border-radius:10px;border:1px solid var(--border);margin-top:6px">
     <div style="flex:1;min-width:0">
       <div style="font-size:13px;font-weight:500">@${esc(u.username)}</div>
       <div style="font-size:10px;font-family:'Geist Mono',monospace;color:var(--t3);margin-top:2px">${avgStr} · ${u.stats?.paperCount||0} papers</div>
     </div>
-    ${alreadyFriend
-      ?'<span style="font-size:11px;font-family:\'Geist Mono\',monospace;color:var(--t3)">already added</span>'
-      :`<button class="btn bd" onclick="lbAddFriend('${u.user_id}','${esc(u.username)}')">Add</button>`}
+    ${actionBtn}
   </div>`;
 }
 
 function lbAddFriend(user_id,username){
+  // Direct add kept for internal use (e.g. accepting a request locally)
   if(lbFriends.some(f=>f.user_id===user_id))return;
   lbFriends.push({user_id,username});
   sv('st_friends',lbFriends);
-  lbMsg2(`Added @${username} ✓`,'#16a34a');
-  document.getElementById('lb-search-result').innerHTML='';
-  document.getElementById('lb-search-inp').value='';
-  lbRefresh();
 }
 
 function lbRemoveFriend(user_id){
@@ -6083,12 +6130,22 @@ function lbMsg2(msg,col){
   el.style.color=col;el.textContent=msg;
   setTimeout(()=>{if(el.textContent===msg)el.textContent='';},3000);
 }
+function lbMsgModal(msg,col){
+  const el=document.getElementById('fr-modal-msg');if(!el)return;
+  el.style.color=col;el.textContent=msg;
+  setTimeout(()=>{if(el.textContent===msg)el.textContent='';},3000);
+}
 
 function initFriendsTab(){
   lbFriends=JSON.parse(localStorage.getItem('st_friends')||'[]');
   frRenderPill();
   lbRenderProfile();
   lbRefresh();
+  // Check for incoming requests and accepted sent requests
+  if(sbUserId){
+    renderFriendRequests();
+    lbProcessAccepted();
+  }
 }
 
 function frRenderPill(){
@@ -6154,25 +6211,174 @@ async function lbSearchModal(){
     const found=data[0];
     if(found.user_id===sbUserId){res.innerHTML='<div style="font-size:12px;color:var(--t3)">That\'s you!</div>';return;}
     const already=lbFriends.some(f=>f.user_id===found.user_id);
+    const sentList=JSON.parse(localStorage.getItem('st_fr_sent')||'[]');
+    const alreadySentModal=sentList.some(s=>s.to_id===found.user_id);
     const avg=found.stats?.avg??0;
     const pc=found.stats?.paperCount??0;
+    let modalAction='';
+    if(already)modalAction=`<span style="font-size:11px;color:var(--t3)">Friends ✓</span>`;
+    else if(alreadySentModal)modalAction=`<span style="font-size:11px;font-family:'Geist Mono',monospace;color:var(--t3)">Requested ✓</span>`;
+    else modalAction=`<button class="btn bd fr-send-btn" onclick="lbSendRequest('${found.user_id}','${esc(found.username)}')" style="font-size:11px;padding:5px 12px;display:flex;align-items:center;gap:5px">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+      Request
+    </button>`;
     res.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--glass);border:1px solid var(--border);border-radius:10px;margin-top:10px">
       <div style="width:34px;height:34px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">${esc(found.username).slice(0,2).toUpperCase()}</div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:500">@${esc(found.username)}</div>
         <div style="font-size:11px;font-family:'Geist Mono',monospace;color:var(--t3)">${avg?avg+'% avg · ':''} ${pc} paper${pc!==1?'s':''}</div>
       </div>
-      ${already
-        ?`<span style="font-size:11px;color:var(--t3)">Already added</span>`
-        :`<button class="btn bd" onclick="lbAddFriendFromModal('${found.user_id}','${esc(found.username)}')" style="font-size:11px;padding:5px 12px">Add</button>`}
+      ${modalAction}
     </div>`;
   }catch{res.innerHTML='<div style="font-size:12px;color:var(--t3)">Search failed. Try again.</div>';}
 }
 
 async function lbAddFriendFromModal(uid,uname){
-  await lbAddFriend(uid,uname);
-  frCloseAdd();
-  lbRefresh();
+  // Legacy: now delegates to send request
+  await lbSendRequest(uid,uname);
+  setTimeout(frCloseAdd,1200);
+}
+
+/* ── Friend Request System ─────────────────────────────── */
+// Send a request (writes to friend_requests table)
+async function lbSendRequest(to_id,to_username){
+  if(!sbUserId){lbMsg2('Sign in to send friend requests.','#e53e3e');return;}
+  const myUsername=localStorage.getItem('st_lb_username')||'';
+  if(!myUsername){lbMsg2('Set up your username first.','#e53e3e');return;}
+  if(lbFriends.some(f=>f.user_id===to_id)){lbMsg2('Already friends!','#9898a4');return;}
+  // Check if already sent
+  const sent=JSON.parse(localStorage.getItem('st_fr_sent')||'[]');
+  if(sent.some(s=>s.to_id===to_id)){lbMsg2('Request already sent!','#9898a4');return;}
+  try{
+    const r=await sbFetch('/rest/v1/friend_requests',{
+      method:'POST',
+      headers:{'Prefer':'return=minimal'},
+      body:JSON.stringify({from_id:sbUserId,from_username:myUsername,to_id,to_username,status:'pending'})
+    });
+    if(r.ok||r.status===201||r.status===204){
+      sent.push({to_id,to_username});
+      localStorage.setItem('st_fr_sent',JSON.stringify(sent));
+      lbMsg2(`Request sent to @${to_username} ✓`,'#16a34a');
+      lbMsgModal(`Request sent to @${to_username} ✓`,'#16a34a');
+      // Dim send buttons in both results
+      ['lb-search-result','fr-modal-result'].forEach(id=>{
+        document.getElementById(id)?.querySelectorAll('button.fr-send-btn').forEach(b=>{
+          b.textContent='Requested ✓';b.disabled=true;b.style.opacity='.55';
+        });
+      });
+    }else{
+      const body=await r.json().catch(()=>({}));
+      if(r.status===409||(body?.message||'').includes('duplicate')){
+        lbMsg2('Request already sent!','#9898a4');lbMsgModal('Request already sent!','#9898a4');
+        sent.push({to_id,to_username});localStorage.setItem('st_fr_sent',JSON.stringify(sent));
+      }else{
+        lbMsg2('Could not send — try again.','#e53e3e');lbMsgModal('Could not send — try again.','#e53e3e');
+      }
+    }
+  }catch{lbMsg2('Connection error.','#e53e3e');lbMsgModal('Connection error.','#e53e3e');}
+}
+
+// Accept an incoming request
+async function lbAcceptRequest(reqId,from_id,from_username,rowEl){
+  if(rowEl){rowEl.classList.add('removing');}
+  if(!lbFriends.some(f=>f.user_id===from_id)){
+    lbFriends.push({user_id:from_id,username:from_username});
+    sv('st_friends',lbFriends);
+  }
+  try{
+    await sbFetch(`/rest/v1/friend_requests?id=eq.${reqId}`,{
+      method:'PATCH',
+      body:JSON.stringify({status:'accepted'})
+    });
+  }catch{}
+  setTimeout(()=>{renderFriendRequests();lbRefresh();},280);
+}
+
+// Decline a request
+async function lbDeclineRequest(reqId,rowEl){
+  if(rowEl){rowEl.classList.add('removing');}
+  try{
+    await sbFetch(`/rest/v1/friend_requests?id=eq.${reqId}`,{method:'DELETE'});
+  }catch{}
+  setTimeout(renderFriendRequests,280);
+}
+
+// Fetch incoming pending requests for current user
+async function lbGetIncomingRequests(){
+  if(!sbUserId)return[];
+  try{
+    const r=await sbFetch(`/rest/v1/friend_requests?to_id=eq.${sbUserId}&status=eq.pending&select=id,from_id,from_username,created_at&order=created_at.desc`);
+    if(r.ok)return await r.json();
+  }catch{}
+  return[];
+}
+
+// Check if someone accepted our sent requests → auto-add them
+async function lbProcessAccepted(){
+  if(!sbUserId)return;
+  try{
+    const r=await sbFetch(`/rest/v1/friend_requests?from_id=eq.${sbUserId}&status=eq.accepted&select=id,to_id,to_username`);
+    if(!r.ok)return;
+    const rows=await r.json();
+    let changed=false;
+    for(const row of rows){
+      if(!lbFriends.some(f=>f.user_id===row.to_id)){
+        lbFriends.push({user_id:row.to_id,username:row.to_username});
+        changed=true;
+      }
+      // Delete the accepted notification
+      await sbFetch(`/rest/v1/friend_requests?id=eq.${row.id}`,{method:'DELETE'}).catch(()=>{});
+      // Remove from local sent list
+      let sent=JSON.parse(localStorage.getItem('st_fr_sent')||'[]');
+      sent=sent.filter(s=>s.to_id!==row.to_id);
+      localStorage.setItem('st_fr_sent',JSON.stringify(sent));
+    }
+    if(changed){sv('st_friends',lbFriends);lbRefresh();}
+  }catch{}
+}
+
+// Render the incoming requests section
+let _lbPendingRequests=[];
+async function renderFriendRequests(){
+  const sec=document.getElementById('fr-requests-section');
+  const listEl=document.getElementById('fr-req-list');
+  const countEl=document.getElementById('fr-req-count');
+  if(!sec||!listEl)return;
+  _lbPendingRequests=await lbGetIncomingRequests();
+  if(!_lbPendingRequests.length){sec.classList.remove('has-requests');return;}
+  sec.classList.add('has-requests');
+  if(countEl)countEl.textContent=_lbPendingRequests.length;
+  const hues=[231,341,189,152,275,32];
+  listEl.innerHTML=_lbPendingRequests.map((req,i)=>{
+    const hue=hues[i%hues.length];
+    const initials=req.from_username.slice(0,2).toUpperCase();
+    const ago=frTimeAgo(req.created_at);
+    return`<div class="fr-req-row" id="fr-req-row-${req.id}" style="--req-delay:${i*0.07}s;animation-delay:var(--req-delay)">
+      <div class="fr-req-av" style="background:hsl(${hue},65%,52%)">${initials}</div>
+      <div class="fr-req-info">
+        <div class="fr-req-name">@${esc(req.from_username)}</div>
+        <div class="fr-req-time">${ago}</div>
+      </div>
+      <div class="fr-req-btns">
+        <button class="fr-req-accept" onclick="lbAcceptRequest('${req.id}','${req.from_id}','${esc(req.from_username)}',document.getElementById('fr-req-row-${req.id}'))">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="11" height="11"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          Accept
+        </button>
+        <button class="fr-req-decline" onclick="lbDeclineRequest('${req.id}',document.getElementById('fr-req-row-${req.id}'))">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="10" height="10"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function frTimeAgo(iso){
+  if(!iso)return'';
+  const diff=(Date.now()-new Date(iso))/1000;
+  if(diff<60)return'just now';
+  if(diff<3600)return`${Math.floor(diff/60)}m ago`;
+  if(diff<86400)return`${Math.floor(diff/3600)}h ago`;
+  return`${Math.floor(diff/86400)}d ago`;
 }
 
 function frOpenSetup(){
@@ -6254,30 +6460,48 @@ document.getElementById('ob-file').addEventListener('change',function(){
   if(this.files[0])obHandleFile(this.files[0]);
 });
 
-async function obCreateAccount(){
+let _obAuthMode='create'; // 'create' | 'signin'
+function obSetAuthMode(mode){
+  _obAuthMode=mode;
+  const isCreate=mode==='create';
+  document.getElementById('ob-tab-create').classList.toggle('act',isCreate);
+  document.getElementById('ob-tab-signin').classList.toggle('act',!isCreate);
+  document.getElementById('ob-s3-h').textContent=isCreate?'Sync your data.':'Welcome back.';
+  document.getElementById('ob-s3-p').textContent=isCreate?'Create an account to sync across devices, access the leaderboard, and never lose your data.':'Sign in to restore your data and get back on the leaderboard.';
+  document.getElementById('ob-pw-hint').textContent=isCreate?'(min. 6 characters)':'';
+  document.getElementById('ob-auth-btn-lbl').innerHTML=isCreate?'Create account &amp; launch':'Sign in &amp; launch';
+  document.getElementById('ob-auth-msg').textContent='';
+  document.getElementById('ob-password').autocomplete=isCreate?'new-password':'current-password';
+}
+
+async function obSubmitAuth(){
   const email=document.getElementById('ob-email').value.trim();
   const password=document.getElementById('ob-password').value;
   const msgEl=document.getElementById('ob-auth-msg');
   if(!email||!password){msgEl.textContent='Enter your email and password.';msgEl.style.color='#e53e3e';return;}
-  if(password.length<6){msgEl.textContent='Password must be at least 6 characters.';msgEl.style.color='#e53e3e';return;}
-  msgEl.textContent='Creating account…';msgEl.style.color='#9898a4';
-  const res=await sbSignUp(email,password);
+  if(_obAuthMode==='create'&&password.length<6){msgEl.textContent='Password must be at least 6 characters.';msgEl.style.color='#e53e3e';return;}
+  msgEl.textContent=_obAuthMode==='create'?'Creating account…':'Signing in…';msgEl.style.color='#9898a4';
+  const res=_obAuthMode==='create'?await sbSignUp(email,password):await sbSignIn(email,password);
   if(res.error){msgEl.textContent=res.error;msgEl.style.color='#e53e3e';return;}
-  // Signed up — store session
   if(res.access_token){
     localStorage.setItem('sb_session',JSON.stringify(res));
     sbAuthToken=res.access_token;
     sbUserId=res.user?.id;
   }
-  msgEl.textContent='Account created ✓';msgEl.style.color='#16a34a';
-  // Claim username if set during onboarding
-  const obUn=document.getElementById('ob-username').value.trim();
-  if(obUn&&sbUserId){
-    localStorage.setItem('st_lb_username',obUn);
-    await lbPublish();
+  msgEl.textContent=_obAuthMode==='create'?'Account created ✓':'Signed in ✓';msgEl.style.color='#16a34a';
+  if(_obAuthMode==='create'){
+    const obUn=document.getElementById('ob-username')?.value.trim();
+    if(obUn&&sbUserId){localStorage.setItem('st_lb_username',obUn);await lbPublish();}
+  }else if(sbUserId){
+    // Sign-in: pull remote data so existing data is restored before launch
+    const remote=await sbLoadAll();
+    if(remote)applyRemoteData(remote);
   }
   setTimeout(()=>obFinish(),600);
 }
+
+// Legacy alias kept for any inline onclicks that may still reference it
+async function obCreateAccount(){return obSubmitAuth();}
 
 function obHandleFile(file){
   const reader=new FileReader();
@@ -6304,13 +6528,17 @@ function parseICS(text){
     const events=[];
     const blocks=text.split('BEGIN:VEVENT').slice(1);
     for(const b of blocks){
-      const get=k=>{const m=b.match(new RegExp(k+':([^\\r\\n]+)'));return m?m[1].trim():''};
+      // Match both plain DTSTART: and parameterised DTSTART;TZID=...:
+      const get=k=>{const m=b.match(new RegExp(k+'(?:;[^:]*)?:([^\\r\\n]+)'));return m?m[1].trim():''};
       const dtstart=get('DTSTART'),dtend=get('DTEND'),summary=get('SUMMARY'),location=get('LOCATION'),desc=get('DESCRIPTION');
       if(!dtstart||!summary)continue;
-      // Parse UTC datetime: 20260201T213800Z
-      const ps=dtstart.replace('Z','');
-      const pe=dtend.replace('Z','');
-      const toDate=s=>new Date(s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8)+'T'+s.slice(9,11)+':'+s.slice(11,13)+':'+s.slice(13,15)+'Z');
+      // Support both UTC (ends with Z) and local-time formats (no Z suffix)
+      const toDate=s=>{
+        const c=s.replace('Z','');
+        const str=c.slice(0,4)+'-'+c.slice(4,6)+'-'+c.slice(6,8)+'T'+c.slice(9,11)+':'+c.slice(11,13)+':'+c.slice(13,15);
+        return s.endsWith('Z')?new Date(str+'Z'):new Date(str);
+      };
+      const ps=dtstart,pe=dtend||dtstart;
       const ds=toDate(ps),de=toDate(pe);
       const dow=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][ds.getDay()];
       if(!dow||dow==='sunday'||dow==='saturday')continue;
@@ -6327,6 +6555,10 @@ function parseICS(text){
       else if(subj.includes('pd/h/pe')||subj.includes('pdhpe')||subj.includes('pd h pe'))subj='pdhpe';
       else if((subj.includes('pe')&&subj.includes('extra'))||(subj.includes('pe*'))||(subj.includes('pe (extra)')))subj='extra pe';
       else if(subj.includes(' pe ')||subj.endsWith(' pe')||subj.startsWith('pe '))subj='pe';
+      // PASS = Physical Activities and Sport Studies — must check BEFORE sport/volleyball
+      // because "sport studies" contains "sport" and would otherwise be mis-labelled
+      else if(subj.includes('physical activities')||subj.includes('sport studies')||
+              (subj.includes('pass')&&(subj.includes('sport')||subj.includes('physical'))))subj='pass';
       else if(subj.includes('volleyball')||subj.includes('sport'))subj='volleyball';
       else if(subj.includes('careers'))subj='careers';
       else if(subj.includes('roll'))subj='roll call';
@@ -6647,11 +6879,21 @@ function applyPerfMode(on,silent){
       @keyframes podIn{from{}to{}}
       @keyframes rowIn{from{}to{}}
     `;
-    // Turn off particles
     applyParticles(false,true);
+    // Force plain cursor in perf mode — hide canvas cursor and trail
+    const cdotEl=document.getElementById('cdot');
+    const trailEl=document.getElementById('ctrail');
+    if(cdotEl)cdotEl.style.display='none';
+    if(trailEl)trailEl.style.display='none';
+    document.body.style.cursor='auto';
+    let cs=document.getElementById('cursor-override-style');
+    if(!cs){cs=document.createElement('style');cs.id='cursor-override-style';document.head.appendChild(cs);}
+    cs.textContent='*{cursor:auto!important}a,button,[onclick]{cursor:pointer!important}input,textarea{cursor:text!important}';
   }else{
     s.textContent='';
     applyParticles(particlesEnabled,true);
+    // Restore cursor state
+    applyFancyCursor(fancyCursor);
   }
 }
 
