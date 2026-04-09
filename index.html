@@ -1953,21 +1953,57 @@ body.night .fr-emoji-opt:hover{background:rgba(255,255,255,.1)}
 .stab-panel.exit-right{opacity:0;transform:translateX(-52px);filter:blur(4px);pointer-events:none;position:absolute;inset:0}
 .stab-panel.exit-left {opacity:0;transform:translateX(52px); filter:blur(4px);pointer-events:none;position:absolute;inset:0}
 
-/* ── STUDY MODE TOGGLE ─────────────────────────────────── */
-.sw-mode-bar{display:flex;gap:2px;background:rgba(0,0,0,.06);border-radius:10px;padding:3px;margin-bottom:16px;width:fit-content}
-.swm{padding:5px 14px;border-radius:7px;font-size:12px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--t2);cursor:none;transition:all .18s;user-select:none}
-.swm.act{background:rgba(255,255,255,.88);color:var(--text);font-weight:500;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.swm:hover:not(.act){color:var(--text)}
-body.night .sw-mode-bar{background:rgba(255,255,255,.06)}
-body.night .swm.act{background:rgba(255,255,255,.14);color:var(--text)}
-body.night .swm:hover:not(.act){color:var(--text)}
+/* ── STUDY WIDGETS LAYOUT ─────────────────────────────────── */
+.study-widgets{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:900px){.study-widgets{grid-template-columns:1fr}}
 
-/* ── FOCUS TIMER SETUP PANEL ─────────────────────────────── */
-#focus-panel{display:none}
+/* Shared hero card chrome */
+.sw-widget,.ft-widget{position:relative;overflow:hidden;display:flex;flex-direction:column}
+.sw-widget::after,.ft-widget::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,#6366f1);border-radius:2px 2px 0 0;opacity:.7}
+.sw-widget-head,.ft-widget-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sw-widget-lbl,.ft-widget-lbl{font-size:10px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--t3)}
+/* Make fg (label+input combos) have consistent spacing across both cards */
+.sw-widget .fg,.ft-widget .fg{margin-bottom:8px}
+/* Align the plain inputs that come after .fg */
+.sw-widget .inp,.ft-widget .inp{margin-bottom:0}
+
+/* Stopwatch arc */
+.sw-arc-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:240px;height:240px;margin:14px auto 22px}
+.sw-arc-svg{position:absolute;inset:0;width:100%;height:100%}
+.sw-arc-track{fill:none;stroke:rgba(0,0,0,.07);stroke-width:3}
+body.night .sw-arc-track{stroke:rgba(255,255,255,.08)}
+.sw-arc-fill{fill:none;stroke:var(--accent,#6366f1);stroke-width:3.5;stroke-linecap:round;transition:stroke-dashoffset .5s linear;opacity:.9}
+.sw-arc-inner{position:relative;z-index:1;text-align:center;user-select:none}
+#sw-display{font-size:52px;font-weight:200;letter-spacing:-.055em;font-variant-numeric:tabular-nums;line-height:1;color:var(--text);transition:color .3s}
+#sw-status{font-size:10px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--t3);margin-top:8px}
+.sw-running #sw-display{color:var(--accent,#6366f1)}
+.sw-btns{display:flex;gap:8px;align-items:center;margin-top:auto;padding-top:16px}
+
+/* Atmosphere chips (replaces grid) */
+.atm-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.atm-chip{display:flex;align-items:center;justify-content:center;gap:6px;padding:13px 8px;border-radius:10px;border:1.5px solid var(--border);background:rgba(255,255,255,.5);cursor:none;transition:all .16s;font-size:12px;font-weight:500;color:var(--t2);user-select:none;letter-spacing:-.01em;text-align:center}
+.atm-chip:hover{border-color:var(--borders);background:rgba(255,255,255,.82);color:var(--text)}
+.atm-chip.act{border-color:var(--text);background:rgba(255,255,255,.92);color:var(--text);box-shadow:0 1px 6px rgba(0,0,0,.09)}
+.atm-chip-em{font-size:15px;line-height:1}
+body.night .atm-chip{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:var(--t3)}
+body.night .atm-chip:hover{background:rgba(255,255,255,.1);color:var(--text);border-color:rgba(255,255,255,.2)}
+body.night .atm-chip.act{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.12);color:var(--text)}
+
+/* Focus timer duration hero */
+.ft-dur-hero{display:flex;align-items:center;justify-content:center;gap:20px;margin:14px 0 10px}
+.ft-dur-display{text-align:center;min-width:72px}
+.ft-dur-val{font-size:56px;font-weight:200;letter-spacing:-.05em;font-variant-numeric:tabular-nums;line-height:1;color:var(--text)}
+.ft-dur-unit{font-size:10px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-top:4px}
+.ft-dur-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--glass);color:var(--text);font-size:18px;font-weight:300;display:flex;align-items:center;justify-content:center;cursor:none;transition:all .16s;flex-shrink:0;line-height:1}
+.ft-dur-btn:hover{background:rgba(255,255,255,.95);border-color:var(--borders);transform:scale(1.08)}
+body.night .ft-dur-btn{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);color:var(--text)}
+body.night .ft-dur-btn:hover{background:rgba(255,255,255,.14)}
+
+/* Focus timer setup panel — always visible in new layout */
+#focus-panel{display:flex!important;flex-direction:column;flex:1}
+#focus-panel .ft-opts{margin-bottom:12px}
 .ft-dur-row{display:flex;align-items:center;gap:14px;margin-bottom:20px}
-.ft-dur-val{font-size:44px;font-weight:200;letter-spacing:-.05em;font-variant-numeric:tabular-nums;line-height:1;min-width:56px;color:var(--text)}
-.ft-dur-unit{font-size:10px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-top:8px}
-.ft-slider-wrap{flex:1;display:flex;flex-direction:column;gap:6px}
+.ft-slider-wrap{display:flex;flex-direction:column;gap:6px}
 .ft-slider{width:100%;-webkit-appearance:none;appearance:none;height:3px;border-radius:99px;background:var(--border);outline:none;cursor:none}
 .ft-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--text);cursor:none;box-shadow:0 1px 5px rgba(0,0,0,.2)}
 .ft-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--text);cursor:none;border:none}
@@ -2940,124 +2976,108 @@ body.night .sb-close{background:rgba(255,255,255,.1)}
 
     <div id="study-panel">
     <div id="stab-log" class="stab-panel visible">
-      <div class="g2">
-        <div class="glass card">
-          <!-- Mode toggle -->
-          <div class="sw-ch-row">
-            <div class="sw-mode-bar">
-              <div class="swm act" onclick="swSetMode('stopwatch',this)">Stopwatch</div>
-              <div class="swm" onclick="swSetMode('focus',this)">Focus</div>
-            </div>
+      <div class="study-widgets">
+
+        <!-- ── STOPWATCH WIDGET ── -->
+        <div class="sw-widget glass card" id="sw-panel">
+          <div class="sw-widget-head">
+            <span class="sw-widget-lbl">Stopwatch</span>
             <div class="sw-fs-btn" id="sw-fs-open-btn" onclick="swOpenFs()" title="Fullscreen">
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="13" height="13"><path stroke-linecap="round" d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
             </div>
           </div>
-
-          <!-- ── STOPWATCH PANEL ── -->
-          <div id="sw-panel">
-            <div class="fg"><label class="fl">Subject</label>
-              <select class="inp" id="lg-subj"><option>mathematics</option><option>english</option><option>science</option><option>music</option><option>commerce</option><option>geography</option><option>history</option><option>history elective</option><option>pdhpe</option><option>pe</option><option>careers</option></select>
-            </div>
-            <div class="fg"><label class="fl">What are you doing?</label><input class="inp" id="lg-what" placeholder="e.g. Trigonometry exercises, chapter 4"></div>
-            <div style="text-align:center;padding:22px 0 18px">
-              <div id="sw-display" style="font-size:56px;font-weight:200;letter-spacing:-.05em;font-variant-numeric:tabular-nums;line-height:1;color:var(--text)">00:00:00</div>
-              <div id="sw-status" style="font-size:11px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-top:8px">ready</div>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <button class="btn bd bf" id="sw-btn" onclick="swToggle()">
-                <svg id="sw-btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="5,3 19,12 5,21"/></svg>
-                <span id="sw-btn-lbl">Start</span>
-              </button>
-              <button class="btn bo" id="sw-stop-btn" onclick="swStop()" style="display:none">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
-                Stop &amp; Log
-              </button>
-              <button id="sw-cancel-btn" onclick="swCancel()" style="display:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,.5);cursor:none;align-items:center;justify-content:center;flex-shrink:0;color:var(--t3);transition:all .15s" onmouseover="this.style.background='rgba(229,62,62,.08)';this.style.color='#e53e3e';this.style.borderColor='rgba(229,62,62,.2)'" onmouseout="this.style.background='rgba(255,255,255,.5)';this.style.color='var(--t3)';this.style.borderColor='var(--border)'" title="Cancel">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" width="12" height="12"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
-              </button>
+          <div class="fg" style="margin-bottom:8px">
+            <select class="inp" id="lg-subj" style="font-size:12px;padding:7px 10px"><option>mathematics</option><option>english</option><option>science</option><option>music</option><option>commerce</option><option>geography</option><option>history</option><option>history elective</option><option>pdhpe</option><option>pe</option><option>careers</option></select>
+          </div>
+          <input class="inp" id="lg-what" placeholder="what are you working on?" style="font-size:12px;padding:7px 10px;margin-bottom:0">
+          <!-- Arc display -->
+          <div class="sw-arc-wrap">
+            <svg class="sw-arc-svg" viewBox="0 0 240 240">
+              <circle class="sw-arc-track" cx="120" cy="120" r="106"/>
+              <circle class="sw-arc-fill" id="sw-arc-path" cx="120" cy="120" r="106"
+                stroke-dasharray="666" stroke-dashoffset="666"
+                transform="rotate(-90 120 120)"/>
+            </svg>
+            <div class="sw-arc-inner">
+              <div id="sw-display">00:00:00</div>
+              <div id="sw-status">ready</div>
             </div>
           </div>
-
-          <!-- ── FOCUS TIMER PANEL ── -->
-          <div id="focus-panel">
-            <div class="fg"><label class="fl">Subject</label>
-              <select class="inp" id="ft-subj"><option>mathematics</option><option>english</option><option>science</option><option>music</option><option>commerce</option><option>geography</option><option>history</option><option>history elective</option><option>pdhpe</option><option>pe</option><option>careers</option></select>
-            </div>
-            <div class="fg"><label class="fl">Session goal (optional)</label><input class="inp" id="ft-goal" placeholder="e.g. Finish chapter 4 notes"></div>
-            <!-- Duration slider -->
-            <div class="fg">
-              <label class="fl">Duration</label>
-              <div class="ft-dur-row">
-                <div>
-                  <div class="ft-dur-val" id="ft-dur-val">25</div>
-                  <div class="ft-dur-unit">min</div>
-                </div>
-                <div class="ft-slider-wrap">
-                  <input type="range" class="ft-slider" id="ft-slider" min="5" max="120" step="5" value="25" oninput="ftSliderUpdate(this.value)">
-                  <div class="ft-slider-ticks"><span>5</span><span>30</span><span>60</span><span>90</span><span>120</span></div>
-                </div>
-              </div>
-            </div>
-            <!-- Atmosphere picker -->
-            <label class="fl" style="margin-bottom:8px">Atmosphere</label>
-            <div class="atm-grid" id="atm-grid">
-              <div class="atm-card act" data-atm="sakura" onclick="ftSelAtm('sakura',this)">
-                <div class="atm-em">🌸</div>
-                <div class="atm-name">Sakura</div>
-                <div class="atm-desc">petals drifting</div>
-              </div>
-              <div class="atm-card" data-atm="space" onclick="ftSelAtm('space',this)">
-                <div class="atm-em">🌌</div>
-                <div class="atm-name">Space</div>
-                <div class="atm-desc">drifting stars</div>
-              </div>
-              <div class="atm-card" data-atm="ocean" onclick="ftSelAtm('ocean',this)">
-                <div class="atm-em">🌊</div>
-                <div class="atm-name">Ocean</div>
-                <div class="atm-desc">gentle waves</div>
-              </div>
-              <div class="atm-card" data-atm="autumn" onclick="ftSelAtm('autumn',this)">
-                <div class="atm-em">🍂</div>
-                <div class="atm-name">Autumn</div>
-                <div class="atm-desc">warm leaves</div>
-              </div>
-              <div class="atm-card" data-atm="rain" onclick="ftSelAtm('rain',this)">
-                <div class="atm-em">🌧️</div>
-                <div class="atm-name">Rain</div>
-                <div class="atm-desc">soft downpour</div>
-              </div>
-              <div class="atm-card" data-atm="aurora" onclick="ftSelAtm('aurora',this)">
-                <div class="atm-em">🌿</div>
-                <div class="atm-name">Aurora</div>
-                <div class="atm-desc">northern lights</div>
-              </div>
-            </div>
-            <!-- Options -->
-            <div class="ft-opts">
-              <div class="ft-opt-pill on" id="ft-break-pill" onclick="ftToggleOpt('break',this)">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Break reminder
-              </div>
-              <div class="ft-opt-pill on" id="ft-sound-pill" onclick="ftToggleOpt('sound',this)">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072"/></svg>
-                Done chime
-              </div>
-              <div class="ft-opt-pill on" id="ft-log-pill" onclick="ftToggleOpt('log',this)">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                Auto-log
-              </div>
-            </div>
-            <button class="btn bd bf" onclick="ftBegin()">
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-              Begin Focus
+          <!-- Buttons -->
+          <div class="sw-btns">
+            <button class="btn bd bf" id="sw-btn" onclick="swToggle()" style="flex:1">
+              <svg id="sw-btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="5,3 19,12 5,21"/></svg>
+              <span id="sw-btn-lbl">Start</span>
+            </button>
+            <button class="btn bo" id="sw-stop-btn" onclick="swStop()" style="display:none">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="13" height="13"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2h-4M9 3v18M15 3v18"/></svg>
+              Stop &amp; Log
+            </button>
+            <button id="sw-cancel-btn" onclick="swCancel()" title="Discard"
+              style="display:none;width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,.5);cursor:none;align-items:center;justify-content:center;flex-shrink:0;color:var(--t3);transition:all .15s"
+              onmouseover="this.style.background='rgba(229,62,62,.1)';this.style.color='#e53e3e';this.style.borderColor='rgba(229,62,62,.25)'"
+              onmouseout="this.style.background='rgba(255,255,255,.5)';this.style.color='var(--t3)';this.style.borderColor='var(--border)'">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="11" height="11"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
             </button>
           </div>
         </div>
 
-        <div class="glass card">
-          <div class="ch">recent sessions</div>
-          <div id="log-list" style="max-height:420px;overflow-y:auto"><div class="es"><div class="ei">—</div>No sessions logged yet.</div></div>
+        <!-- ── FOCUS TIMER WIDGET ── -->
+        <div class="ft-widget glass card" id="focus-panel">
+          <div class="ft-widget-head">
+            <span class="ft-widget-lbl">Focus Timer</span>
+          </div>
+          <div class="fg" style="margin-bottom:8px">
+            <select class="inp" id="ft-subj" style="font-size:12px;padding:7px 10px"><option>mathematics</option><option>english</option><option>science</option><option>music</option><option>commerce</option><option>geography</option><option>history</option><option>history elective</option><option>pdhpe</option><option>pe</option><option>careers</option></select>
+          </div>
+          <input class="inp" id="ft-goal" placeholder="session goal (optional)" style="font-size:12px;padding:7px 10px;margin-bottom:0">
+          <!-- Duration hero -->
+          <div class="ft-dur-hero">
+            <button class="ft-dur-btn" onclick="ftDurStep(-5)">−</button>
+            <div class="ft-dur-display">
+              <div class="ft-dur-val" id="ft-dur-val">25</div>
+              <div class="ft-dur-unit">min</div>
+            </div>
+            <button class="ft-dur-btn" onclick="ftDurStep(5)">+</button>
+          </div>
+          <!-- Slider (secondary control) -->
+          <div class="ft-slider-wrap" style="margin-bottom:18px">
+            <input type="range" class="ft-slider" id="ft-slider" min="5" max="120" step="5" value="25" oninput="ftSliderUpdate(this.value)">
+            <div class="ft-slider-ticks"><span>5</span><span>30</span><span>60</span><span>90</span><span>120</span></div>
+          </div>
+          <!-- Atmosphere -->
+          <div class="sw-widget-lbl" style="margin-bottom:8px">Atmosphere</div>
+          <div class="atm-chips" id="atm-grid">
+            <div class="atm-chip act" data-atm="sakura" onclick="ftSelAtm('sakura',this)"><span class="atm-chip-em">🌸</span>Sakura</div>
+            <div class="atm-chip" data-atm="space" onclick="ftSelAtm('space',this)"><span class="atm-chip-em">🌌</span>Space</div>
+            <div class="atm-chip" data-atm="ocean" onclick="ftSelAtm('ocean',this)"><span class="atm-chip-em">🌊</span>Ocean</div>
+            <div class="atm-chip" data-atm="autumn" onclick="ftSelAtm('autumn',this)"><span class="atm-chip-em">🍂</span>Autumn</div>
+            <div class="atm-chip" data-atm="rain" onclick="ftSelAtm('rain',this)"><span class="atm-chip-em">🌧️</span>Rain</div>
+            <div class="atm-chip" data-atm="aurora" onclick="ftSelAtm('aurora',this)"><span class="atm-chip-em">🌿</span>Aurora</div>
+          </div>
+          <!-- Options -->
+          <div class="ft-opts">
+            <div class="ft-opt-pill on" id="ft-break-pill" onclick="ftToggleOpt('break',this)">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Breaks
+            </div>
+            <div class="ft-opt-pill on" id="ft-sound-pill" onclick="ftToggleOpt('sound',this)">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072"/></svg>
+              Chime
+            </div>
+          </div>
+          <button class="btn bd bf" onclick="ftBegin()">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Begin Focus
+          </button>
         </div>
+
+      </div><!-- /study-widgets -->
+
+      <!-- Recent sessions — full width -->
+      <div class="glass card">
+        <div class="ch">recent sessions</div>
+        <div id="log-list" style="max-height:360px;overflow-y:auto"><div class="es"><div class="ei">—</div>No sessions logged yet.</div></div>
       </div>
     </div>
 
@@ -4786,8 +4806,18 @@ function swFmt(ms){
   return`${pad(h)}:${pad(m%60)}:${pad(s%60)}`;
 }
 function swTick(){
-  document.getElementById('sw-display').textContent=swFmt(swElapsed+(Date.now()-swStart));
+  const ms=swElapsed+(Date.now()-swStart);
+  document.getElementById('sw-display').textContent=swFmt(ms);
+  swUpdateArc(ms);
 }
+function swUpdateArc(ms){
+  const arc=document.getElementById('sw-arc-path');if(!arc)return;
+  const circ=666; // 2π×106
+  const maxMs=7200000; // 2h = full circle
+  const fill=Math.min(1,(ms||0)/maxMs);
+  arc.setAttribute('stroke-dashoffset',circ*(1-fill));
+}
+function swResetArc(){swUpdateArc(0);}
 function swToggle(){
   if(!swRunning){
     // Start
@@ -4799,6 +4829,7 @@ function swToggle(){
     document.getElementById('sw-status').textContent='running';
     document.getElementById('sw-stop-btn').style.display='';
     const cb=document.getElementById('sw-cancel-btn');if(cb)cb.style.display='flex';
+    document.getElementById('sw-panel')?.classList.add('sw-running');
   }else{
     // Pause
     swElapsed+=Date.now()-swStart;
@@ -4822,7 +4853,7 @@ function swStop(){
     confetti();
     showToast(`Logged ${mins}m of ${subj}`);
   }
-  swElapsed=0;
+  swElapsed=0;swResetArc();
   document.getElementById('sw-display').textContent='00:00:00';
   document.getElementById('sw-btn-lbl').textContent='Start';
   document.getElementById('sw-btn-icon').innerHTML='<polygon points="5,3 19,12 5,21"/>';
@@ -4830,19 +4861,20 @@ function swStop(){
   document.getElementById('sw-stop-btn').style.display='none';
   document.getElementById('lg-what').value='';
   const cb=document.getElementById('sw-cancel-btn');if(cb)cb.style.display='none';
+  document.getElementById('sw-panel')?.classList.remove('sw-running');
   swFloatHide();
 }
 
 function swCancel(){
-  // Discard the current session without logging
   if(swRunning){clearInterval(swTimer);swRunning=false;}
-  swElapsed=0;
+  swElapsed=0;swResetArc();
   document.getElementById('sw-display').textContent='00:00:00';
   document.getElementById('sw-btn-lbl').textContent='Start';
   document.getElementById('sw-btn-icon').innerHTML='<polygon points="5,3 19,12 5,21"/>';
   document.getElementById('sw-status').textContent='ready';
   document.getElementById('sw-stop-btn').style.display='none';
   const cb=document.getElementById('sw-cancel-btn');if(cb)cb.style.display='none';
+  document.getElementById('sw-panel')?.classList.remove('sw-running');
   swFloatHide();
 }
 
@@ -4914,20 +4946,8 @@ function swFloatReturn(){
 /* ════ STUDY MODE TOGGLE ════════════════════════════════ */
 let curSwMode='stopwatch';
 function swSetMode(mode,el){
-  if(curSwMode===mode)return;
+  // Both widgets are always visible as separate cards — no-op
   curSwMode=mode;
-  document.querySelectorAll('.swm').forEach(e=>e.classList.remove('act'));
-  if(el)el.classList.add('act');
-  const swp=document.getElementById('sw-panel');
-  const ftp=document.getElementById('focus-panel');
-  const fsBtn=document.getElementById('sw-fs-open-btn');
-  if(mode==='stopwatch'){
-    swp.style.display='';ftp.style.display='none';
-    if(fsBtn){fsBtn.title='Fullscreen stopwatch';}
-  }else{
-    swp.style.display='none';ftp.style.display='block';
-    if(fsBtn){fsBtn.title='Begin focus session';}
-  }
 }
 
 /* ════ STOPWATCH FULLSCREEN ════════════════════════════ */
@@ -4997,16 +5017,23 @@ function ftSliderUpdate(v){
   ftDurMins=+v;
   document.getElementById('ft-dur-val').textContent=v;
 }
+function ftDurStep(delta){
+  const slider=document.getElementById('ft-slider');
+  const cur=+slider.value;
+  const next=Math.max(5,Math.min(120,cur+delta));
+  slider.value=next;
+  ftSliderUpdate(next);
+}
 function ftSelAtm(atm,el){
   ftAtm=atm;
-  document.querySelectorAll('.atm-card').forEach(c=>c.classList.remove('act'));
+  document.querySelectorAll('.atm-chip,.atm-card').forEach(c=>c.classList.remove('act'));
   if(el)el.classList.add('act');
 }
 function ftToggleOpt(opt,el){
+  if(opt==='log')return; // auto-log is always on
   el.classList.toggle('on');
   if(opt==='break')ftBreakEnabled=el.classList.contains('on');
   else if(opt==='sound')ftSoundEnabled=el.classList.contains('on');
-  else if(opt==='log')ftAutoLog=el.classList.contains('on');
 }
 
 function ftBegin(){
@@ -5015,6 +5042,7 @@ function ftBegin(){
   ftTotalSecs=ftDurMins*60;
   ftRemSecs=ftTotalSecs;
   ftRunning=true;ftPaused=false;ftBreakShown=false;
+
   // open fullscreen
   const fs=document.getElementById('focus-fs');
   fs.classList.add('open');
@@ -5348,7 +5376,14 @@ function addPaper(){
   const total=+document.getElementById('pp-total').value||100;
   const date=document.getElementById('pp-date').value;
   if(!name||!mark||!date)return;
+  if(mark>total){
+    const inp=document.getElementById('pp-mark');
+    inp.style.borderColor='#e53e3e';inp.title='Mark cannot exceed total';
+    setTimeout(()=>{inp.style.borderColor='';inp.title='';},1800);
+    showToast('Mark cannot exceed total score');return;
+  }
   const pct=+(mark/total*100).toFixed(1);
+  if(pct>100){showToast('Score cannot exceed 100%');return;}
   papers.push({id:Date.now(),subj:curPaperSubj,name,mark,total,date,notes:document.getElementById('pp-notes').value});
   papers.sort((a,b)=>b.date.localeCompare(a.date));sv('st_p5',papers);
   lbUpdateWeekly([{subj:curPaperSubj,pct}]);
