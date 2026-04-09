@@ -1532,7 +1532,7 @@ body.night .home-timer{
 /* ══ FRIENDS PAGE ══════════════════════════════════════ */
 /* Root fills the entire page, no pg-wrap used */
 .fr-root{display:flex;flex-direction:column;height:100%;min-height:100vh;padding:36px 44px 40px;box-sizing:border-box}
-.fr-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px;flex-shrink:0}
+.fr-header{display:flex;align-items:flex-start;margin-bottom:24px;flex-shrink:0}
 .fr-title-block{display:flex;flex-direction:column}
 .fr-title{font-size:28px;font-weight:700;letter-spacing:-.04em;line-height:1}
 .fr-sub{font-size:12px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-top:5px}
@@ -3114,12 +3114,12 @@ body.night .sb-close{background:rgba(255,255,255,.1)}
       <div class="fr-title-block">
         <div class="fr-title">Friends</div>
         <div class="fr-sub" id="fr-sub-line">leaderboard</div>
-      </div>
-      <div id="fr-profile-pill" class="fr-profile-pill" onclick="frOpenSetup()" title="Your profile">
-        <div class="fr-avatar" id="fr-avatar-pill">?</div>
-        <div>
-          <div class="fr-pill-name" id="fr-pill-name">Set up profile</div>
-          <div class="fr-pill-sub" id="fr-pill-sub">click to configure</div>
+        <div id="fr-profile-pill" class="fr-profile-pill" onclick="frOpenSetup()" title="Your profile" style="margin-top:10px;align-self:flex-start">
+          <div class="fr-avatar" id="fr-avatar-pill">?</div>
+          <div>
+            <div class="fr-pill-name" id="fr-pill-name">Set up profile</div>
+            <div class="fr-pill-sub" id="fr-pill-sub">click to configure</div>
+          </div>
         </div>
       </div>
     </div>
@@ -3719,14 +3719,16 @@ document.addEventListener('mousemove',e=>{
 });
 
 document.addEventListener('click',e=>{
-  dotScale=0.44;
-  setTimeout(()=>{dotScale=1;},130);
-  const N=9;for(let i=0;i<N;i++){
-    const p=document.createElement('div');p.className='cpar';
-    const ang=(i/N)*Math.PI*2,dist=14+Math.random()*20;
-    const pCol=document.body.classList.contains('night')?'rgba(220,225,255,.9)':'rgba(15,15,15,.85)';
-    p.style.cssText=`left:${e.clientX}px;top:${e.clientY}px;width:${2.5+Math.random()*3}px;height:${2.5+Math.random()*3}px;background:${pCol};--tx:${Math.cos(ang)*dist}px;--ty:${Math.sin(ang)*dist}px;animation-duration:${.38+Math.random()*.2}s`;
-    document.body.appendChild(p);setTimeout(()=>p.remove(),700);
+  if(!perfMode&&fancyCursor){
+    dotScale=0.44;
+    setTimeout(()=>{dotScale=1;},130);
+    const N=9;for(let i=0;i<N;i++){
+      const p=document.createElement('div');p.className='cpar';
+      const ang=(i/N)*Math.PI*2,dist=14+Math.random()*20;
+      const pCol=document.body.classList.contains('night')?'rgba(220,225,255,.9)':'rgba(15,15,15,.85)';
+      p.style.cssText=`left:${e.clientX}px;top:${e.clientY}px;width:${2.5+Math.random()*3}px;height:${2.5+Math.random()*3}px;background:${pCol};--tx:${Math.cos(ang)*dist}px;--ty:${Math.sin(ang)*dist}px;animation-duration:${.38+Math.random()*.2}s`;
+      document.body.appendChild(p);setTimeout(()=>p.remove(),700);
+    }
   }
 });
 
@@ -4291,7 +4293,16 @@ function applyRemoteData(remote){
     const parsed=typeof ics==='string'?JSON.parse(ics):ics;
     localStorage.setItem('st_ics',JSON.stringify(parsed));applyICS(parsed);
   }
-  const fr=get('st_friends');if(fr!==undefined){lbFriends=fr;localStorage.setItem('st_friends',JSON.stringify(fr));}
+  const fr=get('st_friends');
+  if(fr!==undefined){
+    // Merge remote + local by user_id — never drop a friend due to a stale remote snapshot
+    const merged=[...lbFriends];
+    for(const f of (Array.isArray(fr)?fr:[])){
+      if(f?.user_id&&!merged.some(m=>m.user_id===f.user_id))merged.push(f);
+    }
+    lbFriends=merged;
+    localStorage.setItem('st_friends',JSON.stringify(lbFriends));
+  }
   if(window.innerWidth<=640){mhRenderHeroPanel();mhRenderRems();mhRenderHW();mhRenderCal();mhRenderExams();mhRenderTodayEvs();}
 }
 
@@ -7260,7 +7271,7 @@ async function sbSilentPull(){
     if(!remote||!Object.keys(remote).length)return;
     // Only apply keys where Supabase updated_at is newer than our last push timestamp
     const localTs=JSON.parse(localStorage.getItem('sb_push_ts')||'{}');
-    const DATA_KEYS=['st_r5','st_e5','st_l5','st_p5','st_x5','st_hw','st_name','st_ics'];
+    const DATA_KEYS=['st_r5','st_e5','st_l5','st_p5','st_x5','st_hw','st_name','st_ics','st_friends'];
     let changed=false;
     const filtered={};
     DATA_KEYS.forEach(k=>{
