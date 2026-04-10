@@ -2440,7 +2440,17 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
   <div class="modal-box" style="max-width:340px">
     <div class="mt" id="tt-edit-title">Edit Subject</div>
     <div class="mdl" id="tt-edit-sub">Monday · Period 1</div>
-    <div style="font-size:11px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px">Changes apply to all periods of this subject</div>
+    <!-- Scope toggle -->
+    <div style="display:flex;gap:6px;margin-bottom:16px">
+      <div class="ft-opt-pill on" id="tt-scope-all" onclick="ttSetScope('all',this)" style="flex:1;justify-content:center">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        All periods
+      </div>
+      <div class="ft-opt-pill" id="tt-scope-one" onclick="ttSetScope('one',this)" style="flex:1;justify-content:center">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M12 9v6"/></svg>
+        This period
+      </div>
+    </div>
     <div class="fg">
       <label class="fl">Subject name</label>
       <input class="inp" id="tt-edit-subj" placeholder="e.g. mathematics" autocomplete="off" spellcheck="false">
@@ -6937,6 +6947,10 @@ function obHandleFile(file){
 // ICS parser — extracts weekly timetable into TT-compatible format
 function parseICS(text){
   try{
+    // RFC 5545 §3.1: unfold lines (CRLF/LF followed by a single whitespace = continuation)
+    text=text.replace(/\r\n([ \t])/g,'').replace(/\n([ \t])/g,'');
+
+    const BYDAY_MAP={MO:'monday',TU:'tuesday',WE:'wednesday',TH:'thursday',FR:'friday'};
     const events=[];
     const blocks=text.split('BEGIN:VEVENT').slice(1);
     for(const b of blocks){
@@ -6945,18 +6959,53 @@ function parseICS(text){
       const dtstart=get('DTSTART'),dtend=get('DTEND'),summary=get('SUMMARY'),location=get('LOCATION'),desc=get('DESCRIPTION');
       if(!dtstart||!summary)continue;
       // Support both UTC (ends with Z) and local-time formats (no Z suffix)
+      // Also handle date-only format (VALUE=DATE:20260206 — no time component)
       const toDate=s=>{
         const c=s.replace('Z','');
-        const str=c.slice(0,4)+'-'+c.slice(4,6)+'-'+c.slice(6,8)+'T'+c.slice(9,11)+':'+c.slice(11,13)+':'+c.slice(13,15);
+        if(c.length===8){
+          // Date-only: YYYYMMDD — treat as local midnight
+          return new Date(`${c.slice(0,4)}-${c.slice(4,6)}-${c.slice(6,8)}T00:00:00`);
+        }
+        const str=`${c.slice(0,4)}-${c.slice(4,6)}-${c.slice(6,8)}T${c.slice(9,11)}:${c.slice(11,13)}:${c.slice(13,15)}`;
         return s.endsWith('Z')?new Date(str+'Z'):new Date(str);
       };
       const ps=dtstart,pe=dtend||dtstart;
       const ds=toDate(ps),de=toDate(pe);
-      const dow=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][ds.getDay()];
-      if(!dow||dow==='sunday'||dow==='saturday')continue;
-      // Extract subject name
-      let subj=summary.replace(/\d+\w+:\s*/,'').replace(/Yr \d+\s*/i,'').trim().toLowerCase();
-      if(subj.includes('mathematics')||subj.includes('math'))subj='mathematics';
+      if(isNaN(ds))continue;
+      const dtDow=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][ds.getDay()];
+
+      // RRULE BYDAY — the most reliable source of which days this class runs on.
+      // Sentral sometimes sets DTSTART to Monday even for Friday-only classes, so
+      // we always prefer BYDAY when present over inferring from DTSTART alone.
+      const rrule=get('RRULE');
+      let targetDays;
+      const bydayM=rrule.match(/BYDAY=([^;:\r\n]+)/i);
+      if(bydayM){
+        const parsed=bydayM[1].split(',')
+          .map(d=>BYDAY_MAP[d.trim().replace(/[+\-\d]/g,'').slice(0,2).toUpperCase()])
+          .filter(Boolean);
+        targetDays=parsed.length?parsed:[dtDow];
+      }else{
+        targetDays=dtDow&&dtDow!=='sunday'&&dtDow!=='saturday'?[dtDow]:[];
+      }
+      if(!targetDays.length)continue;
+
+      // Extract and normalise subject name
+      // Step 1: strip leading class code (digits+word chars+colon) and "Yr N"
+      let subj=summary.replace(/^\d[\w/]*:\s*/,'').replace(/^Yr\s*\d+\s*/i,'').trim().toLowerCase();
+      // Also strip trailing class code fragments like " 1" " 2" etc.
+      subj=subj.replace(/\s+\d+$/, '').trim();
+      if(!subj)subj=summary.trim().toLowerCase();
+
+      // Step 2: normalise to canonical subject names.
+      // Order matters — more specific checks before general ones.
+      // Tech subjects: must be checked BEFORE 'science', 'english', 'history' etc.
+      // to prevent "computing science" matching "science", etc.
+      if(/\bit[\s\-]*engineering\b/.test(subj)||/\binformation\s+technology\s+eng/.test(subj))subj='it engineering';
+      else if(/\bcomputing\s+tech/.test(subj)||/\bcomp\s+tech\b/.test(subj))subj='computing technology';
+      else if(/\belectronics?\b/.test(subj)&&!/\belectronic.*music\b/.test(subj))subj='electronics';
+      else if(/\bcritical\s+thinking\b/.test(subj))subj='critical thinking';
+      else if(subj.includes('mathematics')||subj.includes(' maths')||subj.startsWith('maths')||subj.includes(' math')||subj.startsWith('math'))subj='mathematics';
       else if(subj.includes('english'))subj='english';
       else if(subj.includes('science'))subj='science';
       else if(subj.includes('music'))subj='music';
@@ -6965,40 +7014,48 @@ function parseICS(text){
       else if(subj.includes('history elective')||subj.includes('history el'))subj='history elective';
       else if(subj.includes('history'))subj='history';
       else if(subj.includes('pd/h/pe')||subj.includes('pdhpe')||subj.includes('pd h pe'))subj='pdhpe';
-      else if((subj.includes('pe')&&subj.includes('extra'))||(subj.includes('pe*'))||(subj.includes('pe (extra)')))subj='extra pe';
-      else if(subj.includes(' pe ')||subj.endsWith(' pe')||subj.startsWith('pe '))subj='pe';
-      // PASS = Physical Activities and Sport Studies — must check BEFORE sport/volleyball
-      // because "sport studies" contains "sport" and would otherwise be mis-labelled
+      else if((subj.includes('pe')&&subj.includes('extra'))||subj.includes('pe*')||subj.includes('pe (extra)'))subj='extra pe';
+      else if(/\bpe\b/.test(subj)&&!/computing|speech/.test(subj))subj='pe';
+      // PASS = Physical Activities and Sport Studies — before sport/volleyball
       else if(subj.includes('physical activities')||subj.includes('sport studies')||
               (subj.includes('pass')&&(subj.includes('sport')||subj.includes('physical'))))subj='pass';
-      else if(subj.includes('volleyball')||subj.includes('sport'))subj='volleyball';
+      // Specific sports — preserve the actual sport name, never collapse to a generic label.
+      // "grade sport" / "rec sport" / "sport" alone falls through to the else and keeps its name.
+      else if(/\bvolleyball\b/.test(subj))subj='volleyball';
+      else if(/\bsoccer\b/.test(subj))subj='soccer';
+      else if(/\bbasketball\b/.test(subj))subj='basketball';
+      else if(/\btennis\b/.test(subj))subj='tennis';
+      else if(/\bswimming\b/.test(subj))subj='swimming';
+      else if(/\bathletics\b/.test(subj))subj='athletics';
+      else if(/\bcricket\b/.test(subj))subj='cricket';
+      else if(/\bnetball\b/.test(subj))subj='netball';
+      else if(/\brugby\b/.test(subj))subj='rugby';
+      else if(/\bgymnastics?\b/.test(subj)||/\brec[\s\-]*gym\b/.test(subj))subj='gymnastics';
+      // "grade sport", "sport" etc — keep as-is (falls through to the else below)
       else if(subj.includes('careers'))subj='careers';
       else if(subj.includes('roll'))subj='roll call';
-      // Unknown subject — clean up the raw name and keep it as-is
-      // e.g. "10PASS6: Yr 10 Pass" → "pass", "Yr 10 Extension Maths" → "extension maths"
-      else{
-        // Strip leading class code like "10PASS6:" or "10MaK:"
-        subj=summary.replace(/^\d+\w+:\s*/,'').replace(/Yr \d+\s*/i,'').trim().toLowerCase();
-        // Remove trailing numbers/codes
-        subj=subj.replace(/\s*\d+\s*$/, '').trim();
-        if(!subj)subj='unknown';
-      }
-      // Period label from description
-      const periodM=desc.match(/Period:\s*([^\\\n\r]+)/i);
+      // else: keep the cleaned name as-is (unknown subjects are preserved verbatim)
+
+      // Period label from description (unfolded, so full content is now available)
+      const periodM=desc.match(/Period:\s*([^\\\n\r;,]+)/i);
       const periodLbl=periodM?periodM[1].trim().toLowerCase():'period';
-      // Room from location
-      const roomM=location.match(/Room:\s*([^\r\n,]+)/i);
+      // Room from location or description
+      const roomM=(location||desc).match(/Room[:\s]+([^\r\n,\\;]+)/i);
       const room=roomM?roomM[1].trim():'';
-      // Local time hours/mins
+      // Local time hours/mins from DTSTART (same time applies to all BYDAY occurrences)
       const sh=ds.getHours(),sm=ds.getMinutes(),eh=de.getHours(),em=de.getMinutes();
-      events.push({dow,l:periodLbl,s:[sh,sm],e:[eh,em],subj,room});
+
+      // Push one event entry per target day
+      for(const dow of targetDays){
+        events.push({dow,l:periodLbl,s:[sh,sm],e:[eh,em],subj,room});
+      }
     }
     if(!events.length)return null;
-    // Deduplicate — Sentral exports one VEVENT per week for the whole term,
-    // so the same period appears many times. Keep only unique l+start combos per day.
+    // Deduplicate — Sentral exports one VEVENT per week; same period appears many times.
+    // Key includes subj so that rotating-cycle subjects on the same slot are both preserved.
     const seen=new Set();
     const unique=events.filter(ev=>{
-      const key=`${ev.dow}|${ev.l}|${ev.s[0]}:${ev.s[1]}`;
+      const key=`${ev.dow}|${ev.subj}|${ev.s[0]}:${ev.s[1]}`;
       if(seen.has(key))return false;
       seen.add(key);return true;
     });
@@ -7815,9 +7872,21 @@ function buildColourGrid_active(grid,sel){
   ttSelectedColour=sel;
 }
 
+let ttEditScope='all'; // 'all' | 'one'
+function ttSetScope(scope,el){
+  ttEditScope=scope;
+  document.getElementById('tt-scope-all').classList.toggle('on',scope==='all');
+  document.getElementById('tt-scope-one').classList.toggle('on',scope==='one');
+}
+
 function openTTEdit(day,periodLabel,p){
   ttEditCtx={day,periodLabel,p};
-  document.getElementById('tt-edit-title').textContent='Edit '+( p.subj||'period');
+  // Default to 'all' when multiple periods share this subject, 'one' otherwise
+  const subj=p.subj;
+  const count=subj?['monday','tuesday','wednesday','thursday','friday']
+    .flatMap(d=>TT[d]||[]).filter(e=>e.subj===subj).length:1;
+  ttSetScope(count>1?'all':'one');
+  document.getElementById('tt-edit-title').textContent='Edit '+(p.subj||'period');
   document.getElementById('tt-edit-sub').textContent=day.charAt(0).toUpperCase()+day.slice(1)+' · '+periodLabel;
   document.getElementById('tt-edit-subj').value=p.subj||'';
   document.getElementById('tt-edit-room').value=p.room||'';
@@ -7837,52 +7906,48 @@ function closeTTEdit(){
 
 function saveTTEdit(){
   if(!ttEditCtx)return;
-  const {p}=ttEditCtx;
+  const {day,periodLabel,p}=ttEditCtx;
   const oldSubj=p.subj;
   const newSubj=document.getElementById('tt-edit-subj').value.trim().toLowerCase()||null;
   const newRoom=document.getElementById('tt-edit-room').value.trim()||null;
   const newIcon=ttSelectedIcon||null;
+  const DAYS=['monday','tuesday','wednesday','thursday','friday'];
 
-  // Rename subject across the ENTIRE timetable
-  if(newSubj&&oldSubj&&newSubj!==oldSubj){
-    ['monday','tuesday','wednesday','thursday','friday'].forEach(day=>{
-      (TT[day]||[]).forEach(period=>{
-        if(period.subj===oldSubj){
-          period.subj=newSubj;
-          if(!period.icon&&newIcon)period.icon=newIcon;
+  if(ttEditScope==='all'){
+    // Apply subject rename + icon to every period of this subject across all days
+    DAYS.forEach(d=>{
+      (TT[d]||[]).forEach(entry=>{
+        if(entry.subj===oldSubj){
+          if(newSubj)entry.subj=newSubj;
+          if(newIcon)entry.icon=newIcon;
         }
       });
     });
-    // Also migrate colour if old subject had one
-    if(SUBJ_COLOURS[oldSubj]){
+    // Migrate colour key if subject was renamed
+    if(newSubj&&oldSubj&&newSubj!==oldSubj&&SUBJ_COLOURS[oldSubj]){
       SUBJ_COLOURS[newSubj]=SUBJ_COLOURS[oldSubj];
       delete SUBJ_COLOURS[oldSubj];
     }
-    // Migrate room change only on the specific period
-    const {day,periodLabel}=ttEditCtx;
+    // Room only updates on this specific period (rooms differ per period)
     const dayArr=TT[day];
-    if(dayArr){const entry=dayArr.find(p2=>p2.l===periodLabel);if(entry)entry.room=newRoom;}
+    if(dayArr){const entry=dayArr.find(e=>e.l===periodLabel);if(entry)entry.room=newRoom;}
   }else{
-    // No rename — just update this specific period
-    const {day,periodLabel}=ttEditCtx;
+    // 'one' — only touch this single period
     const dayArr=TT[day];
     if(dayArr){
-      const entry=dayArr.find(p2=>p2.l===periodLabel);
+      const entry=dayArr.find(e=>e.l===periodLabel);
       if(entry){entry.subj=newSubj;entry.room=newRoom;entry.icon=newIcon;}
     }
   }
 
-  // Also update icon in SIC
-  if(newSubj&&newIcon&&TT_ICONS[newIcon]) SIC[newSubj]=TT_ICONS[newIcon];
+  // Update icon registry
+  if(newSubj&&newIcon&&TT_ICONS[newIcon])SIC[newSubj]=TT_ICONS[newIcon];
 
-  // Apply colour choice
+  // Apply colour choice to whichever subject name is now canonical
   const finalSubj=newSubj||oldSubj;
   if(finalSubj){
-    if(ttSelectedColour===null){
-      delete SUBJ_COLOURS[finalSubj];
-    }else if(ttSelectedColour){
-      SUBJ_COLOURS[finalSubj]=ttSelectedColour;
-    }
+    if(ttSelectedColour===null){delete SUBJ_COLOURS[finalSubj];}
+    else if(ttSelectedColour){SUBJ_COLOURS[finalSubj]=ttSelectedColour;}
     saveSubjColours();
   }
 
@@ -7893,7 +7958,8 @@ function saveTTEdit(){
   renderDash();
   renderRems();
   renderHW();
-  showToast('Subject updated');
+  if(curPage==='study')renderStudy();
+  showToast(ttEditScope==='all'?'All periods updated':'This period updated');
 }
 
 document.getElementById('tt-edit-modal').addEventListener('click',function(e){if(e.target===this)closeTTEdit();});
