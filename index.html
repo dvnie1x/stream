@@ -149,16 +149,6 @@ body.night .stj.act{background:var(--text);color:#111}
 /* Night: sync badge */
 body.night #sync-badge{background:rgba(18,20,28,.92);border-color:rgba(255,255,255,.1)}
 
-/* Notion sync status pill */
-.nt-status{font-size:12px;font-family:'Geist Mono',monospace;padding:6px 10px;border-radius:8px;background:rgba(0,0,0,.04);color:var(--t2);margin-top:8px}
-.nt-status.ok{background:rgba(22,163,74,.1);color:#16a34a}
-.nt-status.error{background:rgba(220,38,38,.1);color:#dc2626}
-.nt-status.syncing{background:rgba(99,102,241,.08);color:#6366f1}
-body.night .nt-status{background:rgba(255,255,255,.06);color:var(--t2)}
-body.night .nt-status.ok{background:rgba(22,163,74,.15);color:#4ade80}
-body.night .nt-status.error{background:rgba(220,38,38,.15);color:#f87171}
-body.night .nt-status.syncing{background:rgba(99,102,241,.15);color:#a5b4fc}
-
 body.night .cd.tdy{color:#0f0f0f}
 body.night .cd.tdy .cd-chip{background:rgba(0,0,0,.12);color:#111}
 /* Night: scrollbar */
@@ -1535,6 +1525,67 @@ body.night .home-timer{
 .scd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .scn{font-size:13px}
 
+/* ── CALENDAR VIEW PANELS (swipe transitions) ────────── */
+#cal-views-wrap{position:relative;overflow:hidden}
+.cal-panel{will-change:transform,opacity;transition:opacity .34s cubic-bezier(.4,0,.2,1),transform .34s cubic-bezier(.4,0,.2,1),filter .34s ease}
+.cal-panel.cp-pre-right{opacity:0;transform:translateX(60px);filter:blur(12px);pointer-events:none;position:absolute;top:0;left:0;right:0;overflow:hidden}
+.cal-panel.cp-pre-left {opacity:0;transform:translateX(-60px);filter:blur(12px);pointer-events:none;position:absolute;top:0;left:0;right:0;overflow:hidden}
+.cal-panel.cp-exit-right{opacity:0;transform:translateX(-60px);filter:blur(12px);pointer-events:none;position:absolute;top:0;left:0;right:0}
+.cal-panel.cp-exit-left {opacity:0;transform:translateX(60px); filter:blur(12px);pointer-events:none;position:absolute;top:0;left:0;right:0}
+.cal-panel.cp-visible{opacity:1;transform:translateX(0);filter:blur(0);pointer-events:auto;position:relative}
+@keyframes delModalBgIn{from{opacity:0}to{opacity:1}}
+@keyframes delModalCardIn{from{opacity:0;transform:scale(.88) translateY(12px);filter:blur(4px)}to{opacity:1;transform:scale(1) translateY(0);filter:blur(0)}}
+#pg-cal .pg-wrap{padding-left:80px}
+
+/* ── DAY VIEW ────────────────────────────────────────── */
+.dv-outer{border-radius:16px;overflow:hidden;display:flex;flex-direction:column;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid var(--glass-bd);box-shadow:var(--sh)}
+.dv-header{padding:18px 20px 14px;border-bottom:1.5px solid var(--border);background:rgba(255,255,255,.45);backdrop-filter:blur(8px)}
+body.night .dv-header{background:rgba(255,255,255,.05)}
+.dv-date-big{font-size:28px;font-weight:700;letter-spacing:-.04em;line-height:1;color:var(--text)}
+.dv-date-big span{font-weight:300;color:var(--t2)}
+.dv-dow{font-size:13px;color:var(--t3);margin-top:3px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.08em}
+.dv-allday{display:flex;align-items:center;gap:8px;padding:7px 16px;border-bottom:1px solid var(--border);min-height:32px;background:rgba(255,255,255,.25)}
+body.night .dv-allday{background:rgba(255,255,255,.03)}
+.dv-allday-lbl{font-size:9.5px;font-family:'Geist Mono',monospace;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;width:48px;flex-shrink:0;text-align:right}
+.dv-allday-chips{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+.dv-allday-chip{font-size:10.5px;padding:2px 8px;border-radius:5px;color:#fff;font-weight:500;white-space:nowrap}
+.dv-scroll{overflow-y:auto;flex:1;max-height:calc(100vh - 280px);min-height:400px;overscroll-behavior:contain}
+.dv-scroll::-webkit-scrollbar{width:4px}.dv-scroll::-webkit-scrollbar-track{background:transparent}.dv-scroll::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:2px}
+.dv-body{display:flex;position:relative}
+.dv-time-col{width:66px;flex-shrink:0;position:relative}
+.dv-time-lbl{position:absolute;right:10px;font-size:9.5px;font-family:'Geist Mono',monospace;color:var(--t3);transform:translateY(-50%);white-space:nowrap}
+.dv-col{flex:1;position:relative}
+.dv-hl{position:absolute;left:0;right:0;height:1px;background:var(--border);opacity:.6}
+.dv-hl.wv-hl-mark{background:rgba(99,102,241,.45);height:1.5px;opacity:1}
+.dv-hl-half{position:absolute;left:0;right:0;height:1px;background:var(--border);opacity:.25}
+.dv-event{position:absolute;left:4px;right:4px;border-radius:9px;padding:6px 10px;cursor:none;z-index:10;overflow:hidden;transition:filter .12s,box-shadow .12s;box-shadow:0 2px 12px rgba(0,0,0,.18),0 1px 0 rgba(255,255,255,.25) inset}
+.dv-event:hover{filter:brightness(1.07);box-shadow:0 4px 18px rgba(0,0,0,.24)}
+.dv-event-name{font-size:12px;font-weight:600;color:#fff;line-height:1.3;text-shadow:0 1px 3px rgba(0,0,0,.2)}
+.dv-event-time{font-size:10px;font-family:'Geist Mono',monospace;color:rgba(255,255,255,.8);margin-top:2px}
+.dv-now-line{position:absolute;left:0;right:0;z-index:16;pointer-events:none}
+.dv-now-dot{position:absolute;left:-4px;top:-4px;width:9px;height:9px;border-radius:50%;background:#e53e3e}
+.dv-now-bar{position:absolute;left:0;right:0;top:0;height:2px;background:#e53e3e;box-shadow:0 0 6px rgba(229,62,62,.5)}
+/* ── CALENDAR ANIMATIONS ─────────────────────────────── */
+@keyframes calCellIn{from{opacity:0;transform:scale(.88) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes calCellSlideL{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes calCellSlideR{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes wvEvIn{from{opacity:0;transform:translateY(8px) scaleY(.9)}to{opacity:1;transform:translateY(0) scaleY(1)}}
+@keyframes wvColIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+@keyframes wvColInL{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+@keyframes calSyncPop{0%{opacity:0;transform:scale(.7)}60%{transform:scale(1.12)}100%{opacity:1;transform:scale(1)}}
+.cd.anim-in{animation:calCellIn .28s cubic-bezier(.34,1.4,.64,1) both}
+.cd.anim-l{animation:calCellSlideL .22s cubic-bezier(.25,.46,.45,.94) both}
+.cd.anim-r{animation:calCellSlideR .22s cubic-bezier(.25,.46,.45,.94) both}
+.wv-event.anim-ev{animation:wvEvIn .3s cubic-bezier(.34,1.3,.64,1) both}
+.wv-day-col.anim-col{animation:wvColIn .22s cubic-bezier(.25,.46,.45,.94) both}
+.wv-day-col.anim-col-l{animation:wvColInL .22s cubic-bezier(.25,.46,.45,.94) both}
+/* sync countdown pill */
+.cal-sync-pill{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-family:'Geist Mono',monospace;color:var(--t3);background:rgba(0,0,0,.04);border:1px solid var(--border);border-radius:20px;padding:3px 9px;letter-spacing:.02em;transition:color .3s}
+body.night .cal-sync-pill{background:rgba(255,255,255,.05)}
+.cal-sync-pill.syncing{color:#16a34a}
+.cal-sync-dot{width:6px;height:6px;border-radius:50%;background:var(--t3);flex-shrink:0;transition:background .3s}
+.cal-sync-pill.syncing .cal-sync-dot{background:#16a34a;animation:swpulse .8s ease-in-out infinite}
+
 /* PAGE WRAP */
 .pg-wrap{padding:36px 44px 52px}
 .pg-wrap.full-h{min-height:100vh}
@@ -1921,6 +1972,106 @@ body.night .fr-emoji-opt:hover{background:rgba(255,255,255,.1)}
 .em{font-family:'Geist Mono',monospace;font-size:10px;color:var(--t3);margin-top:2px}
 .ev-stag{font-size:10px;padding:2px 7px;border-radius:20px;background:rgba(17,17,17,.07);color:var(--t2);font-family:'Geist Mono',monospace;margin-top:4px;display:inline-block}
 
+/* ── WEEK VIEW ────────────────────────────────────────── */
+.cal-view-toggle{display:flex;gap:2px;background:rgba(0,0,0,.06);border-radius:10px;padding:3px}
+body.night .cal-view-toggle{background:rgba(255,255,255,.08)}
+.cvt-btn{padding:5px 16px;border-radius:8px;font-size:12px;font-weight:500;color:var(--t2);cursor:none;transition:all .18s;font-family:'Geist',sans-serif;border:none;background:transparent;letter-spacing:-.01em}
+.cvt-btn.act{background:rgba(255,255,255,.88);color:var(--text);box-shadow:0 1px 6px rgba(0,0,0,.1),0 1px 0 rgba(255,255,255,.9) inset}
+.cvt-btn:hover:not(.act){color:var(--text);background:rgba(255,255,255,.4)}
+body.night .cvt-btn.act{background:rgba(255,255,255,.16);color:var(--text)}
+body.night .cvt-btn:hover:not(.act){background:rgba(255,255,255,.08)}
+.wv-outer{border-radius:16px;overflow:hidden;display:flex;flex-direction:column;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid var(--glass-bd);box-shadow:var(--sh)}
+.wv-header{display:grid;border-bottom:1.5px solid var(--border);background:rgba(255,255,255,.45);backdrop-filter:blur(8px)}
+body.night .wv-header{background:rgba(255,255,255,.05)}
+.wv-corner{border-right:1px solid var(--border);padding:10px 0}
+body.night .wv-corner{border-right-color:rgba(255,255,255,.08)}
+.wv-day-hd{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 6px 12px;border-right:1px solid var(--border);transition:background .15s}
+.wv-day-hd:last-child{border-right:none}
+body.night .wv-day-hd{border-right-color:rgba(255,255,255,.07)}
+.wv-day-hd-name{font-size:9px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:6px}
+.wv-day-hd-num{font-size:20px;font-weight:300;letter-spacing:-.04em;color:var(--text);line-height:1;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .15s}
+.wv-day-hd-num.today{background:var(--text);color:#fff;font-weight:600;font-size:17px;box-shadow:0 3px 12px rgba(0,0,0,.2)}
+body.night .wv-day-hd-num.today{background:rgba(255,255,255,.9);color:#111}
+.wv-scroll{overflow-y:auto;flex:1;max-height:calc(100vh - 240px);min-height:380px;position:relative;scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.1) transparent;overscroll-behavior:contain}
+.wv-scroll::-webkit-scrollbar{width:5px}
+.wv-scroll::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:3px}
+body.night .wv-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1)}
+.wv-body{display:flex;position:relative}
+.wv-time-col{flex-shrink:0;width:66px;position:relative;border-right:1px solid var(--border)}
+body.night .wv-time-col{border-right-color:rgba(255,255,255,.08)}
+.wv-time-lbl{position:absolute;right:8px;font-size:9.5px;font-family:'Geist Mono',monospace;color:var(--t3);letter-spacing:.04em;transform:translateY(-50%);line-height:1;white-space:nowrap;pointer-events:none;user-select:none}
+.wv-days-wrap{flex:1;display:grid;position:relative}
+.wv-hour-lines{position:absolute;inset:0;pointer-events:none;z-index:1}
+.wv-hl{position:absolute;left:0;right:0;border-top:1px solid var(--border)}
+body.night .wv-hl{border-top-color:rgba(255,255,255,.07)}
+.wv-hl-mark{border-top:1.5px solid rgba(99,102,241,.28)!important}
+body.night .wv-hl-mark{border-top-color:rgba(160,160,255,.28)!important}
+.wv-hl-half{position:absolute;left:0;right:0;border-top:1px dashed rgba(0,0,0,.05)}
+body.night .wv-hl-half{border-top-color:rgba(255,255,255,.04)}
+.wv-day-col{position:relative;border-right:1px solid var(--border);cursor:crosshair;user-select:none}
+.wv-day-col:last-child{border-right:none}
+body.night .wv-day-col{border-right-color:rgba(255,255,255,.06)}
+.wv-day-col.today-col{background:rgba(99,102,241,.03)}
+body.night .wv-day-col.today-col{background:rgba(140,140,255,.04)}
+.wv-ghost{position:absolute;background:rgba(99,102,241,.14);border:2px solid rgba(99,102,241,.45);border-radius:8px;z-index:20;pointer-events:none;display:none;backdrop-filter:blur(2px);transition:none}
+.wv-ghost.active{display:block}
+.wv-ghost-lbl{font-size:10px;font-family:'Geist Mono',monospace;color:rgba(80,82,200,.9);padding:4px 7px;font-weight:600;white-space:nowrap;overflow:hidden}
+body.night .wv-ghost{background:rgba(130,130,255,.15);border-color:rgba(150,150,255,.5)}
+body.night .wv-ghost-lbl{color:rgba(180,180,255,.9)}
+.wv-event{position:absolute;left:3px;right:3px;border-radius:8px;padding:5px 8px;cursor:none;z-index:10;overflow:hidden;transition:filter .12s,box-shadow .12s;box-shadow:0 2px 10px rgba(0,0,0,.15),0 1px 0 rgba(255,255,255,.25) inset}
+.wv-event:hover{filter:brightness(1.07);box-shadow:0 4px 16px rgba(0,0,0,.22),0 1px 0 rgba(255,255,255,.3) inset;z-index:11}
+.wv-event-name{font-size:11px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.25)}
+.wv-event-time{font-size:9.5px;font-family:'Geist Mono',monospace;color:rgba(255,255,255,.8);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wv-event-subj{font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Geist Mono',monospace;text-transform:capitalize;letter-spacing:.04em}
+.wv-event-del{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .14s,background .14s;cursor:pointer;flex-shrink:0;z-index:20}
+.wv-event:hover .wv-event-del,.dv-event:hover .wv-event-del{opacity:1}
+.wv-event-del:hover{background:rgba(0,0,0,.55)!important}
+.wv-now-line{position:absolute;left:0;right:0;z-index:16;pointer-events:none}
+.wv-now-dot{position:absolute;left:-4px;top:-4px;width:9px;height:9px;border-radius:50%;background:#e53e3e;box-shadow:0 0 0 2px rgba(229,62,62,.3)}
+.wv-now-bar{position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,#e53e3e,rgba(229,62,62,.4));border-radius:1px}
+/* event popover */
+#wv-ev-pop{position:fixed;z-index:15000;background:rgba(248,248,252,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.9);box-shadow:0 16px 48px rgba(0,0,0,.18),0 1px 0 rgba(255,255,255,.92) inset;border-radius:14px;padding:14px 16px;width:260px;display:none}
+#wv-ev-pop.show{animation:popIn .18s cubic-bezier(.34,1.4,.64,1) both}
+body.night #wv-ev-pop{background:rgba(22,24,32,.94);border-color:rgba(255,255,255,.12)}
+#wv-ev-pop .pop-del{padding:7px;border-radius:8px;border:1.5px solid rgba(229,62,62,.25);background:rgba(229,62,62,.06);color:#e53e3e;font-size:12px;cursor:pointer;transition:all .14s}
+#wv-ev-pop .pop-del:hover{background:rgba(229,62,62,.14);border-color:rgba(229,62,62,.4)}
+.pop-inp{width:100%;box-sizing:border-box;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:rgba(255,255,255,.6);font-size:12px;font-family:inherit;color:var(--text);outline:none;transition:border-color .14s}
+.pop-inp:focus{border-color:rgba(99,102,241,.5)}
+body.night .pop-inp{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);color:var(--text)}
+#wv-pop-save:hover{background:rgba(99,102,241,.2)!important}
+@keyframes popIn{from{opacity:0;transform:scale(.88) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+/* Event color picker */
+.ev-colors{display:flex;gap:5px;flex-wrap:wrap;padding:2px 0}
+.ev-color-opt{width:22px;height:22px;border-radius:50%;cursor:none;border:2.5px solid transparent;transition:transform .12s,border-color .12s;flex-shrink:0}
+.ev-color-opt:hover{transform:scale(1.2)}
+.ev-color-opt.sel{border-color:var(--text);transform:scale(1.12);box-shadow:0 0 0 2px rgba(255,255,255,.8),0 2px 8px rgba(0,0,0,.2)}
+body.night .ev-color-opt.sel{box-shadow:0 0 0 2px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.4)}
+/* Recurring event UI */
+.recur-row{display:none;flex-direction:column;gap:8px;padding:10px 12px;background:rgba(0,0,0,.04);border-radius:10px;margin-top:-4px}
+.recur-row.show{display:flex}
+body.night .recur-row{background:rgba(255,255,255,.06)}
+.recur-days{display:flex;gap:4px;flex-wrap:wrap}
+.rday{width:34px;height:28px;border-radius:7px;border:1.5px solid var(--border);background:rgba(255,255,255,.5);font-size:9.5px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);cursor:none;transition:all .14s;display:flex;align-items:center;justify-content:center}
+.rday.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.rday:hover:not(.on){border-color:var(--borders);background:rgba(255,255,255,.88)}
+body.night .rday{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1);color:var(--t2)}
+body.night .rday.on{background:rgba(255,255,255,.9);color:#111;border-color:transparent}
+/* Apple Calendar / iCloud sync modal */
+.ical-icon-wrap{width:52px;height:52px;border-radius:16px;background:linear-gradient(145deg,#ff453a 0%,#ff7b73 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(255,69,58,.35);margin-bottom:16px}
+.ical-step{display:flex;gap:11px;align-items:flex-start;padding:10px 12px;background:rgba(0,0,0,.04);border-radius:10px;margin-bottom:8px}
+body.night .ical-step{background:rgba(255,255,255,.06)}
+.ical-step-num{width:22px;height:22px;border-radius:50%;background:var(--text);color:var(--bg);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.ical-step-title{font-size:13px;font-weight:500;line-height:1.3;margin-bottom:3px}
+.ical-step-sub{font-size:11.5px;color:var(--t2);line-height:1.55;font-family:'Geist Mono',monospace}
+.ical-connect-btn{width:100%;padding:11px;border-radius:11px;background:linear-gradient(135deg,#ff453a,#ff6b5e);color:#fff;border:none;font-size:13px;font-weight:600;cursor:none;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-.01em;box-shadow:0 4px 16px rgba(255,69,58,.35),0 1px 0 rgba(255,255,255,.2) inset;margin-bottom:10px}
+.ical-connect-btn:hover{filter:brightness(1.06);box-shadow:0 6px 22px rgba(255,69,58,.45),0 1px 0 rgba(255,255,255,.2) inset}
+.ical-connect-btn:disabled{opacity:.5;cursor:not-allowed;filter:none}
+.ical-export-btn{width:100%;padding:11px;border-radius:11px;background:linear-gradient(135deg,#ff453a,#ff6b5e);color:#fff;border:none;font-size:13px;font-weight:600;cursor:none;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-.01em;box-shadow:0 4px 16px rgba(255,69,58,.35),0 1px 0 rgba(255,255,255,.2) inset;margin-bottom:10px}
+.ical-export-btn:hover{filter:brightness(1.06);box-shadow:0 6px 22px rgba(255,69,58,.45),0 1px 0 rgba(255,255,255,.2) inset}
+.ical-connected-banner{display:flex;align-items:center;gap:10px;background:rgba(22,163,74,.08);border:1.5px solid rgba(22,163,74,.2);border-radius:11px;padding:11px 14px;margin-bottom:14px}
+body.night .ical-connected-banner{background:rgba(22,163,74,.1);border-color:rgba(22,163,74,.25)}
+.ical-warn{font-size:10.5px;color:var(--t3);font-family:'Geist Mono',monospace;line-height:1.55;padding:8px 10px;background:rgba(255,165,0,.07);border:1px solid rgba(255,165,0,.18);border-radius:8px;margin-bottom:12px}
+body.night .ical-warn{background:rgba(255,165,0,.06);border-color:rgba(255,165,0,.15)}
 /* MODALS */
 .modal-bg{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.14);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .22s ease;visibility:hidden}
 .modal-bg.open{opacity:1;pointer-events:all;visibility:visible}
@@ -2481,6 +2632,31 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
   </div>
 </div>
 
+<!-- APPLE CALENDAR / iCLOUD SYNC MODAL -->
+<div id="ical-modal" class="modal-bg">
+  <div class="modal-box" style="max-width:400px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+      <div class="ical-icon-wrap" style="margin-bottom:0;flex-shrink:0">
+        <svg fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="1.8" width="26" height="26"><rect x="3" y="4" width="18" height="18" rx="2.5"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/><circle cx="12" cy="16" r="2" fill="white" stroke="none"/></svg>
+      </div>
+      <div>
+        <div class="mt" style="margin-bottom:2px">Apple Calendar Sync</div>
+        <div style="font-size:11px;color:var(--t3);font-family:'Geist Mono',monospace">Two-way sync via iCloud CalDAV</div>
+      </div>
+    </div>
+    <!-- Dynamic status area -->
+    <div id="ical-status-ctn"></div>
+    <!-- Always-visible export fallback -->
+    <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px">
+      <div style="font-size:11px;color:var(--t3);font-family:'Geist Mono',monospace;margin-bottom:8px">Or export as .ics for manual import</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn bo" style="flex:1;font-size:11px" onclick="exportICS()">Export .ics</button>
+        <button class="btn bo" style="font-size:11px" onclick="closeICalModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ICS IMPORT MODAL -->
 <div id="ics-modal" class="modal-bg">
   <div class="modal-box" style="max-width:360px">
@@ -2719,13 +2895,59 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
 
 <!-- Event modal -->
 <div id="qm" class="modal-bg">
-  <div class="modal-box">
+  <div class="modal-box" style="width:420px">
     <div class="mdl" id="qm-dl">Tuesday, 24 March</div>
     <div class="mt">Add Event</div>
     <div class="fg"><label class="fl">Event name</label><input class="inp" id="qen" placeholder="e.g. English Assessment" onkeydown="if(event.key==='Enter')saveQEv()"></div>
-    <div class="fg"><label class="fl">Time (optional)</label><input class="inp" type="time" id="qet"></div>
+    <div class="fg" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div><label class="fl">Start time</label><input class="inp" type="time" id="qet"></div>
+      <div><label class="fl">End time</label><input class="inp" type="time" id="qet2"></div>
+    </div>
+    <div class="fg">
+      <label class="fl">Colour</label>
+      <div class="ev-colors" id="ev-color-row">
+        <div class="ev-color-opt sel" data-c="#6366f1" style="background:#6366f1" onclick="qSelectColor('#6366f1',this)"></div>
+        <div class="ev-color-opt" data-c="#2563eb" style="background:#2563eb" onclick="qSelectColor('#2563eb',this)"></div>
+        <div class="ev-color-opt" data-c="#7c3aed" style="background:#7c3aed" onclick="qSelectColor('#7c3aed',this)"></div>
+        <div class="ev-color-opt" data-c="#16a34a" style="background:#16a34a" onclick="qSelectColor('#16a34a',this)"></div>
+        <div class="ev-color-opt" data-c="#ea580c" style="background:#ea580c" onclick="qSelectColor('#ea580c',this)"></div>
+        <div class="ev-color-opt" data-c="#dc2626" style="background:#dc2626" onclick="qSelectColor('#dc2626',this)"></div>
+        <div class="ev-color-opt" data-c="#db2777" style="background:#db2777" onclick="qSelectColor('#db2777',this)"></div>
+        <div class="ev-color-opt" data-c="#0891b2" style="background:#0891b2" onclick="qSelectColor('#0891b2',this)"></div>
+        <div class="ev-color-opt" data-c="#ca8a04" style="background:#ca8a04" onclick="qSelectColor('#ca8a04',this)"></div>
+        <div class="ev-color-opt" data-c="#6b7280" style="background:#6b7280" onclick="qSelectColor('#6b7280',this)"></div>
+        <input type="color" id="qecustom" style="width:22px;height:22px;border-radius:50%;border:2.5px solid var(--border);cursor:none;padding:0;overflow:hidden;background:none" title="Custom colour" oninput="qSelectColor(this.value,null)">
+      </div>
+      <input type="hidden" id="qecolor" value="#6366f1">
+    </div>
     <div class="fg"><label class="fl">Link to subject</label>
       <select class="inp" id="qes"><option value="">— none —</option><option>mathematics</option><option>english</option><option>science</option><option>music</option><option>commerce</option><option>geography</option><option>history</option><option>history elective</option><option>pdhpe</option><option>pe</option><option>careers</option></select>
+    </div>
+    <div class="fg">
+      <label class="fl">Repeat</label>
+      <select class="inp" id="qerecur" onchange="qRecurChange(this.value)">
+        <option value="none">Never</option>
+        <option value="daily">Every day</option>
+        <option value="weekdays">Every weekday (Mon–Fri)</option>
+        <option value="weekly">Weekly on selected days</option>
+        <option value="monthly">Monthly</option>
+      </select>
+    </div>
+    <div class="recur-row" id="recur-days-row">
+      <label class="fl" style="margin-bottom:4px">Repeat on</label>
+      <div class="recur-days">
+        <div class="rday" data-d="1" onclick="qToggleDay(1,this)">Mon</div>
+        <div class="rday" data-d="2" onclick="qToggleDay(2,this)">Tue</div>
+        <div class="rday" data-d="3" onclick="qToggleDay(3,this)">Wed</div>
+        <div class="rday" data-d="4" onclick="qToggleDay(4,this)">Thu</div>
+        <div class="rday" data-d="5" onclick="qToggleDay(5,this)">Fri</div>
+        <div class="rday" data-d="6" onclick="qToggleDay(6,this)">Sat</div>
+        <div class="rday" data-d="0" onclick="qToggleDay(0,this)">Sun</div>
+      </div>
+    </div>
+    <div class="recur-row" id="recur-until-row">
+      <label class="fl" style="margin-bottom:4px">End date <span style="color:var(--t3)">(optional)</span></label>
+      <input class="inp" type="date" id="qeuntil">
     </div>
     <div class="fg"><label class="fl">Note</label><input class="inp" id="qeno" placeholder="Optional note…"></div>
     <div class="fg" style="display:flex;align-items:center;gap:8px">
@@ -2972,10 +3194,6 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
         <div class="qs-val" id="qs-exam-count">0</div>
         <div class="qs-lbl">Upcoming Exams</div>
       </div>
-      <div class="qs-cell">
-        <div class="qs-val" id="qs-log-count">0</div>
-        <div class="qs-lbl">Sessions Logged</div>
-      </div>
     </div>
 
     <!-- Row 2: current subject tile + today's schedule side by side -->
@@ -3045,14 +3263,30 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
 <!-- CALENDAR -->
 <div class="pg" id="pg-cal">
   <div class="pg-wrap">
-    <div class="pg-title">Calendar</div>
-    <div class="pg-desc">Double-click any day to add an event — or tap twice quickly. Events can be linked to subjects.</div>
-    <div class="cal-layout">
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="pg-title" style="margin-bottom:0">Calendar</div>
+        <div id="cal-sync-pill" class="cal-sync-pill" style="visibility:hidden">
+          <div class="cal-sync-dot"></div>
+          <span id="cal-sync-lbl">sync in 30s</span>
+        </div>
+      </div>
+      <div class="cal-view-toggle">
+        <button class="cvt-btn act" data-v="month" onclick="setCalView('month')">Month</button>
+        <button class="cvt-btn" data-v="week" onclick="setCalView('week')">Week</button>
+        <button class="cvt-btn" data-v="day" onclick="setCalView('day')">Day</button>
+      </div>
+      <div></div>
+    </div>
+    <div class="pg-desc" id="cal-desc" style="margin-bottom:18px">Double-click any day to add an event — or drag in Week view to set a time.</div>
+
+    <div id="cal-views-wrap">
+    <!-- ── MONTH VIEW ── -->
+    <div id="cal-month-layout" class="cal-panel cal-layout cp-visible" style="display:grid">
       <div class="glass card">
         <div class="cnr">
           <div>
             <div class="cml" id="cml">March 2026</div>
-
           </div>
           <div class="cnb">
             <button class="cbn" onclick="calNav(-1)">&#8592;</button>
@@ -3078,6 +3312,94 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
         </div>
       </div>
     </div>
+
+    <!-- ── WEEK VIEW ── -->
+    <div id="cal-week-layout" class="cal-panel cp-pre-right" style="display:block">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px">
+        <button class="cbn" onclick="wvNavWeek(-1)" title="Previous week">&#8592;</button>
+        <button class="cbn" onclick="wvNavToday()" style="padding:0 12px;width:auto;font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:.04em">Today</button>
+        <button class="cbn" onclick="wvNavWeek(1)" title="Next week">&#8594;</button>
+        <span id="wv-range-lbl" style="font-size:14px;font-weight:500;letter-spacing:-.02em;margin-left:4px;color:var(--text)"></span>
+        <button class="btn bo" onclick="openQM(localDateStr(new Date()))" style="margin-left:auto;padding:6px 12px;font-size:11px;cursor:none;display:flex;align-items:center;gap:5px">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+          Add Event
+        </button>
+      </div>
+      <div id="wv-grid-container"></div>
+    </div>
+
+    <!-- ── DAY VIEW ── -->
+    <div id="cal-day-layout" class="cal-panel cal-layout cp-pre-right" style="display:grid">
+      <div>
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px">
+          <button class="cbn" onclick="dvNavDay(-1)">&#8592;</button>
+          <button class="cbn" onclick="dvNavToday()" style="padding:0 12px;width:auto;font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:.04em">Today</button>
+          <button class="cbn" onclick="dvNavDay(1)">&#8594;</button>
+          <button class="btn bo" onclick="openQM(localDateStr(dvDate))" style="margin-left:auto;padding:6px 12px;font-size:11px;cursor:none;display:flex;align-items:center;gap:5px">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+            Add Event
+          </button>
+        </div>
+        <div id="dv-grid-container"></div>
+      </div>
+      <div style="position:sticky;top:0;display:flex;flex-direction:column;gap:14px">
+        <div class="glass card" id="dv-next-card">
+          <div class="ch">Next Up</div>
+          <div id="dv-next-ctn"><div class="es" style="padding:8px">Nothing scheduled</div></div>
+        </div>
+        <div class="glass card">
+          <div class="ch" id="dv-agenda-hd">Today's Agenda</div>
+          <div id="dv-agenda-list" style="max-height:calc(50vh - 100px);overflow-y:auto"><div class="es" style="padding:8px">No events</div></div>
+        </div>
+      </div>
+    </div>
+    </div><!-- end cal-views-wrap -->
+  </div>
+</div>
+
+<!-- Recurring delete modal -->
+<div id="del-recur-modal" style="display:none;position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:center;justify-content:center;animation:delModalBgIn .22s ease both">
+  <div id="del-recur-card" style="background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.85);box-shadow:0 24px 64px rgba(0,0,0,.22),0 1px 0 rgba(255,255,255,.9) inset;border-radius:20px;padding:28px 28px 22px;width:320px;max-width:90vw;animation:delModalCardIn .28s cubic-bezier(.34,1.28,.64,1) both">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <div style="width:32px;height:32px;border-radius:10px;background:rgba(229,62,62,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg fill="none" viewBox="0 0 20 20" width="16" height="16"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" fill="#e53e3e"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" fill="#e53e3e"/></svg>
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:700;letter-spacing:-.02em" id="del-recur-title">Delete recurring event</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:1px;font-family:'Geist Mono',monospace" id="del-recur-sub"></div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--t2);margin:14px 0 18px;line-height:1.55">This event repeats. What would you like to delete?</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="delRecurThis()" style="width:100%;padding:11px 14px;border-radius:11px;border:1.5px solid var(--border);background:rgba(255,255,255,.55);font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;text-align:left;transition:background .13s,border-color .13s;display:flex;align-items:center;gap:10px">
+        <span style="font-size:18px;line-height:1">📅</span>
+        <div><div>Just this event</div><div style="font-size:10.5px;font-weight:400;color:var(--t3);margin-top:1px">Remove only this occurrence</div></div>
+      </button>
+      <button onclick="delRecurAll()" style="width:100%;padding:11px 14px;border-radius:11px;border:1.5px solid rgba(229,62,62,.3);background:rgba(229,62,62,.07);font-size:12.5px;font-weight:600;color:#e53e3e;cursor:pointer;text-align:left;transition:background .13s,border-color .13s;display:flex;align-items:center;gap:10px">
+        <span style="font-size:18px;line-height:1">🗑️</span>
+        <div><div>All events in series</div><div style="font-size:10.5px;font-weight:400;color:rgba(229,62,62,.7);margin-top:1px">Permanently delete every occurrence</div></div>
+      </button>
+      <button onclick="closeDelRecurModal()" style="width:100%;padding:9px;border-radius:10px;border:none;background:none;font-size:12px;color:var(--t3);cursor:pointer;margin-top:2px">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Event popover (week + day view) -->
+<div id="wv-ev-pop">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div style="font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--t3);text-transform:uppercase" id="wv-pop-title">Event</div>
+    <button onclick="wvPopClose()" style="background:none;border:none;cursor:pointer;padding:2px 4px;font-size:13px;color:var(--t3);line-height:1">✕</button>
+  </div>
+  <input class="pop-inp" id="wv-pop-name" placeholder="Event name" />
+  <div style="display:flex;gap:6px;margin-top:6px">
+    <input class="pop-inp" id="wv-pop-start" type="time" style="flex:1;min-width:0" />
+    <input class="pop-inp" id="wv-pop-end" type="time" style="flex:1;min-width:0" />
+  </div>
+  <div class="ev-colors" id="wv-pop-colors" style="margin-top:8px;gap:5px;flex-wrap:wrap;display:flex"></div>
+  <input class="pop-inp" id="wv-pop-note" placeholder="Note (optional)" style="margin-top:6px" />
+  <div style="display:flex;gap:6px;margin-top:10px">
+    <button class="pop-del" id="wv-pop-del" onclick="wvPopDelete()" style="flex:1">Delete</button>
+    <button id="wv-pop-save" onclick="wvPopSave()" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid rgba(99,102,241,.35);background:rgba(99,102,241,.1);color:#6366f1;font-size:12px;cursor:pointer;transition:all .14s">Save</button>
   </div>
 </div>
 
@@ -3485,6 +3807,26 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
       </div>
     </div>
 
+    <!-- Integrations -->
+    <div class="st-section">
+      <div class="st-section-label">Integrations</div>
+      <div class="st-cards">
+        <div class="st-card st-card-wide">
+          <div class="st-card-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="12" cy="16" r="2" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <div class="st-card-body">
+            <div class="st-card-title">Apple Calendar Sync</div>
+            <div class="st-card-desc" id="st-ical-desc">Connect iCloud to sync events two-ways in real time</div>
+            <button class="btn bo" onclick="closeSettings();openICalModal()" style="margin-top:10px;width:100%;display:flex;align-items:center;justify-content:center;gap:6px">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="13" height="13"><path stroke-linecap="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"/><path stroke-linecap="round" d="M10.172 13.828a4 4 0 015.656 0l4-4a4 4 0 01-5.656-5.656l-1.102 1.101"/></svg>
+              <span id="st-ical-btn-lbl">Connect Apple Calendar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Appearance -->
     <div class="st-section">
       <div class="st-section-label">Appearance</div>
@@ -3573,31 +3915,6 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
             <div class="st-card-desc">Get reminded about upcoming homework and exams</div>
           </div>
           <div class="st-toggle" id="st-notif-toggle"><div class="st-toggle-knob"></div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Notion Sync -->
-    <div class="st-section">
-      <div class="st-section-label">Notion</div>
-      <div class="st-cards">
-        <div class="st-card st-card-wide">
-          <div class="st-card-icon">◻</div>
-          <div class="st-card-body">
-            <div class="st-card-title">Notion Calendar Sync</div>
-            <div class="st-card-desc">Import events from a Notion database. Requires a Cloudflare Worker proxy — see setup instructions.</div>
-            <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
-              <input class="inp" id="nt-worker-url" placeholder="Worker URL (https://…workers.dev)" style="width:100%;font-size:12px">
-              <input class="inp" id="nt-db-id" placeholder="Notion Database ID (32-char hex)" style="width:100%;font-size:12px">
-              <input class="inp" id="nt-token" type="password" placeholder="Notion API Token (secret_…)" style="width:100%;font-size:12px">
-            </div>
-            <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-              <button class="btn bd" onclick="notionSaveCfg()" style="font-size:12px;padding:7px 14px">Save &amp; Sync</button>
-              <button class="btn bo" onclick="notionSync()" style="font-size:12px;padding:7px 14px">Sync now</button>
-              <button class="btn bo" onclick="notionClear()" style="font-size:12px;padding:7px 14px;color:#dc2626;border-color:rgba(220,38,38,.3)">Clear</button>
-            </div>
-            <div id="nt-status" class="nt-status" style="display:none"></div>
-          </div>
         </div>
       </div>
     </div>
@@ -4542,7 +4859,6 @@ async function sbPushAll(){
 /* ════ STATE ════════════════════════════════════════════ */
 let rems=JSON.parse(localStorage.getItem('st_r5')||'[]');
 let evs=JSON.parse(localStorage.getItem('st_e5')||'[]');
-let notionEvs=JSON.parse(localStorage.getItem('notion_cache')||'[]');
 let logs=JSON.parse(localStorage.getItem('st_l5')||'[]');
 let papers=JSON.parse(localStorage.getItem('st_p5')||'[]');
 let exams=JSON.parse(localStorage.getItem('st_x5')||'[]');
@@ -4664,10 +4980,9 @@ function renderDash(){
   const now=new Date(),td=now.toISOString().split('T')[0];
 
   // Quick stats
-  const qr=document.getElementById('qs-rem-count'),qe=document.getElementById('qs-exam-count'),ql=document.getElementById('qs-log-count'),qh=document.getElementById('qs-hw-count');
+  const qr=document.getElementById('qs-rem-count'),qe=document.getElementById('qs-exam-count'),qh=document.getElementById('qs-hw-count');
   if(qr)qr.textContent=rems.filter(r=>!r.done).length;
   if(qe)qe.textContent=exams.filter(ex=>new Date(ex.date+'T09:00:00')>=now).length;
-  if(ql)ql.textContent=logs.length;
   if(qh)qh.textContent=hw.filter(h=>!h.done).length;
   renderHW();
 
@@ -4696,9 +5011,9 @@ function renderDash(){
   }
 
   // Today's events
-  const te=evs.filter(e=>e.date===td).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  const te=getEventsForDate(td).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
   const tl=document.getElementById('tdl');
-  if(tl)tl.innerHTML=te.length?te.map((e,i)=>`<div class="sci"><div class="sct">${e.time||'—'}</div><div class="scd" style="background:${COLS[i%COLS.length]}"></div><div class="scn">${esc(e.name)}${e.subj?` <span style="font-size:10px;color:var(--t3);font-family:'Geist Mono',monospace">${e.subj}</span>`:''}</div></div>`).join(''):'<div class="es" style="padding:10px"><div class="ei">—</div>No events today.</div>';
+  if(tl)tl.innerHTML=te.length?te.map(e=>{const col=e.color||'#6366f1';return`<div class="sci"><div class="sct">${e.time||'—'}</div><div class="scd" style="background:${col}"></div><div class="scn">${esc(e.name)}${e.subj?` <span style="font-size:10px;color:var(--t3);font-family:'Geist Mono',monospace">${e.subj}</span>`:''}</div></div>`}).join(''):'<div class="es" style="padding:10px"><div class="ei">—</div>No events today.</div>';
 
   // Next exam
   const upcoming=exams.filter(ex=>new Date(ex.date+'T09:00:00')>=now).sort((a,b)=>a.date.localeCompare(b.date));
@@ -4800,6 +5115,7 @@ function saveHW(){
   if(due&&addToCal){
     evs.push({id:id+1,name:`📚 ${task}`,date:due,time:'',note:subj,subj,hwId:id});
     evs.sort((a,b)=>a.date.localeCompare(b.date));sv('st_e5',evs);
+    icalStartAutoRefresh();
   }
   closeHWModal();
   renderHW();
@@ -4887,7 +5203,7 @@ function renderCal(){
   for(let i=0;i<dow;i++){const e=document.createElement('div');e.className='cd oth';e.textContent=prev-dow+1+i;g.appendChild(e);}
   for(let d=1;d<=last.getDate();d++){
     const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dayEvs=[...evs,...notionEvs].filter(e=>e.date===ds);
+    const dayEvs=getEventsForDate(ds);
     const el=document.createElement('div');
     let cls='cd'+(ds===today?' tdy':'')+(ds===calSel?' sel':'');
     el.className=cls;
@@ -4897,7 +5213,11 @@ function renderCal(){
     if(dayEvs.length){
       const show=dayEvs.slice(0,2);
       const extra=dayEvs.length-show.length;
-      chipsHtml=`<div class="cd-chips">${show.map(ev=>`<div class="cd-chip">${esc(ev.name)}</div>`).join('')}${extra?`<div class="cd-chip" style="opacity:.55">+${extra} more</div>`:''}</div>`;
+      const isTdy=ds===today;
+      chipsHtml=`<div class="cd-chips">${show.map(ev=>{
+        const chipStyle=ev.color&&!isTdy?`background:${ev.color}22;color:${ev.color};font-weight:600`:'';
+        return `<div class="cd-chip" style="${chipStyle}">${esc(ev.name)}</div>`;
+      }).join('')}${extra?`<div class="cd-chip" style="opacity:.55">+${extra} more</div>`:''}</div>`;
     }
     el.innerHTML=`<span class="cd-num">${d}</span>${chipsHtml}`;
     el.ondblclick=function(ev){ev.preventDefault();ev.stopPropagation();openQM(ds);};
@@ -4911,19 +5231,30 @@ function renderCal(){
       }
     };
     g.appendChild(el);
+    // Staggered entry animation
+    const animCls=_calNavDir<0?'anim-l':_calNavDir>0?'anim-r':'anim-in';
+    el.classList.add(animCls);
+    el.style.animationDelay=`${(d-1)*12}ms`;
   }
   const tot=dow+last.getDate();for(let i=1;i<=(tot%7===0?0:7-tot%7);i++){const e=document.createElement('div');e.className='cd oth';e.textContent=i;g.appendChild(e);}
   renderEvs();
 }
-function calNav(d){calM+=d;if(calM<0){calM=11;calY--;}if(calM>11){calM=0;calY++;}renderCal();}
+let _calNavDir=0;
+function calNav(d){_calNavDir=d;calM+=d;if(calM<0){calM=11;calY--;}if(calM>11){calM=0;calY++;}renderCal();_calNavDir=0;}
 function selDay(ds){calSel=calSel===ds?null:ds;document.getElementById('cfl').textContent=calSel?new Date(calSel+'T12:00').toLocaleDateString('en-AU',{day:'numeric',month:'short'}):'All';renderCal();}
 
 function openQM(ds){
   qdate=ds;const d=new Date(ds+'T12:00');
   document.getElementById('qm-dl').textContent=d.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'});
-  ['qen','qet','qeno'].forEach(id=>document.getElementById(id).value='');
+  ['qen','qet','qet2','qeno','qeuntil'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('qes').value=getCurSubj();
   document.getElementById('qer').checked=false;
+  document.getElementById('qerecur').value='none';
+  document.getElementById('recur-days-row').classList.remove('show');
+  document.getElementById('recur-until-row').classList.remove('show');
+  qRecurDays=[];
+  document.querySelectorAll('.rday').forEach(b=>b.classList.remove('on'));
+  qSelectColor('#6366f1',document.querySelector('.ev-color-opt[data-c="#6366f1"]'));
   setTimeout(cddSyncAll,0);
   document.getElementById('qm').classList.add('open');
   setTimeout(()=>document.getElementById('qen').focus(),220);
@@ -4933,26 +5264,1184 @@ document.getElementById('qm').addEventListener('click',e=>{if(e.target===documen
 function saveQEv(){
   const name=document.getElementById('qen').value.trim();if(!name||!qdate)return;
   const subj=document.getElementById('qes').value;
-  evs.push({id:Date.now(),name,date:qdate,time:document.getElementById('qet').value,note:document.getElementById('qeno').value,subj});
+  const startTime=document.getElementById('qet').value||'';
+  const endTime=document.getElementById('qet2').value||'';
+  const color=document.getElementById('qecolor').value||'#6366f1';
+  const recurFreq=document.getElementById('qerecur').value;
+  const ev={id:Date.now(),name,date:qdate,time:startTime,note:document.getElementById('qeno').value,subj,color};
+  if(endTime)ev.endTime=endTime;
+  if(recurFreq&&recurFreq!=='none'){
+    ev.recur={freq:recurFreq,start:qdate,days:qRecurDays.length?[...qRecurDays]:null,until:document.getElementById('qeuntil').value||null};
+  }
+  evs.push(ev);
   evs.sort((a,b)=>a.date.localeCompare(b.date));sv('st_e5',evs);
+  icalStartAutoRefresh();
   if(document.getElementById('qer').checked){
     rems.unshift({id:Date.now()+1,text:name,pri:document.getElementById('qert').value,subj,done:false,ld:new Date(qdate+'T12:00').toLocaleDateString('en-AU',{day:'numeric',month:'short'})});
     sv('st_r5',rems);renderRems();
   }
-  closeQM();renderCal();renderDash();
+  // Push to iCloud if connected
+  if(icalState==='connected')icalPushEvent(ev);
+  closeQM();renderCal();if(calView==='week')renderWeekView();else if(calView==='day')renderDayView();renderDash();
 }
 function renderEvs(){
   const el=document.getElementById('evl');
-  const allCalEvs=[...evs,...notionEvs].sort((a,b)=>a.date.localeCompare(b.date));
-  const list=calSel?allCalEvs.filter(e=>e.date===calSel):allCalEvs;
-  if(!list.length){el.innerHTML='<div class="es" style="padding:10px">No events.<br><span style="font-size:11px">Double-click a day to add one.</span></div>';return;}
-  el.innerHTML=list.map((e,i)=>`<div class="evi">
-    <div style="width:3px;border-radius:4px;background:${e._notion?'#7c3aed':COLS[i%COLS.length]};align-self:stretch;flex-shrink:0"></div>
-    <div style="flex:1"><div class="en">${esc(e.name)}</div><div class="em">${e.date}${e.time?' · '+e.time:''}${e.note?' · '+esc(e.note):''}</div>${e._notion?'<div class="ev-stag" style="color:#7c3aed;background:rgba(124,58,237,.1)">notion</div>':e.subj?`<div class="ev-stag">${e.subj}</div>`:''}</div>
-    ${e._notion?'':'<div class="db" onclick="delEv('+e.id+')">✕</div>'}
-  </div>`).join('');
+  const showList=calSel?getEventsForDate(calSel):evs;
+  if(!showList.length){el.innerHTML='<div class="es" style="padding:10px">No events.<br><span style="font-size:11px">Double-click a day to add one.</span></div>';return;}
+  el.innerHTML=showList.map((e,i)=>{
+    const col=e.color||COLS[i%COLS.length];
+    const recurBadge=e.recur?`<div class="ev-stag" style="background:${col}18;color:${col}">↻ ${e.recur.freq==='weekdays'?'Weekdays':e.recur.freq}</div>`:'';
+    const delId=e._v?null:e.id; // don't show delete for virtual recurring instances
+    return `<div class="evi">
+      <div style="width:3px;border-radius:4px;background:${col};align-self:stretch;flex-shrink:0"></div>
+      <div style="flex:1"><div class="en">${esc(e.name)}</div><div class="em">${e.date}${e.time?' · '+e.time:''}${e.endTime?' → '+e.endTime:''}${e.note?' · '+esc(e.note):''}</div>${e.subj?`<div class="ev-stag">${e.subj}</div>`:''} ${recurBadge}</div>
+      ${delId?`<div class="db" onclick="delEv(${delId})">✕</div>`:''}
+    </div>`;
+  }).join('');
 }
-function delEv(id){evs=evs.filter(e=>e.id!==id);sv('st_e5',evs);renderCal();}
+function delEv(id){
+  const ev=evs.find(e=>e.id===id);
+  if(ev&&ev.icalUid&&icalState==='connected')icalDeleteEvent(ev.icalUid,ev.icalCalHref);
+  evs=evs.filter(e=>e.id!==id);sv('st_e5',evs);renderCal();if(calView==='week')renderWeekView();else if(calView==='day')renderDayView();
+}
+
+/* ════ RECURRING + COLOR HELPERS ════════════════════════ */
+let qRecurDays=[];
+
+function qSelectColor(hex,el){
+  document.getElementById('qecolor').value=hex;
+  document.querySelectorAll('.ev-color-opt').forEach(b=>b.classList.remove('sel'));
+  if(el)el.classList.add('sel');
+}
+function qToggleDay(d,el){
+  const i=qRecurDays.indexOf(d);
+  if(i>=0){qRecurDays.splice(i,1);el.classList.remove('on');}
+  else{qRecurDays.push(d);el.classList.add('on');}
+}
+function qRecurChange(v){
+  document.getElementById('recur-days-row').classList.toggle('show',v==='weekly');
+  document.getElementById('recur-until-row').classList.toggle('show',v!=='none');
+}
+
+/* ════ RECURRING EVENT EXPANSION ════════════════════════ */
+function getEventsForDate(ds){
+  const result=[];
+  const d=new Date(ds+'T12:00');
+  const dow=d.getDay(); // 0=Sun,1=Mon,...
+  for(const ev of evs){
+    if(!ev.recur){
+      if(ev.date===ds)result.push(ev);
+    }else{
+      const r=ev.recur;
+      if(ds<r.start)continue;
+      if(r.until&&ds>r.until)continue;
+      if(r.exceptions&&r.exceptions.includes(ds))continue;
+      if(r.freq==='daily'){result.push({...ev,date:ds,_v:1});continue;}
+      if(r.freq==='monthly'){
+        const sd=new Date(r.start+'T12:00');
+        if(d.getDate()===sd.getDate())result.push({...ev,date:ds,_v:1});
+        continue;
+      }
+      const chkDays=r.freq==='weekdays'?[1,2,3,4,5]:(r.days&&r.days.length?r.days:[new Date(r.start+'T12:00').getDay()]);
+      if(chkDays.includes(dow))result.push({...ev,date:ds,_v:1});
+    }
+  }
+  return result;
+}
+
+/* ════ WEEK VIEW ════════════════════════════════════════ */
+const WV_START_H=0,WV_END_H=24,WV_HOUR_PX=76;
+const WV_TOTAL=(WV_END_H-WV_START_H)*WV_HOUR_PX;
+let calView='month';
+let wvWeekStart=wvGetWeekStart(new Date());
+let wvDrag=null,wvNowTimer=null,wvPopEvId=null,dvDrag=null;
+let _wvSavedScroll=0,_dvSavedScroll=0;
+
+function localDateStr(d){
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
+function wvGetWeekStart(d){
+  const dow=d.getDay();
+  const diff=dow===0?-6:1-dow;
+  const m=new Date(d);m.setHours(0,0,0,0);m.setDate(m.getDate()+diff);return m;
+}
+
+const CAL_VIEWS=['month','week','day'];
+function setCalView(v){
+  if(calView===v)return;
+  playWhoosh();
+  const fromIdx=CAL_VIEWS.indexOf(calView);
+  const toIdx=CAL_VIEWS.indexOf(v);
+  const goRight=toIdx>fromIdx;
+  const prevView=calView;
+  if(v==='week')renderWeekView();
+  else if(v==='day')renderDayView();
+  calView=v;
+  document.querySelectorAll('.cvt-btn').forEach(b=>b.classList.toggle('act',b.dataset.v===v));
+
+  const CP=['cp-visible','cp-pre-right','cp-pre-left','cp-exit-right','cp-exit-left'];
+
+  // Outgoing: slide out, then park in the pre-enter position for next time
+  const outEl=document.getElementById('cal-'+prevView+'-layout');
+  if(outEl){
+    outEl.classList.remove(...CP);
+    outEl.classList.add(goRight?'cp-exit-right':'cp-exit-left');
+    setTimeout(()=>{
+      outEl.classList.remove('cp-exit-right','cp-exit-left');
+      outEl.classList.add(goRight?'cp-pre-left':'cp-pre-right');
+    },360);
+  }
+
+  // Incoming: snap to start position, then transition to visible
+  const inEl=document.getElementById('cal-'+v+'-layout');
+  if(inEl){
+    inEl.classList.remove(...CP);
+    inEl.classList.add(goRight?'cp-pre-right':'cp-pre-left');
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      inEl.classList.remove('cp-pre-right','cp-pre-left');
+      inEl.classList.add('cp-visible');
+    }));
+  }
+
+  if(v==='week')wvScheduleNow();
+  else if(v==='day')dvScheduleNow();
+  else{if(wvNowTimer)clearInterval(wvNowTimer);wvNowTimer=null;if(dvNowTimer)clearInterval(dvNowTimer);dvNowTimer=null;}
+}
+
+let _wvNavDir=0;
+function wvNavWeek(d){_wvNavDir=d;wvWeekStart=new Date(wvWeekStart);wvWeekStart.setDate(wvWeekStart.getDate()+d*7);renderWeekView();_wvNavDir=0;}
+function wvNavToday(){_wvNavDir=0;wvWeekStart=wvGetWeekStart(new Date());renderWeekView();}
+
+function wvScheduleNow(){
+  if(wvNowTimer)clearInterval(wvNowTimer);
+  wvDrawNowLine();
+  wvNowTimer=setInterval(wvDrawNowLine,30000);
+}
+
+function wvFmtTime(h,m){
+  const h24=h%24;
+  const ap=h24>=12?'pm':'am',hh=h24%12||12;
+  return `${hh}:${String(m).padStart(2,'0')} ${ap}`;
+}
+
+function wvMinsFromY(y){
+  const raw=Math.round((y/WV_HOUR_PX)*60/15)*15;
+  return WV_START_H*60+Math.max(0,Math.min(raw,(WV_END_H-WV_START_H)*60));
+}
+
+function wvGetSubjColour(subj){
+  const SUBJ_LIST=['mathematics','english','science','music','commerce','geography','history','history elective','pdhpe','pe','careers'];
+  const SUBJ_COLS=['#2563eb','#7c3aed','#16a34a','#ea580c','#0891b2','#65a30d','#dc2626','#db2777','#ca8a04','#059669','#6366f1'];
+  const i=SUBJ_LIST.indexOf((subj||'').toLowerCase());
+  return i>=0?SUBJ_COLS[i]:'#6366f1';
+}
+
+function renderWeekView(){
+  const container=document.getElementById('wv-grid-container');
+  if(!container)return;
+  const today=new Date();
+  const todayDs=localDateStr(today);
+  const days=[];
+  for(let i=0;i<7;i++){const d=new Date(wvWeekStart);d.setDate(d.getDate()+i);days.push(d);}
+
+  // Range label
+  const start=days[0],end=days[6];
+  const lblA=start.toLocaleDateString('en-AU',{month:'short',year:'numeric'});
+  const lblB=end.toLocaleDateString('en-AU',{month:'short',year:'numeric'});
+  document.getElementById('wv-range-lbl').textContent=lblA===lblB?lblA:`${start.toLocaleDateString('en-AU',{month:'short'})} – ${lblB}`;
+
+  const totalHours=WV_END_H-WV_START_H;
+  const colTmpl=`66px repeat(7,1fr)`;
+
+  // Header
+  const hdrHtml=`<div class="wv-corner"></div>`+days.map(d=>{
+    const ds=localDateStr(d);
+    const isT=ds===todayDs;
+    return `<div class="wv-day-hd">
+      <div class="wv-day-hd-name">${d.toLocaleDateString('en-AU',{weekday:'short'}).toUpperCase()}</div>
+      <div class="wv-day-hd-num${isT?' today':''}">${d.getDate()}</div>
+    </div>`;
+  }).join('');
+
+  // Time labels
+  let timeLblHtml='';
+  for(let h=WV_START_H;h<WV_END_H;h++){
+    const top=(h-WV_START_H)*WV_HOUR_PX;
+    timeLblHtml+=`<div class="wv-time-lbl" style="top:${top}px">${wvFmtTime(h,0)}</div>`;
+  }
+
+  // Hour lines
+  let hlHtml='';
+  for(let h=WV_START_H;h<=WV_END_H;h++){
+    const top=(h-WV_START_H)*WV_HOUR_PX;
+    const mark=(h===5||h===22)?' wv-hl-mark':'';
+    hlHtml+=`<div class="wv-hl${mark}" style="top:${top}px"></div>`;
+    if(h<WV_END_H)hlHtml+=`<div class="wv-hl-half" style="top:${top+WV_HOUR_PX/2}px"></div>`;
+  }
+
+  // Day columns
+  const dayCols=days.map((d,ci)=>{
+    const ds=localDateStr(d);
+    const isT=ds===todayDs;
+    const dayEvs=getEventsForDate(ds).filter(e=>e.time);
+    const evHtml=dayEvs.map(ev=>{
+      const[sh,sm]=(ev.time||'00:00').split(':').map(Number);
+      const startMins=sh*60+sm;
+      const endMins=ev.endTime?(parseInt(ev.endTime.split(':')[0])*60+parseInt(ev.endTime.split(':')[1])):startMins+60;
+      const durMins=Math.max(endMins-startMins,15);
+      const top=((startMins-WV_START_H*60)/60)*WV_HOUR_PX;
+      const height=Math.max((durMins/60)*WV_HOUR_PX,22);
+      if(top<0||top>WV_TOTAL)return'';
+      const col=ev.color||wvGetSubjColour(ev.subj);
+      const timeLbl=ev.endTime?`${wvFmtTime(sh,sm)} – ${wvFmtTime(...ev.endTime.split(':').map(Number))}`:wvFmtTime(sh,sm);
+      const delAction=ev._v?`delRecurOccurrence(${ev.id},'${ds}')`:(`delEv(${ev.id})`);
+      const popAction=`wvShowPop(${ev.id},event)`;
+      const evDelay=_wvNavDir===0?`${40+Math.random()*60|0}ms`:'0ms';
+      return `<div class="wv-event anim-ev" style="top:${top}px;height:${height}px;background:${col};animation-delay:${evDelay}"
+        onmousedown="event.stopPropagation()"
+        onclick="event.stopPropagation();${popAction}">
+        <div class="wv-event-del" onclick="event.stopPropagation();${delAction}">
+          <svg fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3" width="8" height="8"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+        </div>
+        <div class="wv-event-name">${esc(ev.name)}</div>
+        ${height>30?`<div class="wv-event-time">${timeLbl}</div>`:''}
+        ${height>46&&ev.subj?`<div class="wv-event-subj">${esc(ev.subj)}</div>`:''}
+      </div>`;
+    }).join('');
+    const colAnimCls=_wvNavDir<0?' anim-col-l':_wvNavDir>0?' anim-col':'';
+    const colDelay=ci*25;
+    return `<div class="wv-day-col${isT?' today-col':''}${colAnimCls}" data-ds="${ds}" data-ci="${ci}" style="height:${WV_TOTAL}px;animation-delay:${colDelay}ms">${evHtml}</div>`;
+  }).join('');
+
+  container.innerHTML=`
+    <div class="wv-outer">
+      <div class="wv-header" style="display:grid;grid-template-columns:${colTmpl}">${hdrHtml}</div>
+      <div class="wv-scroll" id="wv-scroll">
+        <div class="wv-body">
+          <div class="wv-time-col" style="height:${WV_TOTAL}px">${timeLblHtml}</div>
+          <div class="wv-days-wrap" id="wv-days-wrap" style="display:grid;grid-template-columns:repeat(7,1fr);position:relative">
+            <div class="wv-hour-lines">${hlHtml}</div>
+            ${dayCols}
+            <div class="wv-ghost" id="wv-ghost"><div class="wv-ghost-lbl" id="wv-ghost-lbl"></div></div>
+            <div class="wv-now-line" id="wv-now-line" style="display:none"><div class="wv-now-dot"></div><div class="wv-now-bar"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  requestAnimationFrame(()=>{
+    const scrollEl=document.getElementById('wv-scroll');
+    if(scrollEl)scrollEl.scrollTop=_wvSavedScroll>0?_wvSavedScroll:5*WV_HOUR_PX;
+  });
+  wvAttachDrag();
+  wvDrawNowLine();
+}
+
+function wvAttachDrag(){
+  const daysWrap=document.getElementById('wv-days-wrap');
+  if(!daysWrap)return;
+
+  daysWrap.querySelectorAll('.wv-day-col').forEach(col=>{
+    col.addEventListener('mousedown',e=>{
+      if(e.target.closest('.wv-event'))return;
+      e.preventDefault();
+      const rect=col.getBoundingClientRect();
+      const y=e.clientY-rect.top; // rect.top already accounts for scroll
+      const startMins=wvMinsFromY(y);
+      wvDrag={col,ds:col.dataset.ds,startMins,endMins:startMins+60,colRect:rect};
+      wvUpdateGhost();
+    });
+  });
+
+  // Save scroll position on every scroll so re-renders can restore it
+  const wvScroll=document.getElementById('wv-scroll');
+  if(wvScroll&&!wvScroll._scrollSaving){
+    wvScroll._scrollSaving=true;
+    wvScroll.addEventListener('scroll',()=>{_wvSavedScroll=wvScroll.scrollTop;},{passive:true});
+  }
+  // Attach global listeners once
+  if(!window._wvDragAttached){
+    window._wvDragAttached=true;
+    document.addEventListener('mousemove',wvOnMouseMove);
+    document.addEventListener('mouseup',wvOnMouseUp);
+  }
+}
+
+function dvAttachDrag(){
+  const col=document.getElementById('dv-col');
+  if(!col)return;
+  col.addEventListener('mousedown',e=>{
+    if(e.target.closest('.dv-event')||e.target.closest('.wv-event-del'))return;
+    e.preventDefault();
+    const rect=col.getBoundingClientRect();
+    const y=e.clientY-rect.top;
+    const startMins=wvMinsFromY(y);
+    dvDrag={col,ds:col.dataset.ds,startMins,endMins:startMins+60};
+    dvUpdateGhost();
+  });
+  const dvScroll=document.getElementById('dv-scroll');
+  if(dvScroll&&!dvScroll._scrollSaving){
+    dvScroll._scrollSaving=true;
+    dvScroll.addEventListener('scroll',()=>{_dvSavedScroll=dvScroll.scrollTop;},{passive:true});
+  }
+  if(!window._wvDragAttached){
+    window._wvDragAttached=true;
+    document.addEventListener('mousemove',wvOnMouseMove);
+    document.addEventListener('mouseup',wvOnMouseUp);
+  }
+}
+function dvUpdateGhost(){
+  const ghost=document.getElementById('dv-ghost');
+  const lbl=document.getElementById('dv-ghost-lbl');
+  if(!ghost||!dvDrag)return;
+  const s=Math.min(dvDrag.startMins,dvDrag.endMins);
+  const en=Math.max(dvDrag.startMins,dvDrag.endMins);
+  const top=((s-WV_START_H*60)/60)*WV_HOUR_PX;
+  const h=Math.max(((en-s)/60)*WV_HOUR_PX,WV_HOUR_PX/2);
+  ghost.style.cssText=`left:3px;right:3px;top:${top}px;height:${h}px;display:block`;
+  lbl.textContent=`${wvFmtTime(Math.floor(s/60),s%60)} – ${wvFmtTime(Math.floor(en/60),en%60)}`;
+}
+
+function wvUpdateGhost(){
+  const ghost=document.getElementById('wv-ghost');
+  const lbl=document.getElementById('wv-ghost-lbl');
+  if(!ghost||!wvDrag)return;
+  const daysWrap=document.getElementById('wv-days-wrap');
+  if(!daysWrap)return;
+  const wrapRect=daysWrap.getBoundingClientRect();
+  const colRect=wvDrag.col.getBoundingClientRect();
+  const colL=colRect.left-wrapRect.left;
+  const colW=colRect.width;
+  const s=Math.min(wvDrag.startMins,wvDrag.endMins);
+  const en=Math.max(wvDrag.startMins,wvDrag.endMins);
+  const top=((s-WV_START_H*60)/60)*WV_HOUR_PX;
+  const h=Math.max(((en-s)/60)*WV_HOUR_PX,WV_HOUR_PX/2);
+  ghost.style.cssText=`left:${colL+3}px;width:${colW-6}px;top:${top}px;height:${h}px;display:block`;
+  lbl.textContent=`${wvFmtTime(Math.floor(s/60),s%60)} – ${wvFmtTime(Math.floor(en/60),en%60)}`;
+}
+
+function wvOnMouseMove(e){
+  if(wvDrag){
+    const rect=wvDrag.col.getBoundingClientRect();
+    const y=e.clientY-rect.top;
+    wvDrag.endMins=wvMinsFromY(y);
+    wvUpdateGhost();
+  }
+  if(dvDrag){
+    const rect=dvDrag.col.getBoundingClientRect();
+    const y=e.clientY-rect.top;
+    dvDrag.endMins=wvMinsFromY(y);
+    dvUpdateGhost();
+  }
+}
+
+function wvOnMouseUp(e){
+  if(wvDrag){
+    const ghost=document.getElementById('wv-ghost');
+    if(ghost)ghost.style.display='none';
+    const s=Math.min(wvDrag.startMins,wvDrag.endMins);
+    const en=Math.max(wvDrag.startMins,wvDrag.endMins);
+    if(en-s>=15){
+      const st=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+      const et=`${String(Math.floor(en/60)).padStart(2,'0')}:${String(en%60).padStart(2,'0')}`;
+      wvOpenQMWithTime(wvDrag.ds,st,et);
+    }
+    wvDrag=null;
+  }
+  if(dvDrag){
+    const ghost=document.getElementById('dv-ghost');
+    if(ghost)ghost.style.display='none';
+    const s=Math.min(dvDrag.startMins,dvDrag.endMins);
+    const en=Math.max(dvDrag.startMins,dvDrag.endMins);
+    if(en-s>=15){
+      const st=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+      const et=`${String(Math.floor(en/60)).padStart(2,'0')}:${String(en%60).padStart(2,'0')}`;
+      wvOpenQMWithTime(dvDrag.ds,st,et);
+    }
+    dvDrag=null;
+  }
+}
+
+function wvOpenQMWithTime(ds,startTime,endTime){
+  openQM(ds);
+  setTimeout(()=>{
+    if(startTime&&document.getElementById('qet'))document.getElementById('qet').value=startTime;
+    if(endTime&&document.getElementById('qet2'))document.getElementById('qet2').value=endTime;
+  },60);
+}
+
+function wvDrawNowLine(){
+  const nl=document.getElementById('wv-now-line');
+  if(!nl)return;
+  const now=new Date();
+  const todayDs=localDateStr(now);
+  const col=document.querySelector(`.wv-day-col[data-ds="${todayDs}"]`);
+  if(!col){nl.style.display='none';return;}
+  const mins=now.getHours()*60+now.getMinutes();
+  if(mins<WV_START_H*60||mins>WV_END_H*60){nl.style.display='none';return;}
+  const top=((mins-WV_START_H*60)/60)*WV_HOUR_PX;
+  const daysWrap=document.getElementById('wv-days-wrap');
+  if(!daysWrap)return;
+  const wrapRect=daysWrap.getBoundingClientRect();
+  const colRect=col.getBoundingClientRect();
+  nl.style.cssText=`display:block;top:${top}px;left:${colRect.left-wrapRect.left}px;width:${colRect.width}px`;
+}
+
+/* ════ DAY VIEW ═════════════════════════════════════════ */
+let dvDate=new Date();
+let dvNowTimer=null;
+
+function dvNavDay(d){dvDate=new Date(dvDate);dvDate.setDate(dvDate.getDate()+d);renderDayView();}
+function dvNavToday(){dvDate=new Date();renderDayView();}
+
+function dvScheduleNow(){
+  if(dvNowTimer)clearInterval(dvNowTimer);
+  dvDrawNowLine();
+  dvNowTimer=setInterval(()=>{
+    dvDrawNowLine();
+    // Refresh "Next Up" countdown every minute
+    const ds=localDateStr(dvDate);
+    const isToday=ds===localDateStr(new Date());
+    if(isToday){const nc=document.getElementById('dv-next-ctn');if(nc)renderDayViewSidebar(ds,true);}
+  },60000);
+}
+
+function dvDrawNowLine(){
+  const nl=document.getElementById('dv-now-line');
+  if(!nl)return;
+  const now=new Date();
+  const ds=localDateStr(dvDate);
+  const todayDs=localDateStr(now);
+  if(ds!==todayDs){nl.style.display='none';return;}
+  const mins=now.getHours()*60+now.getMinutes();
+  if(mins<WV_START_H*60||mins>WV_END_H*60){nl.style.display='none';return;}
+  const top=((mins-WV_START_H*60)/60)*WV_HOUR_PX;
+  nl.style.cssText=`display:block;top:${top}px;left:0;right:0`;
+}
+
+function renderDayView(){
+  const container=document.getElementById('dv-grid-container');
+  if(!container)return;
+  const ds=localDateStr(dvDate);
+  const todayDs=localDateStr(new Date());
+  const isToday=ds===todayDs;
+
+  // Header
+  const dayName=dvDate.toLocaleDateString('en-AU',{weekday:'long'});
+  const dayNum=dvDate.toLocaleDateString('en-AU',{day:'numeric'});
+  const monthYear=dvDate.toLocaleDateString('en-AU',{month:'long',year:'numeric'});
+
+  // All-day events (no time set)
+  const allEvs=getEventsForDate(ds);
+  const allDayEvs=allEvs.filter(e=>!e.time);
+  const timedEvs=allEvs.filter(e=>e.time);
+
+  const allDayHtml=allDayEvs.length
+    ? allDayEvs.map(ev=>`<div class="dv-allday-chip" style="background:${ev.color||'#6366f1'}">${esc(ev.name)}</div>`).join('')
+    : `<span style="font-size:10.5px;color:var(--t3);font-family:'Geist Mono',monospace">no all-day events</span>`;
+
+  // Time labels + hour lines
+  let timeLblHtml='',hlHtml='';
+  for(let h=WV_START_H;h<=WV_END_H;h++){
+    const top=(h-WV_START_H)*WV_HOUR_PX;
+    timeLblHtml+=`<div class="dv-time-lbl" style="top:${top}px">${wvFmtTime(h,0)}</div>`;
+    const dvMark=(h===5||h===22)?' wv-hl-mark':'';
+    hlHtml+=`<div class="dv-hl${dvMark}" style="top:${top}px"></div>`;
+    if(h<WV_END_H) hlHtml+=`<div class="dv-hl-half" style="top:${top+WV_HOUR_PX/2}px"></div>`;
+  }
+
+  // Events
+  const evHtml=timedEvs.map(ev=>{
+    const[sh,sm]=(ev.time||'00:00').split(':').map(Number);
+    const startMins=sh*60+sm;
+    const endMins=ev.endTime?(parseInt(ev.endTime.split(':')[0])*60+parseInt(ev.endTime.split(':')[1])):startMins+60;
+    const durMins=Math.max(endMins-startMins,15);
+    const top=((startMins-WV_START_H*60)/60)*WV_HOUR_PX;
+    const height=Math.max((durMins/60)*WV_HOUR_PX,24);
+    if(top<0||top>WV_TOTAL)return'';
+    const col=ev.color||wvGetSubjColour(ev.subj);
+    const timeLbl=ev.endTime?`${wvFmtTime(sh,sm)} – ${wvFmtTime(...ev.endTime.split(':').map(Number))}`:wvFmtTime(sh,sm);
+    const delAction=ev._v?`delRecurOccurrence(${ev.id},'${ds}')`:(`delEv(${ev.id})`);
+    const safeName=esc(ev.name).replace(/'/g,'&#39;');
+    const safeTime=timeLbl.replace(/'/g,'&#39;');
+    return `<div class="dv-event anim-ev" style="top:${top}px;height:${height}px;background:${col}"
+      onclick="event.stopPropagation();wvShowPop(${ev.id},event)">
+      <div class="wv-event-del" onclick="event.stopPropagation();${delAction}">
+        <svg fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3" width="8" height="8"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+      </div>
+      <div class="dv-event-name">${esc(ev.name)}</div>
+      ${height>34?`<div class="dv-event-time">${timeLbl}</div>`:''}
+    </div>`;
+  }).join('');
+
+  container.innerHTML=`
+    <div class="dv-outer">
+      <div class="dv-header">
+        <div class="dv-date-big">${dayNum} ${monthYear.split(' ')[0]} <span>${monthYear.split(' ')[1]}</span></div>
+        <div class="dv-dow${isToday?' today-dow':''}">${isToday?`<span style="color:var(--text);font-weight:600">Today \u00b7 </span>`:``}${dayName}</div>
+      </div>
+      <div class="dv-allday">
+        <div class="dv-allday-lbl">all-day</div>
+        <div class="dv-allday-chips">${allDayHtml}</div>
+      </div>
+      <div class="dv-scroll" id="dv-scroll">
+        <div class="dv-body">
+          <div class="dv-time-col" style="height:${WV_TOTAL}px">${timeLblHtml}</div>
+          <div class="dv-col" id="dv-col" data-ds="${ds}" style="height:${WV_TOTAL}px" ondblclick="openQM('${ds}')">
+            ${hlHtml}
+            ${evHtml}
+            <div class="dv-now-line" id="dv-now-line" style="display:none">
+              <div class="dv-now-dot"></div>
+              <div class="dv-now-bar"></div>
+            </div>
+            <div class="wv-ghost" id="dv-ghost"><div class="wv-ghost-lbl" id="dv-ghost-lbl"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  dvDrawNowLine();
+  dvAttachDrag();
+  renderDayViewSidebar(ds,isToday);
+  requestAnimationFrame(()=>{
+    const scroll=document.getElementById('dv-scroll');
+    if(!scroll)return;
+    scroll.scrollTop=_dvSavedScroll>0?_dvSavedScroll:5*WV_HOUR_PX;
+  });
+}
+
+function renderDayViewSidebar(ds,isToday){
+  const nextEl=document.getElementById('dv-next-ctn');
+  const agEl=document.getElementById('dv-agenda-list');
+  const hdEl=document.getElementById('dv-agenda-hd');
+  if(!nextEl||!agEl)return;
+
+  const allEvs=getEventsForDate(ds).sort((a,b)=>(a.time||'00:00').localeCompare(b.time||'00:00'));
+  const now=new Date();
+  const nowMins=now.getHours()*60+now.getMinutes();
+
+  // Update agenda heading
+  if(hdEl){
+    const d=new Date(ds+'T12:00');
+    hdEl.textContent=isToday?`Today's Agenda`:d.toLocaleDateString('en-AU',{weekday:'long'})+`'s Events`;
+  }
+
+  // Next event countdown (only meaningful today)
+  if(isToday){
+    const next=allEvs.find(e=>{
+      if(!e.time)return false;
+      const[h,m]=e.time.split(':').map(Number);
+      return h*60+m>nowMins;
+    });
+    if(next){
+      const[h,m]=next.time.split(':').map(Number);
+      const diffMins=(h*60+m)-nowMins;
+      const dh=Math.floor(diffMins/60),dm=diffMins%60;
+      const countdown=dh>0?`${dh}h ${dm}m`:`${dm}m`;
+      const col=next.color||'#6366f1';
+      nextEl.innerHTML=`
+        <div style="display:flex;align-items:center;gap:10px;padding:4px 0 6px">
+          <div style="flex-shrink:0;width:4px;align-self:stretch;border-radius:4px;background:${col}"></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(next.name)}</div>
+            <div style="font-size:10px;font-family:'Geist Mono',monospace;color:var(--t3);margin-top:2px">${wvFmtTime(h,m)}${next.endTime?` → ${wvFmtTime(...next.endTime.split(':').map(Number))}`:''}${next.recur?` · recurring`:''}</div>
+          </div>
+          <div style="flex-shrink:0;text-align:right">
+            <div style="font-size:20px;font-weight:700;letter-spacing:-.04em;color:${col};line-height:1">${countdown}</div>
+            <div style="font-size:9px;color:var(--t3);margin-top:1px;font-family:'Geist Mono',monospace">away</div>
+          </div>
+        </div>`;
+    }else{
+      nextEl.innerHTML=`<div class="es" style="padding:8px;font-size:11px">No more events today</div>`;
+    }
+  }else{
+    // For non-today: show event count summary
+    const cnt=allEvs.length;
+    const totalMins=allEvs.filter(e=>e.time&&e.endTime).reduce((s,e)=>{
+      const[sh,sm]=e.time.split(':').map(Number);
+      const[eh,em]=e.endTime.split(':').map(Number);
+      return s+Math.max(0,(eh*60+em)-(sh*60+sm));
+    },0);
+    if(cnt===0){
+      nextEl.innerHTML=`<div class="es" style="padding:8px;font-size:11px">Free day</div>`;
+    }else{
+      const th=Math.floor(totalMins/60),tm=totalMins%60;
+      nextEl.innerHTML=`
+        <div style="display:flex;gap:12px;padding:4px 0 6px">
+          <div style="text-align:center">
+            <div style="font-size:24px;font-weight:700;letter-spacing:-.04em;color:var(--text);line-height:1">${cnt}</div>
+            <div style="font-size:9px;color:var(--t3);font-family:'Geist Mono',monospace;margin-top:2px">event${cnt!==1?'s':''}</div>
+          </div>
+          ${totalMins>0?`<div style="text-align:center">
+            <div style="font-size:24px;font-weight:700;letter-spacing:-.04em;color:var(--text);line-height:1">${th>0?th+'h':tm+'m'}</div>
+            <div style="font-size:9px;color:var(--t3);font-family:'Geist Mono',monospace;margin-top:2px">scheduled</div>
+          </div>`:''}
+        </div>`;
+    }
+  }
+
+  // Agenda list
+  if(allEvs.length===0){
+    agEl.innerHTML=`<div class="es" style="padding:8px">No events</div>`;
+    return;
+  }
+  agEl.innerHTML=allEvs.map(ev=>{
+    const col=ev.color||'#6366f1';
+    const[sh,sm]=(ev.time||'00:00').split(':').map(Number);
+    const timeLbl=ev.time?(ev.endTime?`${wvFmtTime(sh,sm)} → ${wvFmtTime(...ev.endTime.split(':').map(Number))}`:wvFmtTime(sh,sm)):'all-day';
+    const isPast=isToday&&ev.time&&(sh*60+sm+((ev.endTime?(parseInt(ev.endTime.split(':')[0])*60+parseInt(ev.endTime.split(':')[1])):sh*60+sm+60)))/2<nowMins;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);opacity:${isPast?'.45':'1'}">
+      <div style="flex-shrink:0;width:3px;height:32px;border-radius:3px;background:${col}"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(ev.name)}</div>
+        <div style="font-size:10px;font-family:'Geist Mono',monospace;color:var(--t3);margin-top:1px">${timeLbl}${ev.recur?` · ↻`:''}</div>
+      </div>
+    </div>`;
+  }).join('')+'<div style="height:4px"></div>';
+}
+
+// Event popover
+let _wvPopCloseTimer=null;
+let _wvPopCurrentColor=null;
+const POP_COLS=['#6366f1','#0891b2','#16a34a','#ca8a04','#dc2626','#9333ea','#ea580c','#0d9488','#db2777','#64748b'];
+function _wvPopPosition(pop,e){
+  const r=e.currentTarget?e.currentTarget.getBoundingClientRect():{top:e.clientY,left:e.clientX,width:0,height:0};
+  const pw=278,ph=270;
+  let left=r.right+8,top=r.top;
+  if(left+pw>window.innerWidth)left=Math.max(8,r.left-pw-8);
+  if(top+ph>window.innerHeight)top=Math.max(8,window.innerHeight-ph-8);
+  pop.style.left=left+'px';pop.style.top=top+'px';
+}
+function _wvPopColorSwatches(selectedCol){
+  return POP_COLS.map(c=>`<div class="pop-swatch${c===selectedCol?' sel':''}" onclick="event.stopPropagation();wvPopPickColor('${c}')" style="width:18px;height:18px;border-radius:50%;background:${c};cursor:pointer;outline:${c===selectedCol?'2.5px solid '+c:'2px solid transparent'};outline-offset:2px;transition:outline .1s;flex-shrink:0"></div>`).join('');
+}
+function _wvPopOpen(pop){
+  pop.classList.remove('show');
+  pop.style.display='block';
+  pop.offsetHeight;
+  pop.classList.add('show');
+  const outside=ev2=>{if(!pop.contains(ev2.target)&&!ev2.target.closest('.wv-event')&&!ev2.target.closest('.dv-event')){pop.style.display='none';document.removeEventListener('click',outside);}};
+  setTimeout(()=>document.addEventListener('click',outside),50);
+}
+function wvShowPop(id,e){
+  wvPopEvId=id;
+  const ev=evs.find(x=>x.id===id);
+  if(!ev)return;
+  _wvPopCurrentColor=ev.color||POP_COLS[0];
+  const pop=document.getElementById('wv-ev-pop');
+  document.getElementById('wv-pop-title').textContent=ev.recur?'Recurring Event':'Event';
+  document.getElementById('wv-pop-name').value=ev.name||'';
+  document.getElementById('wv-pop-start').value=ev.time||'';
+  document.getElementById('wv-pop-end').value=ev.endTime||'';
+  document.getElementById('wv-pop-note').value=ev.note||'';
+  document.getElementById('wv-pop-colors').innerHTML=_wvPopColorSwatches(_wvPopCurrentColor);
+  document.getElementById('wv-pop-del').style.display='';
+  _wvPopPosition(pop,e);
+  _wvPopOpen(pop);
+}
+function wvShowPopV(name,timeLbl,col,e){
+  const ev=evs.find(x=>x.name===name&&(x.color===col||!x.color));
+  if(ev){wvShowPop(ev.id,e);return;}
+  wvPopEvId=null;
+  _wvPopCurrentColor=col;
+  const pop=document.getElementById('wv-ev-pop');
+  document.getElementById('wv-pop-title').textContent='Recurring Event';
+  document.getElementById('wv-pop-name').value=name;
+  document.getElementById('wv-pop-start').value='';
+  document.getElementById('wv-pop-end').value='';
+  document.getElementById('wv-pop-note').value='';
+  document.getElementById('wv-pop-colors').innerHTML=_wvPopColorSwatches(col);
+  document.getElementById('wv-pop-del').style.display='none';
+  _wvPopPosition(pop,e);
+  _wvPopOpen(pop);
+}
+function wvPopPickColor(c){
+  _wvPopCurrentColor=c;
+  document.getElementById('wv-pop-colors').innerHTML=_wvPopColorSwatches(c);
+}
+function wvPopSave(){
+  if(wvPopEvId==null)return;
+  const ev=evs.find(x=>x.id===wvPopEvId);
+  if(!ev)return;
+  const name=document.getElementById('wv-pop-name').value.trim();
+  const start=document.getElementById('wv-pop-start').value;
+  const end=document.getElementById('wv-pop-end').value;
+  const note=document.getElementById('wv-pop-note').value.trim();
+  if(name)ev.name=name;
+  if(start)ev.time=start; else delete ev.time;
+  if(end)ev.endTime=end; else delete ev.endTime;
+  ev.note=note||undefined;
+  if(_wvPopCurrentColor)ev.color=_wvPopCurrentColor;
+  // Persist edits for iCloud events so auto-refresh doesn't revert them
+  if(ev.icalUid){
+    const fields={};
+    if(name)fields.name=ev.name;
+    if(_wvPopCurrentColor)fields.color=ev.color;
+    if(start)fields.time=ev.time; else fields.time=null;
+    if(end)fields.endTime=ev.endTime; else fields.endTime=null;
+    fields.note=ev.note;
+    icalSaveOverride(ev.icalUid,fields);
+  }
+  _wvPopCurrentColor=null;
+  sv('st_e5',evs);
+  document.getElementById('wv-ev-pop').style.display='none';
+  renderCal();if(calView==='week')renderWeekView();else if(calView==='day')renderDayView();
+  showToast('Event updated');
+}
+function wvPopClose(){
+  _wvPopCurrentColor=null;
+  document.getElementById('wv-ev-pop').style.display='none';
+}
+function wvPopDelete(){
+  if(wvPopEvId!=null){delEv(wvPopEvId);wvPopEvId=null;document.getElementById('wv-ev-pop').style.display='none';}
+}
+
+// ICS Export
+function exportICS(){
+  const now=new Date();
+  const stamp=now.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//stream.//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:stream. Calendar'];
+  function fold(line){// RFC 5545: fold long lines
+    if(line.length<=75)return line;
+    let out='',i=0;
+    while(i<line.length){out+=(i>0?'\r\n ':'')+line.slice(i,i+75);i+=75;}
+    return out;
+  }
+  evs.forEach(ev=>{
+    const[y,mo,d]=ev.date.split('-');
+    lines.push('BEGIN:VEVENT');
+    if(ev.time){
+      const[sh,sm]=ev.time.split(':');
+      lines.push(fold('DTSTART:'+y+mo+d+'T'+sh+sm+'00'));
+      if(ev.endTime){const[eh,em]=ev.endTime.split(':');lines.push(fold('DTEND:'+y+mo+d+'T'+eh+em+'00'));}
+      else{const eh=String(parseInt(sh,10)+1).padStart(2,'0');lines.push(fold('DTEND:'+y+mo+d+'T'+eh+sm+'00'));}
+    }else{
+      lines.push(fold('DTSTART;VALUE=DATE:'+y+mo+d));
+      const nd=new Date(ev.date+'T12:00');nd.setDate(nd.getDate()+1);
+      lines.push(fold('DTEND;VALUE=DATE:'+nd.toISOString().split('T')[0].replace(/-/g,'')));
+    }
+    lines.push(fold('SUMMARY:'+ev.name.replace(/[\\;,]/g,c=>'\\'+c)));
+    if(ev.note)lines.push(fold('DESCRIPTION:'+ev.note.replace(/[\\;,]/g,c=>'\\'+c)));
+    if(ev.subj)lines.push(fold('CATEGORIES:'+ev.subj));
+    lines.push('UID:stream-ev-'+ev.id+'@stream.app');
+    lines.push('DTSTAMP:'+stamp);
+    lines.push('END:VEVENT');
+  });
+  exams.forEach(ex=>{
+    const[y,mo,d]=ex.date.split('-');
+    lines.push('BEGIN:VEVENT');
+    lines.push(fold('DTSTART;VALUE=DATE:'+y+mo+d));
+    const nd=new Date(ex.date+'T12:00');nd.setDate(nd.getDate()+1);
+    lines.push(fold('DTEND;VALUE=DATE:'+nd.toISOString().split('T')[0].replace(/-/g,'')));
+    lines.push(fold('SUMMARY:\uD83D\uDCDD '+ex.name+' — '+ex.subj));
+    lines.push('CATEGORIES:Exam');
+    lines.push('UID:stream-exam-'+ex.id+'@stream.app');
+    lines.push('DTSTAMP:'+stamp);
+    lines.push('END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  const blob=new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='stream-calendar.ics';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Calendar exported — open the .ics to import into Apple Calendar');
+}
+let _delRecurId=null,_delRecurDs=null;
+function delRecurOccurrence(id,ds){
+  const ev=evs.find(e=>e.id===id);if(!ev)return;
+  _delRecurId=id;_delRecurDs=ds;
+  const m=document.getElementById('del-recur-modal');
+  const titleEl=document.getElementById('del-recur-title');
+  const subEl=document.getElementById('del-recur-sub');
+  if(titleEl)titleEl.textContent='Delete "'+ev.name+'"';
+  if(subEl)subEl.textContent=(ev.recur?.freq||'recurring')+' event';
+  if(m){
+    const c=document.getElementById('del-recur-card');
+    m.style.animation='none';c.style.animation='none';
+    void m.offsetHeight;
+    m.style.animation='delModalBgIn .22s ease both';
+    c.style.animation='delModalCardIn .28s cubic-bezier(.34,1.28,.64,1) both';
+    m.style.display='flex';
+  }
+}
+function closeDelRecurModal(){
+  const m=document.getElementById('del-recur-modal');
+  const c=document.getElementById('del-recur-card');
+  if(!m){_delRecurId=null;_delRecurDs=null;return;}
+  c.style.animation='delModalCardIn .18s cubic-bezier(.4,0,.2,1) reverse both';
+  m.style.animation='delModalBgIn .18s ease reverse both';
+  setTimeout(()=>{m.style.display='none';c.style.animation='';m.style.animation=''},190);
+  _delRecurId=null;_delRecurDs=null;
+}
+function delRecurAll(){
+  if(_delRecurId!=null)delEv(_delRecurId);
+  closeDelRecurModal();
+}
+function delRecurThis(){
+  if(_delRecurId==null)return;
+  const ev=evs.find(e=>e.id===_delRecurId);
+  if(ev&&ev.recur&&_delRecurDs){
+    ev.recur.exceptions=ev.recur.exceptions||[];
+    if(!ev.recur.exceptions.includes(_delRecurDs))ev.recur.exceptions.push(_delRecurDs);
+    if(ev.icalUid)icalSaveOverride(ev.icalUid,{recur:ev.recur});
+    sv('st_e5',evs);
+    renderCal();
+    if(calView==='week')renderWeekView();
+    else if(calView==='day')renderDayView();
+    showToast('Occurrence removed');
+  }
+  closeDelRecurModal();
+}
+
+/* ════ iCLOUD CALDAV SYNC ═══════════════════════════════ */
+// We connect to iCloud CalDAV via a CORS proxy since browsers can't
+// make cross-origin PROPFIND/REPORT requests directly.
+const ICAL_PROXY_DEFAULT='https://streamcalendar.daniel-garg.workers.dev';
+function icalNormalizeProxy(u){if(!u)return'';return u.startsWith('http')?u:'https://'+u;}
+let icalProxyUrl=icalNormalizeProxy(localStorage.getItem('st_ical_proxy'))||ICAL_PROXY_DEFAULT;
+let icalCreds=null;
+let icalState='disconnected'; // disconnected | connecting | connected | error
+let icalCalendars=[];
+let icalHomeUrl='';
+// Restore saved session
+(()=>{
+  const s=localStorage.getItem('st_ical_creds');
+  if(s){try{icalCreds=JSON.parse(s);icalHomeUrl=localStorage.getItem('st_ical_home')||'';icalState='connected';}catch(e){}}
+})();
+// Auto-refresh every 30 seconds when connected + visible countdown
+let _icalAutoRefreshTimer=null;
+let _icalCountdownTimer=null;
+let _icalCountdown=30;
+function _icalUpdatePill(syncing){
+  const pill=document.getElementById('cal-sync-pill');
+  const lbl=document.getElementById('cal-sync-lbl');
+  if(!pill||!lbl)return;
+  if(icalState!=='connected'){pill.style.visibility='hidden';return;}
+  pill.style.visibility='visible';
+  if(syncing){
+    pill.classList.add('syncing');
+    lbl.textContent='syncing…';
+  }else{
+    pill.classList.remove('syncing');
+    lbl.textContent=`sync in ${_icalCountdown}s`;
+  }
+}
+function icalStartAutoRefresh(){
+  if(_icalAutoRefreshTimer)clearInterval(_icalAutoRefreshTimer);
+  if(_icalCountdownTimer)clearInterval(_icalCountdownTimer);
+  _icalCountdown=30;
+  _icalUpdatePill(false);
+  _icalCountdownTimer=setInterval(()=>{
+    _icalCountdown--;
+    if(_icalCountdown<=0)_icalCountdown=30;
+    _icalUpdatePill(false);
+  },1000);
+  _icalAutoRefreshTimer=setInterval(async()=>{
+    if(icalState!=='connected')return;
+    _icalCountdown=30;
+    _icalUpdatePill(true);
+    try{
+      await icalFetchCalendars();await icalFetchAllEvents();
+      renderCal();if(calView==='week')renderWeekView();else if(calView==='day')renderDayView();renderDash();
+    }catch(e){console.warn('iCloud auto-refresh failed:',e);}
+    _icalUpdatePill(false);
+  },30000);
+}
+icalStartAutoRefresh();
+
+// Prevent page scroll when mouse is over the calendar time grid
+(function(){
+  const calWrap=document.getElementById('cal-views-wrap');
+  if(!calWrap)return;
+  calWrap.addEventListener('wheel',e=>{
+    if(!document.getElementById('pg-cal')?.classList.contains('act'))return;
+    e.preventDefault();
+    const scrollEl=document.getElementById(calView==='day'?'dv-scroll':'wv-scroll');
+    if(scrollEl)scrollEl.scrollTop+=e.deltaY;
+  },{passive:false});
+})();
+
+async function icalRequest(url,method,body,extraHeaders={}){
+  if(!icalProxyUrl)throw new Error('No proxy configured — see Apple Sync setup guide');
+  const auth='Basic '+btoa(icalCreds.appleId+':'+icalCreds.password);
+  const proxyUrl=icalProxyUrl.replace(/\/+$/,'')+'?target='+encodeURIComponent(url);
+  // Always POST to the Worker; real CalDAV method goes in x-caldav-method header.
+  // This works around Cloudflare Workers' outbound fetch restriction on WebDAV methods.
+  const resp=await fetch(proxyUrl,{
+    method:'POST',
+    headers:{Authorization:auth,'Content-Type':'application/xml; charset=utf-8',Depth:'1','x-caldav-method':method,...extraHeaders},
+    body:body||undefined
+  });
+  return{status:resp.status,text:await resp.text()};
+}
+
+function icalXml(str){return new DOMParser().parseFromString(str,'text/xml');}
+// Namespace-safe helpers — iCloud uses DAV:/caldav namespace prefixes
+// querySelector fails on prefixed XML; getElementsByTagNameNS('*',local) always works
+function icalEl(node,n){return node.getElementsByTagNameNS('*',n)[0]||null;}
+function icalEls(node,n){return Array.from(node.getElementsByTagNameNS('*',n));}
+function icalHref(node){const h=node&&node.getElementsByTagNameNS('*','href')[0];return h?h.textContent.trim():'';}
+function icalText(node,n){const el=icalEl(node,n);return el?el.textContent.trim():'';}
+// Legacy shim (unused path kept for safety)
+function icalTextOf(doc,...tags){for(const t of tags){const v=icalText(doc,t);if(v)return v;}return '';}
+
+async function icalConnect(appleId,password){
+  if(!appleId||!password){showToast('Enter Apple ID and app-specific password');return;}
+  icalCreds={appleId,password};icalState='connecting';updateICalUI();
+  try{
+    // 1. Discover principal
+    const r1=await icalRequest('https://caldav.icloud.com/','PROPFIND',
+      '<?xml version="1.0"?><d:propfind xmlns:d="DAV:"><d:prop><d:current-user-principal/></d:prop></d:propfind>',
+      {Depth:'0'});
+    if(r1.status===401||r1.status===403)throw new Error('Wrong Apple ID or app-specific password');
+    if(r1.status>=500)throw new Error('iCloud server error ('+r1.status+') — try again');
+    const doc1=icalXml(r1.text);
+    const principalPath=icalHref(icalEl(doc1,'current-user-principal'));
+    if(!principalPath)throw new Error('Could not find iCloud principal — check your Apple ID and app-specific password (status '+r1.status+')');
+    const principalUrl=principalPath.startsWith('http')?principalPath:'https://caldav.icloud.com'+principalPath;
+
+    // 2. Get calendar home
+    const r2=await icalRequest(principalUrl,'PROPFIND',
+      '<?xml version="1.0"?><d:propfind xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav"><d:prop><c:calendar-home-set/><d:displayname/></d:prop></d:propfind>',
+      {Depth:'0'});
+    const doc2=icalXml(r2.text);
+    const homePath=icalHref(icalEl(doc2,'calendar-home-set'));
+    if(!homePath)throw new Error('Could not find iCloud calendar home (status '+r2.status+')');
+    icalHomeUrl=homePath.startsWith('http')?homePath:'https://caldav.icloud.com'+homePath;
+
+    // 3. List calendars
+    await icalFetchCalendars();
+    // 4. Import events
+    await icalFetchAllEvents();
+
+    localStorage.setItem('st_ical_creds',JSON.stringify(icalCreds));
+    localStorage.setItem('st_ical_home',icalHomeUrl);
+    icalState='connected';updateICalUI();icalStartAutoRefresh();
+    renderCal();if(calView==='week')renderWeekView();else if(calView==='day')renderDayView();
+    showToast('Connected to iCloud — '+evs.filter(e=>e.icalUid).length+' events imported');
+  }catch(err){
+    icalState='error';icalCreds=null;
+    updateICalUI(err.message||'Connection failed');
+  }
+}
+
+async function icalFetchCalendars(){
+  const r=await icalRequest(icalHomeUrl,'PROPFIND',
+    '<?xml version="1.0"?><d:propfind xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav"><d:prop><d:displayname/><d:resourcetype/></d:prop></d:propfind>',
+    {Depth:'1'});
+  const doc=icalXml(r.text);icalCalendars=[];
+  icalEls(doc,'response').forEach(resp=>{
+    const href=icalHref(resp);
+    const name=icalText(resp,'displayname')||'Calendar';
+    const isCalendar=!!icalEl(resp,'calendar');
+    if(href&&isCalendar&&href!==icalHomeUrl&&!href.endsWith('/inbox/')&&!href.endsWith('/outbox/'))
+      icalCalendars.push({href:href.trim(),name:name.trim()});
+  });
+  if(!icalCalendars.length)icalCalendars=[{href:icalHomeUrl,name:'iCloud Calendar'}];
+}
+
+function icalSaveOverride(icalUid,fields){
+  const ov=JSON.parse(localStorage.getItem('st_ical_ov')||'{}');
+  ov[icalUid]=Object.assign(ov[icalUid]||{},fields);
+  localStorage.setItem('st_ical_ov',JSON.stringify(ov));
+}
+function icalApplyOverrides(){
+  const ov=JSON.parse(localStorage.getItem('st_ical_ov')||'{}');
+  evs.forEach(ev=>{
+    if(ev.icalUid&&ov[ev.icalUid])Object.assign(ev,ov[ev.icalUid]);
+  });
+}
+
+async function icalFetchAllEvents(){
+  evs=evs.filter(e=>!e.icalUid);
+  for(const cal of icalCalendars){
+    try{await icalFetchCalendarEvents(cal);}catch(e){console.warn('Failed to fetch',cal.name,e);}
+  }
+  icalApplyOverrides();
+  sv('st_e5',evs);
+}
+
+async function icalFetchCalendarEvents(cal){
+  const calUrl=cal.href.startsWith('http')?cal.href:'https://caldav.icloud.com'+cal.href;
+  const now=new Date();
+  const from=now.toISOString().split('T')[0].replace(/-/g,'')+'T000000Z';
+  const future=new Date(now);future.setMonth(future.getMonth()+6);
+  const to=future.toISOString().split('T')[0].replace(/-/g,'')+'T000000Z';
+  const r=await icalRequest(calUrl,'REPORT',
+    `<?xml version="1.0"?><c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav"><d:prop><d:getetag/><c:calendar-data/></d:prop><c:filter><c:comp-filter name="VCALENDAR"><c:comp-filter name="VEVENT"><c:time-range start="${from}" end="${to}"/></c:comp-filter></c:comp-filter></c:filter></c:calendar-query>`,
+    {Depth:'1','Content-Type':'application/xml; charset=utf-8'});
+  const doc=icalXml(r.text);
+  icalEls(doc,'calendar-data').forEach(cd=>{
+    try{icalParseVEvent(cd.textContent,cal.href);}catch(e){}
+  });
+}
+
+function icalParseVEvent(icsText,calHref){
+  const blocks=icsText.match(/BEGIN:VEVENT[\s\S]*?END:VEVENT/g)||[];
+  const DN={MO:1,TU:2,WE:3,TH:4,FR:5,SA:6,SU:0};
+  blocks.forEach(block=>{
+    const get=key=>{const m=block.match(new RegExp('^'+key+'(?:;[^:\\r\\n]+)?:(.+)','m'));return m?m[1].trim().replace(/\\,/g,',').replace(/\\n/g,'\n'):null;};
+    const uid=get('UID'),summary=get('SUMMARY');
+    const dtstart=get('DTSTART(?:;[^:]+)?')||get('DTSTART');
+    if(!uid||!summary||!dtstart)return;
+    let date,time,endTime;
+    if(dtstart.includes('T')){
+      const dt=dtstart.replace(/[^0-9]/g,'');
+      date=dt.slice(0,4)+'-'+dt.slice(4,6)+'-'+dt.slice(6,8);
+      const h=dt.slice(8,10),mi=dt.slice(10,12);time=h+':'+mi;
+      const dtend=get('DTEND(?:;[^:]+)?')||get('DTEND');
+      if(dtend&&dtend.includes('T')){const ed=dtend.replace(/[^0-9]/g,'');endTime=ed.slice(8,10)+':'+ed.slice(10,12);}
+    }else{
+      const dt=dtstart.replace(/[^0-9]/g,'');
+      date=dt.slice(0,4)+'-'+dt.slice(4,6)+'-'+dt.slice(6,8);
+    }
+    // Parse RRULE for recurring events
+    const rruleLine=get('RRULE');
+    let recur=null;
+    if(rruleLine){
+      const freq=(rruleLine.match(/FREQ=([^;]+)/i)||[])[1]?.toUpperCase();
+      const bydayStr=(rruleLine.match(/BYDAY=([^;]+)/i)||[])[1];
+      const untilStr=(rruleLine.match(/UNTIL=([^;]+)/i)||[])[1];
+      if(freq==='DAILY'){
+        recur={freq:'daily',start:date};
+      }else if(freq==='WEEKLY'){
+        if(bydayStr){
+          const days=bydayStr.split(',').map(d=>DN[d.replace(/[-\d]/g,'').toUpperCase()]).filter(x=>x!==undefined);
+          const isWeekdays=days.length===5&&[1,2,3,4,5].every(d=>days.includes(d));
+          recur={freq:isWeekdays?'weekdays':'weekly',start:date,days:isWeekdays?null:days};
+        }else{
+          recur={freq:'weekly',start:date,days:[new Date(date+'T12:00').getDay()]};
+        }
+      }else if(freq==='MONTHLY'){
+        recur={freq:'monthly',start:date};
+      }
+      if(recur&&untilStr){
+        const u=untilStr.replace(/[^0-9]/g,'');
+        recur.until=u.slice(0,4)+'-'+u.slice(4,6)+'-'+u.slice(6,8);
+      }
+    }
+    // Dedup: recurring events by uid only (one entry handles all occurrences via recur expansion);
+    // non-recurring by uid+date (allows iCloud-expanded occurrences to coexist)
+    const occKey=recur?uid:(uid+'__'+date);
+    if(evs.some(e=>e._icalKey===occKey))return;
+    const col='#0891b2';
+    const ev={id:Date.now()+Math.random()*1000|0,name:summary,date,icalUid:uid,_icalKey:occKey,icalCalHref:calHref,color:col};
+    if(time)ev.time=time;if(endTime)ev.endTime=endTime;
+    if(recur)ev.recur=recur;
+    evs.push(ev);
+  });
+}
+
+async function icalPushEvent(ev){
+  if(!icalCreds||!icalCalendars.length)return;
+  const calHref=ev.icalCalHref||icalCalendars[0]?.href;if(!calHref)return;
+  const calUrl=calHref.startsWith('http')?calHref:'https://caldav.icloud.com'+calHref;
+  const uid=ev.icalUid||('stream-'+ev.id+'@stream.app');
+  const[y,mo,d]=ev.date.split('-');
+  const stamp=new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  let dtLines='';
+  if(ev.time){
+    const[sh,sm]=ev.time.split(':');
+    dtLines='DTSTART:'+y+mo+d+'T'+sh+sm+'00\r\n';
+    if(ev.endTime){const[eh,em]=ev.endTime.split(':');dtLines+='DTEND:'+y+mo+d+'T'+eh+em+'00\r\n';}
+    else dtLines+='DTEND:'+y+mo+d+'T'+String(parseInt(sh,10)+1).padStart(2,'0')+sm+'00\r\n';
+  }else{
+    const nd=new Date(ev.date+'T12:00');nd.setDate(nd.getDate()+1);
+    dtLines='DTSTART;VALUE=DATE:'+y+mo+d+'\r\nDTEND;VALUE=DATE:'+nd.toISOString().split('T')[0].replace(/-/g,'')+'\r\n';
+  }
+  let rrule='';
+  if(ev.recur){
+    const r=ev.recur,DN=['SU','MO','TU','WE','TH','FR','SA'];
+    if(r.freq==='daily')rrule='RRULE:FREQ=DAILY\r\n';
+    else if(r.freq==='weekdays')rrule='RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR\r\n';
+    else if(r.freq==='weekly'&&r.days?.length)rrule='RRULE:FREQ=WEEKLY;BYDAY='+r.days.map(x=>DN[x]).join(',')+'\r\n';
+    else if(r.freq==='monthly')rrule='RRULE:FREQ=MONTHLY\r\n';
+    if(r.until&&rrule)rrule=rrule.trimEnd()+';UNTIL='+r.until.replace(/-/g,'')+'T000000Z\r\n';
+  }
+  const ics='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//stream.//EN\r\nBEGIN:VEVENT\r\nDTSTAMP:'+stamp+'\r\nUID:'+uid+'\r\n'+dtLines+rrule+
+    'SUMMARY:'+ev.name.replace(/[\\;,]/g,c=>'\\'+c)+'\r\n'+
+    (ev.note?'DESCRIPTION:'+ev.note.replace(/[\\;,]/g,c=>'\\'+c)+'\r\n':'')+
+    'END:VEVENT\r\nEND:VCALENDAR';
+  try{
+    await icalRequest(calUrl+uid+'.ics','PUT',ics,{'Content-Type':'text/calendar; charset=utf-8','If-None-Match':'*'});
+    // Update the event with icalUid so we can delete it later
+    const i=evs.findIndex(e=>e.id===ev.id);
+    if(i>=0){evs[i].icalUid=uid;evs[i].icalCalHref=calHref;sv('st_e5',evs);}
+  }catch(e){console.warn('iCloud push failed:',e);}
+}
+
+async function icalDeleteEvent(uid,calHref){
+  if(!icalCreds||!uid||!calHref)return;
+  const calUrl=calHref.startsWith('http')?calHref:'https://caldav.icloud.com'+calHref;
+  try{await icalRequest(calUrl+uid+'.ics','DELETE',null,{});}
+  catch(e){console.warn('iCloud delete failed:',e);}
+}
+
+async function icalRefresh(){
+  if(!icalCreds)return;
+  document.getElementById('wv-pop-del')&&(document.getElementById('wv-ev-pop').style.display='none');
+  try{
+    await icalFetchCalendars();await icalFetchAllEvents();
+    renderCal();if(calView==='week')renderWeekView();else if(calView==='day')renderDayView();
+    updateICalUI();showToast('Calendar refreshed from iCloud');
+  }catch(e){showToast('Refresh failed: '+e.message);}
+}
+
+function icalDisconnect(){
+  if(!confirm('Disconnect Apple Calendar? iCloud events will be removed from stream.'))return;
+  icalCreds=null;icalState='disconnected';icalCalendars=[];icalHomeUrl='';
+  localStorage.removeItem('st_ical_creds');localStorage.removeItem('st_ical_home');
+  evs=evs.filter(e=>!e.icalUid);sv('st_e5',evs);
+  updateICalUI();_icalUpdatePill(false);renderCal();if(calView==='week')renderWeekView();else if(calView==='day')renderDayView();
+}
+
+function openICalModal(){
+  document.getElementById('ical-modal').classList.add('open');
+  updateICalUI();
+}
+function closeICalModal(){document.getElementById('ical-modal').classList.remove('open');}
+
+function updateICalUI(errorMsg){
+  const ctn=document.getElementById('ical-status-ctn');if(!ctn)return;
+  if(icalState==='connected'){
+    const count=evs.filter(e=>e.icalUid).length;
+    ctn.innerHTML=`<div class="ical-connected-banner">
+      <div style="width:10px;height:10px;border-radius:50%;background:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.2);flex-shrink:0"></div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${icalCreds.appleId}</div>
+        <div style="font-size:11px;color:var(--t2);font-family:'Geist Mono',monospace;margin-top:2px">${icalCalendars.length||'—'} calendar${icalCalendars.length!==1?'s':''} · ${count} event${count!==1?'s':''} synced</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button class="btn bo" style="flex:1;font-size:12px" onclick="icalRefresh()">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5M4 9a8 8 0 0115 3M20 15a8 8 0 01-15-3"/></svg>
+        Refresh
+      </button>
+      <button class="btn bo" style="font-size:12px;color:#e53e3e;border-color:rgba(229,62,62,.25)" onclick="icalDisconnect()">Disconnect</button>
+    </div>`;
+  }else if(icalState==='connecting'){
+    ctn.innerHTML=`<div style="text-align:center;padding:20px 0;font-size:13px;color:var(--t2);font-family:'Geist Mono',monospace">Connecting to iCloud…</div>`;
+  }else{
+    ctn.innerHTML=`
+    ${errorMsg?`<div style="font-size:11.5px;color:#e53e3e;background:rgba(229,62,62,.08);border:1px solid rgba(229,62,62,.2);border-radius:8px;padding:9px 12px;margin-bottom:12px;font-family:'Geist Mono',monospace;line-height:1.5">${errorMsg}</div>`:''}
+    <div class="fg"><label class="fl">Apple ID</label><input class="inp" id="ical-appleId" type="email" placeholder="you@icloud.com" autocomplete="email"></div>
+    <div class="fg">
+      <label class="fl" style="display:flex;align-items:center;justify-content:space-between">
+        App-Specific Password
+        <a href="https://appleid.apple.com/account/manage" target="_blank" rel="noopener" style="font-size:10px;color:#2563eb;font-family:'Geist Mono',monospace;text-decoration:none;font-weight:400">appleid.apple.com ↗</a>
+      </label>
+      <input class="inp" id="ical-pass" type="password" placeholder="xxxx-xxxx-xxxx-xxxx" autocomplete="off" onkeydown="if(event.key==='Enter')icalConnect(document.getElementById('ical-appleId').value,document.getElementById('ical-pass').value)">
+    </div>
+    <div class="ical-warn">Generate an app-specific password at appleid.apple.com → Security → App-Specific Passwords. Your credentials are stored only on this device.</div>
+    <button class="ical-connect-btn" onclick="icalConnect(document.getElementById('ical-appleId').value,document.getElementById('ical-pass').value)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2" width="14" height="14"><path stroke-linecap="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"/><path stroke-linecap="round" d="M10.172 13.828a4 4 0 015.656 0l4-4a4 4 0 01-5.656-5.656l-1.102 1.101"/></svg>
+      Connect to Apple Calendar
+    </button>`;
+  }
+}
 
 /* ════ STUDY ════════════════════════════════════════════ */
 function renderStudy(){
@@ -5768,6 +7257,7 @@ function addExam(){
   confetti();
   renderExamList();
   if(document.getElementById('cg').innerHTML)renderCal();
+  if(calView==='week')renderWeekView();else if(calView==='day')renderDayView();
 }
 function syncExamToCalendar(examId,subj,name,date){
   // Add as a calendar event tagged with examId so we can remove it later
@@ -5799,6 +7289,7 @@ function delExam(id){
   evs=evs.filter(e=>e.examId!==id);sv('st_e5',evs);
   renderExamList();
   if(document.getElementById('cg').innerHTML)renderCal();
+  if(calView==='week')renderWeekView();
 }
 
 /* ════ CONFETTI ═════════════════════════════════════════ */
@@ -5890,6 +7381,18 @@ document.addEventListener('keydown',e=>{
     if(document.getElementById('pg-mobile')?.classList.contains('act')){
       if(e.key==='ArrowRight'){e.preventDefault();mhGoTo(1);return;}
       if(e.key==='ArrowLeft'){e.preventDefault();mhGoTo(0);return;}
+    }
+
+    // Left/right on calendar page cycles through Month/Week/Day views
+    if(curPage==='cal'&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){
+      e.preventDefault();
+      const ci=CAL_VIEWS.indexOf(calView);
+      const next=e.key==='ArrowRight'
+        ?CAL_VIEWS[(ci+1)%CAL_VIEWS.length]
+        :CAL_VIEWS[(ci-1+CAL_VIEWS.length)%CAL_VIEWS.length];
+      setCalView(next);
+      showToast(next.charAt(0).toUpperCase()+next.slice(1)+' view');
+      return;
     }
 
     // Left/right on study page cycles through study tabs
@@ -7444,10 +8947,20 @@ function openSettings(){
   // Populate name input
   const ni=document.getElementById('st-name-inp');
   if(ni)ni.value=localStorage.getItem('st_name')||'';
-  // Populate Notion fields
-  notionPopulateFields();
   // Sync toggles
   stSyncToggles();
+  // Update iCal card state
+  const lbl=document.getElementById('st-ical-btn-lbl');
+  const desc=document.getElementById('st-ical-desc');
+  if(lbl&&desc){
+    if(icalState==='connected'){
+      lbl.textContent='Manage Connection';
+      desc.textContent='Connected as '+icalCreds?.appleId+' · '+evs.filter(e=>e.icalUid).length+' events synced';
+    }else{
+      lbl.textContent='Connect Apple Calendar';
+      desc.textContent='Connect iCloud to sync events two-ways in real time';
+    }
+  }
 }
 
 function closeSettings(){
@@ -7556,6 +9069,7 @@ function showTTImport(){
 }
 function closeICSModal(){document.getElementById('ics-modal').classList.remove('open');}
 document.getElementById('ics-modal').addEventListener('click',function(e){if(e.target===this)closeICSModal();});
+document.getElementById('ical-modal').addEventListener('click',function(e){if(e.target===this)closeICalModal();});
 
 const icsDrop=document.getElementById('ics-drop');
 icsDrop.addEventListener('dragover',e=>{e.preventDefault();icsDrop.classList.add('drag-over');});
@@ -9039,107 +10553,6 @@ function syncMobileNav(){
 })();
 </script>
 <script>
-/* ════ NOTION SYNC ═══════════════════════════════════════ */
-(function(){
-  function ntCfg(){
-    try{return JSON.parse(localStorage.getItem('notion_cfg')||'{}');}
-    catch{return {};}
-  }
-
-  window.notionPopulateFields=function(){
-    const cfg=ntCfg();
-    const wu=document.getElementById('nt-worker-url');
-    const db=document.getElementById('nt-db-id');
-    const tk=document.getElementById('nt-token');
-    if(wu)wu.value=cfg.workerUrl||'';
-    if(db)db.value=cfg.dbId||'';
-    if(tk)tk.value=cfg.token||'';
-    const st=document.getElementById('nt-status');
-    if(st){
-      const c=notionEvs.length;
-      if(c>0&&cfg.workerUrl){st.textContent=`${c} event${c!==1?'s':''} cached from last sync`;st.className='nt-status ok';st.style.display='block';}
-      else{st.style.display='none';}
-    }
-  };
-
-  window.notionSaveCfg=async function(){
-    const wu=(document.getElementById('nt-worker-url').value||'').trim();
-    const db=(document.getElementById('nt-db-id').value||'').trim();
-    const tk=(document.getElementById('nt-token').value||'').trim();
-    if(!wu||!db||!tk){ntStatus('error','Fill in all three fields');return;}
-    localStorage.setItem('notion_cfg',JSON.stringify({workerUrl:wu,dbId:db,token:tk}));
-    await notionSync();
-  };
-
-  window.notionSync=async function(){
-    const cfg=ntCfg();
-    if(!cfg.workerUrl||!cfg.dbId||!cfg.token){
-      ntStatus('error','Configure Notion settings first (open Settings → Notion)');
-      return;
-    }
-    ntStatus('syncing','Syncing with Notion…');
-    try{
-      const res=await fetch(cfg.workerUrl,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({token:cfg.token,dbId:cfg.dbId}),
-      });
-      if(!res.ok)throw new Error('Worker returned HTTP '+res.status);
-      const data=await res.json();
-      if(data.object==='error')throw new Error(data.message||'Notion error');
-      if(!data.results)throw new Error('Unexpected response from worker');
-
-      const parsed=[];
-      for(const page of data.results){
-        const props=page.properties||{};
-        // Find title property (type === 'title')
-        let name='';
-        for(const v of Object.values(props)){
-          if(v.type==='title'&&v.title){name=v.title.map(t=>t.plain_text||'').join('').trim();break;}
-        }
-        // Find first date property (type === 'date')
-        let date=null;
-        for(const v of Object.values(props)){
-          if(v.type==='date'&&v.date&&v.date.start){date=v.date.start.split('T')[0];break;}
-        }
-        if(name&&date)parsed.push({id:'nt_'+page.id,name,date,_notion:true});
-      }
-      notionEvs=parsed;
-      localStorage.setItem('notion_cache',JSON.stringify(notionEvs));
-      const c=notionEvs.length;
-      ntStatus('ok',`Synced ${c} event${c!==1?'s':''} from Notion`);
-      if(typeof renderCal==='function')renderCal();
-      if(typeof renderDash==='function')renderDash();
-    }catch(e){
-      ntStatus('error','Sync failed: '+e.message);
-    }
-  };
-
-  window.notionClear=function(){
-    notionEvs=[];
-    localStorage.removeItem('notion_cache');
-    localStorage.removeItem('notion_cfg');
-    ['nt-worker-url','nt-db-id','nt-token'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    ntStatus('ok','Notion data cleared');
-    if(typeof renderCal==='function')renderCal();
-    if(typeof renderDash==='function')renderDash();
-  };
-
-  function ntStatus(type,msg){
-    const el=document.getElementById('nt-status');
-    if(!el)return;
-    el.textContent=msg;
-    el.className='nt-status '+type;
-    el.style.display='block';
-  }
-
-  // Auto-sync on load if config exists
-  (function(){
-    const cfg=ntCfg();
-    if(cfg.workerUrl&&cfg.dbId&&cfg.token)notionSync();
-  })();
-})();
-
 // ── PWA SERVICE WORKER REGISTRATION ──────────────────────
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
