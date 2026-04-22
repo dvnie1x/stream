@@ -2140,6 +2140,64 @@ body.night .ical-warn{background:rgba(255,165,0,.06);border-color:rgba(255,165,0
 .stab-panel.exit-right{opacity:0;transform:translateX(-52px);filter:blur(4px);pointer-events:none;position:absolute;inset:0}
 .stab-panel.exit-left {opacity:0;transform:translateX(52px); filter:blur(4px);pointer-events:none;position:absolute;inset:0}
 
+/* ── MARKBOOK ──────────────────────────────────────────── */
+.mb-layout{display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start}
+@media(max-width:820px){.mb-layout{grid-template-columns:1fr}}
+.mb-tiles-col{position:sticky;top:14px}
+.mb-tiles{display:flex;flex-direction:column;gap:6px;max-height:520px;overflow-y:auto;padding-right:2px}
+.mb-tile{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:11px;border:1px solid rgba(255,255,255,.75);background:rgba(255,255,255,.55);cursor:none;transition:background .16s ease,border-color .16s ease,transform .16s ease;user-select:none;text-align:left;width:100%;min-width:0;font-family:inherit;color:var(--text)}
+.mb-tile:hover{border-color:var(--borders);background:rgba(255,255,255,.88);transform:translateX(2px)}
+.mb-tile.act{border-color:var(--text);background:rgba(255,255,255,.95);box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.mb-tile .tt-ic.mb-tile-ic{width:26px;height:26px;border-radius:8px;margin-top:0;background:var(--t3);transition:background .16s ease}
+.mb-tile .tt-ic.mb-tile-ic svg{width:14px;height:14px;stroke:#fff;opacity:1}
+.mb-tile-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.mb-tile-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:lowercase}
+.mb-tile-meta{text-transform:lowercase;letter-spacing:.04em}
+.mb-tile-pct{font-family:inherit;font-size:13px;font-weight:500;letter-spacing:-.01em;color:var(--text);font-variant-numeric:tabular-nums;flex-shrink:0;text-transform:lowercase}
+.mb-tile-pct.empty{color:var(--t3);font-weight:400}
+body.night .mb-tile{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08)}
+body.night .mb-tile:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18)}
+body.night .mb-tile.act{border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.13);box-shadow:0 2px 10px rgba(0,0,0,.35)}
+/* Subject-accent background is applied inline (from subjColour); non-act tiles wash it a touch in both themes */
+.mb-tile:not(.act) .tt-ic.mb-tile-ic{filter:saturate(.9) brightness(1.02)}
+body.night .mb-tile:not(.act) .tt-ic.mb-tile-ic{filter:saturate(.85) brightness(.95)}
+
+/* ── Right-column vertical switch animation (mirrors calendar cell entry) ── */
+@keyframes mbSwitchIn{from{opacity:0;transform:translateY(14px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+.mb-right.mb-switching > .glass{animation:mbSwitchIn .28s cubic-bezier(.4,0,.2,1) both}
+.mb-right.mb-switching > .glass:nth-child(2){animation-delay:.04s}
+
+.mb-right{display:flex;flex-direction:column;gap:14px}
+.mb-stats{display:flex;gap:24px;margin-bottom:14px;flex-wrap:wrap}
+.mb-stat-lbl{font-size:11px;color:var(--t3);font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.08em}
+.mb-stat-val{font-size:30px;font-weight:200;letter-spacing:-.04em;color:var(--text)}
+.mb-stat-val .unit{font-size:13px;color:var(--t3);margin-left:2px}
+.mb-stat-val.delta-pos{color:#16a34a}
+.mb-stat-val.delta-neg{color:#e53e3e}
+body.night .mb-stat-val.delta-pos{color:#4ade80}
+body.night .mb-stat-val.delta-neg{color:#f87171}
+
+.mb-chart-wrap{position:relative;width:100%;height:180px;margin-bottom:10px}
+.mb-chart{width:100%;height:100%;display:block}
+.mb-chart-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:12px;font-family:'Geist Mono',monospace;letter-spacing:.04em;text-transform:uppercase;pointer-events:none}
+
+.mb-legend{display:flex;gap:14px;font-size:10px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.mb-legend:empty{display:none}
+.mb-legend-item{display:flex;align-items:center;gap:6px}
+.mb-legend-dot{width:8px;height:8px;border-radius:50%}
+
+.mb-list{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto}
+.mb-row{display:grid;grid-template-columns:86px 1fr 74px 60px 46px 22px;gap:8px;align-items:center;padding:9px 12px;background:rgba(255,255,255,.5);border-radius:9px;border:1px solid rgba(230,230,238,.78)}
+body.night .mb-row{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.08)}
+.mb-row-date{font-family:'Geist Mono',monospace;font-size:11px;color:var(--t3)}
+.mb-row-name{font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mb-row-mark{font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+.mb-row-bench{font-family:'Geist Mono',monospace;font-size:11px;color:var(--t3);font-variant-numeric:tabular-nums}
+.mb-row-pct{font-family:'Geist Mono',monospace;font-size:11px;padding:2px 7px;border-radius:20px;text-align:center}
+.mb-row-del{color:var(--t3);cursor:none;text-align:center;font-size:14px;opacity:.5;transition:all .15s}
+.mb-row-del:hover{opacity:1;color:#e53e3e}
+.mb-add-subj{font-size:10px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-left:6px}
+
 /* ── STUDY WIDGETS LAYOUT ─────────────────────────────────── */
 .study-widgets{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 @media(max-width:900px){.study-widgets{grid-template-columns:1fr}}
@@ -2681,7 +2739,7 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
   <div class="modal-box" style="text-align:center;max-width:340px">
     <div style="font-size:28px;margin-bottom:12px">⚠️</div>
     <div class="mt" style="font-size:17px">Reset everything?</div>
-    <div style="font-size:13px;color:var(--t2);line-height:1.55;margin-bottom:20px">This will wipe your name, timetable, reminders, events, study log, papers, and exams — and take you back to the setup screen.<br><br><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--t3)">This cannot be undone.</span></div>
+    <div style="font-size:13px;color:var(--t2);line-height:1.55;margin-bottom:20px">This will wipe your name, timetable, reminders, events, study log, papers, markbook, and exams — and take you back to the setup screen.<br><br><span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--t3)">This cannot be undone.</span></div>
     <div class="ma" style="justify-content:center">
       <button class="btn bo" onclick="closeResetModal()" style="flex:1">Cancel</button>
       <button class="btn" onclick="confirmReset()" style="flex:1;background:#e53e3e;color:#fff">Yes, reset</button>
@@ -3418,9 +3476,10 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
 <div class="pg" id="pg-study">
   <div class="pg-wrap">
     <div class="pg-title">Study</div>
-    <div class="pg-desc">Stopwatch, past papers, and your study log.</div>
+    <div class="pg-desc">Stopwatch, markbook, past papers, and your study log.</div>
     <div class="study-tabs">
       <div class="stab act" onclick="switchStudyTab('log',this)">Stopwatch</div>
+      <div class="stab" onclick="switchStudyTab('markbook',this)">Markbook</div>
       <div class="stab" onclick="switchStudyTab('papers',this)">Past Papers</div>
     </div>
 
@@ -3529,6 +3588,43 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
         <div class="ch">recent sessions</div>
         <div id="log-stats"></div>
         <div id="log-list" style="max-height:320px;overflow-y:auto"><div class="es"><div class="ei">—</div>No sessions logged yet.</div></div>
+      </div>
+    </div>
+
+    <div id="stab-markbook" class="stab-panel pre-enter-right">
+      <div class="mb-layout">
+        <div class="mb-tiles-col glass card">
+          <div class="ch">subjects</div>
+          <div id="mb-tiles" class="mb-tiles"><div class="es"><div class="ei">—</div>No subjects yet. Import a timetable.</div></div>
+        </div>
+        <div class="mb-right">
+          <div class="glass card">
+            <div class="ch"><span id="mb-add-head">add mark</span></div>
+            <div class="fg"><label class="fl">Assessment name</label><input class="inp" id="mb-name" placeholder="e.g. Term 2 Exam"></div>
+            <div class="fg"><label class="fl">Your mark</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input class="inp" type="number" id="mb-mark" placeholder="82" min="0" style="flex:1">
+                <span style="font-size:16px;color:var(--t3);flex-shrink:0">/</span>
+                <input class="inp" type="number" id="mb-total" value="100" min="1" style="flex:1">
+              </div>
+            </div>
+            <div class="fg"><label class="fl">Benchmark / average mark</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input class="inp" type="number" id="mb-bench" placeholder="74" min="0" style="flex:1">
+                <span style="font-size:11px;color:var(--t3);font-family:'Geist Mono',monospace;flex-shrink:0">out of total</span>
+              </div>
+            </div>
+            <div class="fg"><label class="fl">Date</label><input class="inp" type="date" id="mb-date"></div>
+            <button class="btn bd bf" onclick="addMark()">Add Mark</button>
+          </div>
+          <div class="glass card">
+            <div class="ch">trend</div>
+            <div id="mb-stats" class="mb-stats"></div>
+            <div class="mb-chart-wrap"><canvas id="mb-chart" class="mb-chart"></canvas></div>
+            <div class="mb-legend" id="mb-legend"></div>
+            <div id="mb-list" class="mb-list"><div class="es"><div class="ei">—</div>Pick a subject on the left.</div></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -4731,7 +4827,7 @@ function renderTT(){
 ════════════════════════════════════════════════════════ */
 const SB_URL='https://wbbiqcdmkmydwshzvize.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiYmlxY2Rta215ZHdzaHp2aXplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDc1MzMsImV4cCI6MjA4OTkyMzUzM30.EACRq05DU5NErRKl8NY6MvrQNnDv9HbgqGDIX5-Wan8';
-const SB_SYNC_KEYS=['st_r5','st_e5','st_l5','st_p5','st_x5','st_hw','st_name','st_ics','st_friends'];
+const SB_SYNC_KEYS=['st_r5','st_e5','st_l5','st_p5','st_x5','st_hw','st_mb1','st_name','st_ics','st_friends'];
 let sbUserId=null;
 let sbAuthToken=null;
 
@@ -4825,6 +4921,7 @@ function applyRemoteData(remote){
   const p5=get('st_p5');if(p5!==undefined){papers=p5;localStorage.setItem('st_p5',JSON.stringify(papers));}
   const x5=get('st_x5');if(x5!==undefined){exams=x5;localStorage.setItem('st_x5',JSON.stringify(exams));}
   const hw5=get('st_hw');if(hw5!==undefined){hw=hw5;localStorage.setItem('st_hw',JSON.stringify(hw));}
+  const mb=get('st_mb1');if(mb!==undefined){marks=mb;localStorage.setItem('st_mb1',JSON.stringify(marks));}
   const name=get('st_name');if(name){localStorage.setItem('st_name',name);applyName(name);}
   const ics=get('st_ics');
   if(ics){
@@ -4847,7 +4944,7 @@ function applyRemoteData(remote){
 // Push all local data to Supabase (for first-time sync after login)
 async function sbPushAll(){
   if(!sbUserId)return;
-  const keys=['st_r5','st_e5','st_l5','st_p5','st_x5','st_hw'];
+  const keys=['st_r5','st_e5','st_l5','st_p5','st_x5','st_hw','st_mb1'];
   for(const k of keys){
     const v=localStorage.getItem(k);
     if(v)await sbSet(k,JSON.parse(v));
@@ -4862,8 +4959,9 @@ let evs=JSON.parse(localStorage.getItem('st_e5')||'[]');
 let logs=JSON.parse(localStorage.getItem('st_l5')||'[]');
 let papers=JSON.parse(localStorage.getItem('st_p5')||'[]');
 let exams=JSON.parse(localStorage.getItem('st_x5')||'[]');
+let marks=JSON.parse(localStorage.getItem('st_mb1')||'[]');
 let calY,calM,calSel,qdate=null;
-let curPage='dash',curStudyTab='log',curPaperSubj='mathematics';
+let curPage='dash',curStudyTab='log',curPaperSubj='mathematics',curMarkSubj=null;
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const COLS=['#111','#2563eb','#16a34a','#dc2626','#9333ea','#ea580c','#0891b2','#ca8a04'];
 
@@ -6446,9 +6544,10 @@ function updateICalUI(errorMsg){
 /* ════ STUDY ════════════════════════════════════════════ */
 function renderStudy(){
   const ppd=document.getElementById('pp-date');if(ppd)ppd.value=new Date().toISOString().split('T')[0];
-  renderLogList();renderPapers();
+  const mbd=document.getElementById('mb-date');if(mbd)mbd.value=new Date().toISOString().split('T')[0];
+  renderLogList();renderPapers();renderMarkbook();
 }
-const STABS=['log','papers'];
+const STABS=['log','markbook','papers'];
 function switchStudyTab(tab,el){
   if(curStudyTab===tab)return;
   playWhoosh();
@@ -6461,6 +6560,7 @@ function switchStudyTab(tab,el){
 
   // Render content into the incoming panel while it's still invisible
   if(tab==='papers')renderPapers();
+  if(tab==='markbook')renderMarkbook();
 
   // Outgoing: slide out (stays in DOM as absolute overlay)
   if(outEl){
@@ -7242,6 +7342,265 @@ function renderPapers(){
   setTimeout(renderTrend,0);
 }
 function delPaper(id){papers=papers.filter(p=>p.id!==id);sv('st_p5',papers);renderPapers();}
+
+/* ════ MARKBOOK ══════════════════════════════════════════ */
+// Pull subjects directly from the user's imported timetable only — no hard-coded fallbacks
+function mbSubjects(){
+  const found=new Set();
+  const days=['monday','tuesday','wednesday','thursday','friday'];
+  days.forEach(d=>{
+    (TT[d]||[]).forEach(p=>{
+      if(p.subj&&p.subj!=='roll call'&&p.subj!=='recess'&&p.subj!=='lunch')
+        found.add(p.subj);
+    });
+  });
+  return [...found].sort();
+}
+// For a given subject, return the icon SVG the user picked in the timetable
+// (preferring their p.icon override, then the default subject icon).
+function mbSubjIcon(subj){
+  const days=['monday','tuesday','wednesday','thursday','friday'];
+  for(const d of days){
+    const p=(TT[d]||[]).find(x=>x.subj===subj&&x.icon&&TT_ICONS[x.icon]);
+    if(p)return TT_ICONS[p.icon];
+  }
+  return SIC[subj]||SIC['roll call'];
+}
+function renderMarkbookTiles(){
+  const wrap=document.getElementById('mb-tiles');if(!wrap)return;
+  const subs=mbSubjects();
+  if(!subs.length){
+    wrap.innerHTML='<div class="es"><div class="ei">—</div>Import a timetable to see your subjects.</div>';
+    curMarkSubj=null;renderMarkbookDetail();return;
+  }
+  // Keep or pick active subject
+  if(!curMarkSubj||!subs.includes(curMarkSubj))curMarkSubj=subs[0];
+  wrap.innerHTML=subs.map(s=>{
+    const icon=mbSubjIcon(s);
+    const col=subjColour(s);
+    const bg=col?`style="background:${col}"`:'';
+    const sm=marks.filter(m=>m.subj===s);
+    const avg=sm.length?(sm.reduce((a,b)=>a+(b.mark/b.total*100),0)/sm.length):null;
+    const pctTxt=avg===null?'—':avg.toFixed(0)+'%';
+    const pctCls=avg===null?'empty':'';
+    const meta=sm.length?`${sm.length} mark${sm.length===1?'':'s'}`:'no marks yet';
+    const sArg=esc(s).replace(/'/g,"\\'");
+    return `<div class="mb-tile${s===curMarkSubj?' act':''}" data-s="${esc(s)}" onclick="selMarkSubj('${sArg}',this)">
+      <div class="tt-ic mb-tile-ic" ${bg}>${icon}</div>
+      <div class="mb-tile-body">
+        <div class="ttn mb-tile-name">${esc(s)}</div>
+        <div class="ttr mb-tile-meta">${meta}</div>
+      </div>
+      <div class="mb-tile-pct ${pctCls}">${pctTxt}</div>
+    </div>`;
+  }).join('');
+}
+function selMarkSubj(subj,el){
+  if(subj===curMarkSubj)return;
+  curMarkSubj=subj;
+  document.querySelectorAll('#mb-tiles .mb-tile').forEach(t=>t.classList.remove('act'));
+  if(el)el.classList.add('act');
+  renderMarkbookDetail();
+  // Vertical swipe-in on the right column, same pattern as calendar cell entry
+  const right=document.querySelector('.mb-right');
+  if(right){
+    right.classList.remove('mb-switching');
+    void right.offsetWidth; // force reflow so the animation restarts
+    right.classList.add('mb-switching');
+  }
+}
+function renderMarkbook(){
+  renderMarkbookTiles();
+  renderMarkbookDetail();
+}
+function renderMarkbookDetail(){
+  const headEl=document.getElementById('mb-add-head');
+  if(headEl){
+    headEl.innerHTML=curMarkSubj
+      ? `add mark <span class="mb-add-subj">· ${esc(curMarkSubj)}</span>`
+      : 'add mark';
+  }
+  const statsEl=document.getElementById('mb-stats');
+  const listEl=document.getElementById('mb-list');
+  const legEl=document.getElementById('mb-legend');
+  if(!statsEl||!listEl||!legEl)return;
+  if(!curMarkSubj){
+    statsEl.innerHTML='';legEl.innerHTML='';
+    listEl.innerHTML='<div class="es"><div class="ei">—</div>Pick a subject on the left.</div>';
+    renderMarkChart();return;
+  }
+  const sm=marks.filter(m=>m.subj===curMarkSubj).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const night=document.body.classList.contains('night');
+  const col=night?'#60a5fa':'#2563eb';
+  if(!sm.length){
+    statsEl.innerHTML='';legEl.innerHTML='';
+    listEl.innerHTML=`<div class="es"><div class="ei">—</div>No marks for ${esc(curMarkSubj)} yet. Add one on the left.</div>`;
+    renderMarkChart();return;
+  }
+  const pcts=sm.map(m=>m.mark/m.total*100);
+  const avg=pcts.reduce((a,b)=>a+b,0)/pcts.length;
+  const best=Math.max(...pcts);
+  const benchPcts=sm.filter(m=>m.benchmark!=null).map(m=>m.benchmark/m.total*100);
+  const benchAvg=benchPcts.length?benchPcts.reduce((a,b)=>a+b,0)/benchPcts.length:null;
+  const delta=benchAvg!=null?avg-benchAvg:null;
+  const deltaCls=delta==null?'':delta>=0?'delta-pos':'delta-neg';
+  const deltaTxt=delta==null?'—':(delta>=0?'+':'')+delta.toFixed(1);
+  statsEl.innerHTML=`
+    <div><div class="mb-stat-lbl">Average</div><div class="mb-stat-val">${avg.toFixed(1)}<span class="unit">%</span></div></div>
+    <div><div class="mb-stat-lbl">Best</div><div class="mb-stat-val">${best.toFixed(1)}<span class="unit">%</span></div></div>
+    <div><div class="mb-stat-lbl">Marks</div><div class="mb-stat-val">${sm.length}</div></div>
+    <div><div class="mb-stat-lbl">vs Benchmark</div><div class="mb-stat-val ${deltaCls}">${deltaTxt}${delta==null?'':'<span class="unit">pt</span>'}</div></div>`;
+  legEl.innerHTML=`
+    <div class="mb-legend-item"><span class="mb-legend-dot" style="background:${col}"></span>Your mark</div>
+    <div class="mb-legend-item"><span class="mb-legend-dot" style="background:var(--t3)"></span>Benchmark</div>`;
+  listEl.innerHTML=sm.slice().reverse().map(m=>{
+    const pct=m.mark/m.total*100;
+    const rowCol=pct>=80?'#16a34a':pct>=60?'#d97706':'#e53e3e';
+    const bench=m.benchmark!=null?`${m.benchmark}/${m.total}`:'—';
+    return `<div class="mb-row">
+      <div class="mb-row-date">${m.date}</div>
+      <div class="mb-row-name">${esc(m.name)}</div>
+      <div class="mb-row-mark">${m.mark}/${m.total}</div>
+      <div class="mb-row-bench" title="benchmark">${bench}</div>
+      <div class="mb-row-pct" style="background:${rowCol}1f;color:${rowCol}">${pct.toFixed(0)}%</div>
+      <div class="mb-row-del" onclick="delMark(${m.id})">✕</div>
+    </div>`;
+  }).join('');
+  requestAnimationFrame(renderMarkChart);
+}
+function addMark(){
+  if(!curMarkSubj){showToast('Pick a subject first');return;}
+  const name=document.getElementById('mb-name').value.trim();
+  const mark=+document.getElementById('mb-mark').value;
+  const total=+document.getElementById('mb-total').value||100;
+  const benchRaw=document.getElementById('mb-bench').value;
+  const bench=benchRaw===''?null:+benchRaw;
+  const date=document.getElementById('mb-date').value;
+  if(!name||isNaN(mark)||!date){showToast('Fill name, mark and date');return;}
+  if(mark>total){
+    const inp=document.getElementById('mb-mark');
+    inp.style.borderColor='#e53e3e';setTimeout(()=>{inp.style.borderColor='';},1800);
+    showToast('Mark cannot exceed total');return;
+  }
+  if(bench!=null&&(isNaN(bench)||bench>total)){
+    const inp=document.getElementById('mb-bench');
+    inp.style.borderColor='#e53e3e';setTimeout(()=>{inp.style.borderColor='';},1800);
+    showToast('Benchmark cannot exceed total');return;
+  }
+  marks.push({id:Date.now(),subj:curMarkSubj,name,mark,total,benchmark:bench,date});
+  marks.sort((a,b)=>a.date.localeCompare(b.date));
+  sv('st_mb1',marks);
+  document.getElementById('mb-name').value='';
+  document.getElementById('mb-mark').value='';
+  document.getElementById('mb-bench').value='';
+  confetti();
+  renderMarkbook();
+}
+function delMark(id){marks=marks.filter(m=>m.id!==id);sv('st_mb1',marks);renderMarkbook();}
+
+function renderMarkChart(){
+  const canvas=document.getElementById('mb-chart');if(!canvas)return;
+  const wrap=canvas.parentElement;
+  // Remove any old empty overlay
+  const oldEmpty=wrap.querySelector('.mb-chart-empty');if(oldEmpty)oldEmpty.remove();
+  const sm=curMarkSubj?marks.filter(m=>m.subj===curMarkSubj).slice().sort((a,b)=>a.date.localeCompare(b.date)):[];
+  const W=wrap.offsetWidth||canvas.offsetWidth||400;
+  const H=wrap.offsetHeight||180;
+  canvas.width=W*2;canvas.height=H*2;canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');ctx.setTransform(1,0,0,1,0,0);ctx.scale(2,2);
+  ctx.clearRect(0,0,W,H);
+  if(!sm.length){
+    const msg=document.createElement('div');msg.className='mb-chart-empty';
+    msg.textContent=curMarkSubj?'No marks yet — add one to see the trend':'Pick a subject';
+    wrap.appendChild(msg);return;
+  }
+  const night=document.body.classList.contains('night');
+  const col=night?'#60a5fa':'#2563eb'; // user-mark line/dots — distinct blue
+  const gridCol=night?'rgba(255,255,255,.06)':'rgba(0,0,0,.06)';
+  const axisCol=night?'rgba(200,210,230,.35)':'rgba(60,70,90,.45)';
+  const benchCol=night?'rgba(200,210,230,.55)':'rgba(120,130,150,.85)';
+  const benchFill=night?'rgba(200,210,230,.3)':'rgba(120,130,150,.65)';
+
+  const padL=34,padR=14,padT=14,padB=22;
+  const chartW=W-padL-padR,chartH=H-padT-padB;
+  const pcts=sm.map(m=>m.mark/m.total*100);
+  const benches=sm.map(m=>m.benchmark!=null?m.benchmark/m.total*100:null);
+  const all=pcts.concat(benches.filter(v=>v!=null));
+  let lo=Math.max(0,Math.min(...all)-10);
+  let hi=Math.min(100,Math.max(...all)+10);
+  if(hi-lo<20){const mid=(hi+lo)/2;lo=Math.max(0,mid-10);hi=Math.min(100,mid+10);}
+  const toY=v=>padT+chartH-((v-lo)/(hi-lo))*chartH;
+  const toX=i=>sm.length===1?padL+chartW/2:padL+(chartW)*(i/(sm.length-1));
+
+  // Y gridlines at 0/25/50/75/100 where in range
+  ctx.strokeStyle=gridCol;ctx.lineWidth=1;
+  ctx.font='9px "Geist Mono",monospace';
+  ctx.fillStyle=axisCol;ctx.textAlign='right';ctx.textBaseline='middle';
+  [0,25,50,75,100].forEach(v=>{
+    if(v<lo||v>hi)return;
+    const y=toY(v);
+    ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(W-padR,y);ctx.stroke();
+    ctx.fillText(v+'%',padL-6,y);
+  });
+
+  // X labels (first and last date)
+  ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillStyle=axisCol;
+  if(sm.length>=1)ctx.fillText(sm[0].date.slice(5),toX(0),H-padB+6);
+  if(sm.length>1)ctx.fillText(sm[sm.length-1].date.slice(5),toX(sm.length-1),H-padB+6);
+
+  // User line fill
+  ctx.beginPath();
+  ctx.moveTo(toX(0),toY(pcts[0]));
+  pcts.forEach((v,i)=>{if(i>0)ctx.lineTo(toX(i),toY(v));});
+  ctx.lineTo(toX(sm.length-1),padT+chartH);
+  ctx.lineTo(toX(0),padT+chartH);
+  ctx.closePath();
+  ctx.fillStyle=col+(night?'22':'18');
+  ctx.fill();
+
+  // User line
+  if(sm.length>1){
+    ctx.beginPath();ctx.moveTo(toX(0),toY(pcts[0]));
+    pcts.forEach((v,i)=>{if(i>0)ctx.lineTo(toX(i),toY(v));});
+    ctx.strokeStyle=col;ctx.lineWidth=2;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
+  }
+
+  // Benchmark faint connecting line (dashed) through defined benches
+  const bpts=benches.map((v,i)=>v==null?null:[toX(i),toY(v)]).filter(Boolean);
+  if(bpts.length>1){
+    ctx.save();ctx.setLineDash([3,4]);
+    ctx.beginPath();ctx.moveTo(bpts[0][0],bpts[0][1]);
+    for(let i=1;i<bpts.length;i++)ctx.lineTo(bpts[i][0],bpts[i][1]);
+    ctx.strokeStyle=benchFill;ctx.lineWidth=1.2;ctx.stroke();
+    ctx.restore();
+  }
+
+  // Benchmark dots (grey) — drawn under user dots
+  benches.forEach((v,i)=>{
+    if(v==null)return;
+    const x=toX(i),y=toY(v);
+    ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);
+    ctx.fillStyle=benchCol;ctx.fill();
+    ctx.strokeStyle=night?'rgba(14,15,18,.9)':'rgba(255,255,255,.95)';
+    ctx.lineWidth=1.5;ctx.stroke();
+  });
+
+  // User mark dots (coloured)
+  pcts.forEach((v,i)=>{
+    const x=toX(i),y=toY(v);
+    ctx.beginPath();ctx.arc(x,y,4.5,0,Math.PI*2);
+    ctx.fillStyle=col;ctx.fill();
+    ctx.strokeStyle=night?'rgba(14,15,18,.9)':'rgba(255,255,255,.95)';
+    ctx.lineWidth=1.8;ctx.stroke();
+    // value label above
+    ctx.fillStyle=night?'rgba(230,235,255,.85)':'rgba(30,40,70,.78)';
+    ctx.font='600 9px "Geist Mono",monospace';ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.fillText(v.toFixed(0)+'%',x,y-7);
+  });
+}
+// Redraw chart on resize & theme change
+window.addEventListener('resize',()=>{if(curStudyTab==='markbook')renderMarkChart();});
 
 function addExam(){
   const subj=document.getElementById('ex-subj').value;
@@ -8755,6 +9114,8 @@ function populateSubjectDropdowns(){
       `<div class="stj${s===curSubj?' act':''}" data-s="${s}" onclick="selPaperSubj('${s}',this)">${s}</div>`
     ).join('');
   }
+  // Refresh markbook (subjects come straight from the imported timetable)
+  if(typeof renderMarkbook==='function')renderMarkbook();
   // Sync custom dropdown triggers after options change
   setTimeout(cddSyncAll,0);
 }
@@ -8826,6 +9187,8 @@ function applyNight(on,animate){
       :`<path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>`;
   }
   // Cursor colour is handled per-frame in drawCursor() — no filter needed
+  // Redraw markbook chart so its colours match the new theme
+  if(curStudyTab==='markbook'&&typeof renderMarkChart==='function')requestAnimationFrame(renderMarkChart);
 }
 function toggleNight(){
   nightMode=!nightMode;
@@ -9038,7 +9401,7 @@ function stSetAccent(key,el){
 
 function stResetData(){
   if(!confirm('This will permanently delete ALL your stream. data (homework, papers, logs, exams, reminders). This cannot be undone.\n\nAre you sure?'))return;
-  const keys=['st_r5','st_e5','st_l5','st_p5','st_x5','st_hw','st_name','st_ics','st_friends','st_lb_username','st_lb_emoji','st_lb_streak','st_lb_weekly','st_setup_done','st_night','st_fancy_cursor','st_perf','st_particles','st_blur','st_transitions','st_accent','st_notif'];
+  const keys=['st_r5','st_e5','st_l5','st_p5','st_x5','st_hw','st_mb1','st_name','st_ics','st_friends','st_lb_username','st_lb_emoji','st_lb_streak','st_lb_weekly','st_setup_done','st_night','st_fancy_cursor','st_perf','st_particles','st_blur','st_transitions','st_accent','st_notif'];
   keys.forEach(k=>localStorage.removeItem(k));
   showToast('Data reset. Reloading…');
   setTimeout(()=>location.reload(),1200);
@@ -9282,7 +9645,7 @@ async function sbSilentPull(){
     if(!remote||!Object.keys(remote).length)return;
     // Only apply keys where Supabase updated_at is newer than our last push timestamp
     const localTs=JSON.parse(localStorage.getItem('sb_push_ts')||'{}');
-    const DATA_KEYS=['st_r5','st_e5','st_l5','st_p5','st_x5','st_hw','st_name','st_ics','st_friends'];
+    const DATA_KEYS=['st_r5','st_e5','st_l5','st_p5','st_x5','st_hw','st_mb1','st_name','st_ics','st_friends'];
     let changed=false;
     const filtered={};
     DATA_KEYS.forEach(k=>{
@@ -9810,6 +10173,7 @@ function exportData(){
   rems.forEach(r=>rows.push(['Reminder',r.subj||'',r.text,'','','',r.pri||'']));
   exams.forEach(e=>rows.push(['Exam',e.subj,e.name,e.date,'','','']));
   papers.forEach(p=>rows.push(['Past Paper',p.subj,p.name,p.date,p.mark,p.total,p.notes||'']));
+  marks.forEach(m=>rows.push(['Markbook',m.subj,m.name,m.date,m.mark,m.total,m.benchmark!=null?'benchmark '+m.benchmark:'']));
   logs.forEach(l=>rows.push(['Study Session',l.subj,l.what||'session',l.date,l.mins+'min','','']));
   const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a');
