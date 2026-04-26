@@ -1671,6 +1671,8 @@ body.night .fr-pod-2 .fr-pod-avatar{background:rgba(255,255,255,.14);color:#cbd5
 body.night .fr-pod-3 .fr-pod-avatar{background:rgba(234,88,12,.2);color:#fed7aa}
 .fr-pod-username{font-size:11px;font-weight:600;letter-spacing:-.01em;color:var(--text);margin-bottom:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
 .fr-pod-you{font-size:9px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--t3)}
+.owner-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;margin-left:6px;font-size:9px;font-family:'Geist Mono',monospace;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;border-radius:4px;vertical-align:middle;box-shadow:0 1px 2px rgba(0,0,0,.15);white-space:nowrap}
+body.night .owner-badge{box-shadow:0 1px 3px rgba(0,0,0,.4)}
 .fr-pod-value{font-size:30px;font-weight:200;letter-spacing:-.05em;line-height:1;color:var(--text);margin:6px 0 2px}
 .fr-pod-unit{font-size:13px;color:var(--t3);font-weight:400}
 .fr-pod-sub{font-size:10px;font-family:'Geist Mono',monospace;color:var(--t3);margin-bottom:10px}
@@ -2406,6 +2408,7 @@ body.night .hw-filter.act{background:rgba(255,255,255,.90);color:#0f0f0f;border-
 #ctx-cursor-item.active-cursor{background:rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.12);font-weight:500}
 body.night #ctx-cursor-item.active-cursor{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18)}
 #watermark{position:fixed;bottom:10px;right:14px;font-size:9.5px;font-family:'Geist Mono',monospace;color:rgba(0,0,0,.18);letter-spacing:.06em;pointer-events:none;z-index:50;user-select:none}
+body.night #watermark{color:rgba(255,255,255,.32)}
 
 /* Sync badge */
 #sync-badge{
@@ -3762,7 +3765,7 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
           <div class="fg">
             <label class="fl">Search by @username</label>
             <div style="display:flex;gap:8px">
-              <input class="inp" id="lb-search-inp" placeholder="@username" style="flex:1" onkeydown="if(event.key==='Enter')lbSearch()">
+              <input class="inp" id="lb-search-inp" placeholder="@username" style="flex:1" autocomplete="off" oninput="lbSearchDebounced()" onkeydown="if(event.key==='Enter')lbSearch()">
               <button class="btn bo" onclick="lbSearch()" style="flex-shrink:0">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35"/></svg>
               </button>
@@ -3819,7 +3822,7 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
     <div class="fg">
       <label class="fl">Username</label>
       <div style="display:flex;gap:8px">
-        <input class="inp" id="fr-modal-inp" placeholder="@username" style="flex:1" onkeydown="if(event.key==='Enter')lbSearchModal()">
+        <input class="inp" id="fr-modal-inp" placeholder="@username" style="flex:1" autocomplete="off" oninput="lbSearchModalDebounced()" onkeydown="if(event.key==='Enter')lbSearchModal()">
         <button class="btn bo" onclick="lbSearchModal()">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35"/></svg>
         </button>
@@ -4836,21 +4839,92 @@ async function sbFetch(path,opts={}){
   return fetch(SB_URL+path,{...opts,headers});
 }
 
-// Write one key to Supabase (upsert)
-async function sbSet(k,v){
-  if(!sbUserId)return;
+// Dirty queue: keys whose local value has not yet been confirmed pushed.
+// Persisted in localStorage so failed/aborted pushes survive a refresh.
+function _sbDirtyGet(){try{return JSON.parse(localStorage.getItem('sb_dirty')||'{}');}catch{return{};}}
+function _sbDirtySet(o){try{localStorage.setItem('sb_dirty',JSON.stringify(o));}catch{}}
+function _sbMarkDirty(k,ts){const d=_sbDirtyGet();d[k]=ts;_sbDirtySet(d);}
+function _sbClearDirty(k,ts){const d=_sbDirtyGet();if(d[k]===ts){delete d[k];_sbDirtySet(d);}}
+function _sbIsDirty(k){const d=_sbDirtyGet();return Object.prototype.hasOwnProperty.call(d,k);}
+
+let _sbRetryTimer=null;
+function _sbScheduleRetry(ms=3000){if(_sbRetryTimer)return;_sbRetryTimer=setTimeout(()=>{_sbRetryTimer=null;_sbReplayDirty();},ms);}
+
+// Push a single key. On success, advance sb_push_ts and clear dirty for that ts.
+// On failure, leave dirty intact and schedule a retry.
+async function _sbPushKey(k,v,ts){
+  if(!sbUserId)return false;
   try{
-    const ts=new Date().toISOString();
-    await sbFetch('/rest/v1/entries',{
+    const r=await sbFetch('/rest/v1/entries',{
       method:'POST',
       headers:{'Prefer':'resolution=merge-duplicates'},
       body:JSON.stringify({user_id:sbUserId,key:k,value:JSON.stringify(v),updated_at:ts})
     });
-    // Record when we last pushed this key so silent pull can skip older remote data
+    if(!r.ok)throw 0;
     const localTs=JSON.parse(localStorage.getItem('sb_push_ts')||'{}');
     localTs[k]=ts;
     localStorage.setItem('sb_push_ts',JSON.stringify(localTs));
-  }catch{}
+    _sbClearDirty(k,ts);
+    return true;
+  }catch{
+    _sbScheduleRetry();
+    return false;
+  }
+}
+
+// Replay every dirty key from localStorage. Called on init, on visibility return,
+// and on push failure backoff. Idempotent — same ts means upsert overwrites with
+// identical row.
+async function _sbReplayDirty(){
+  if(!sbUserId)return;
+  const d=_sbDirtyGet();
+  const keys=Object.keys(d);
+  for(const k of keys){
+    const ts=d[k];
+    const raw=localStorage.getItem(k);
+    if(raw==null){_sbClearDirty(k,ts);continue;}
+    let parsed;try{parsed=JSON.parse(raw);}catch{parsed=raw;}
+    await _sbPushKey(k,parsed,ts);
+  }
+}
+
+// Flush dirty queue using keepalive fetch so the request survives page close /
+// navigation. Browsers cap keepalive bodies at ~64KB but our rows are tiny.
+function _sbFlushOnHide(){
+  if(!sbUserId||!sbAuthToken)return;
+  const d=_sbDirtyGet();
+  const keys=Object.keys(d);
+  if(!keys.length)return;
+  for(const k of keys){
+    const ts=d[k];
+    const raw=localStorage.getItem(k);
+    if(raw==null)continue;
+    try{
+      fetch(SB_URL+'/rest/v1/entries',{
+        method:'POST',
+        keepalive:true,
+        headers:{
+          'apikey':SB_KEY,
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+sbAuthToken,
+          'Prefer':'resolution=merge-duplicates'
+        },
+        body:JSON.stringify({user_id:sbUserId,key:k,value:raw,updated_at:ts})
+      });
+    }catch{}
+  }
+}
+window.addEventListener('pagehide',_sbFlushOnHide);
+window.addEventListener('beforeunload',_sbFlushOnHide);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')_sbFlushOnHide();});
+
+// Write one key to Supabase (upsert). Marks dirty before push so an aborted /
+// failed request can be replayed on next load.
+async function sbSet(k,v){
+  if(!sbUserId)return;
+  const ts=new Date().toISOString();
+  _sbMarkDirty(k,ts);
+  return _sbPushKey(k,v,ts);
 }
 
 // Read all keys for the current user from Supabase (includes timestamps for conflict resolution)
@@ -4910,11 +4984,19 @@ async function sbGetSession(){
   }catch{return null;}
 }
 
-// Apply remote data over local state
+// Apply remote data over local state.
+// Keys present in the dirty queue (local edit not yet confirmed pushed) are
+// skipped — local is authoritative until the push is acknowledged. This is
+// what makes deletions stick: a stale remote pull cannot resurrect a deleted
+// item if the deletion is still pending push.
 function applyRemoteData(remote){
   if(!remote)return;
-  // remote[key] is now {data, updated_at} — extract just the data
-  const get=(k)=>{const v=remote[k];return v!==undefined?(v.data!==undefined?v.data:v):undefined;};
+  const dirty=_sbDirtyGet();
+  // remote[key] is {data, updated_at}; return undefined for dirty keys so we skip them.
+  const get=(k)=>{
+    if(dirty[k])return undefined;
+    const v=remote[k];return v!==undefined?(v.data!==undefined?v.data:v):undefined;
+  };
   const r5=get('st_r5');if(r5!==undefined){rems=r5;localStorage.setItem('st_r5',JSON.stringify(rems));}
   const e5=get('st_e5');if(e5!==undefined){evs=e5;localStorage.setItem('st_e5',JSON.stringify(evs));}
   const l5=get('st_l5');if(l5!==undefined){logs=l5;localStorage.setItem('st_l5',JSON.stringify(logs));}
@@ -4928,7 +5010,8 @@ function applyRemoteData(remote){
     const parsed=typeof ics==='string'?JSON.parse(ics):ics;
     localStorage.setItem('st_ics',JSON.stringify(parsed));applyICS(parsed);
   }
-  const fr=get('st_friends');
+  // Friends use union-merge (never drops on stale remote) so dirty-skip doesn't apply here.
+  const fr=remote['st_friends']!==undefined?(remote['st_friends'].data!==undefined?remote['st_friends'].data:remote['st_friends']):undefined;
   if(fr!==undefined){
     // Merge remote + local by user_id — never drop a friend due to a stale remote snapshot
     const merged=[...lbFriends];
@@ -7868,7 +7951,11 @@ function lbGetMyStats(){
     .sort((a,b)=>b.avg-a.avg);
   const weekly=lbGetWeeklyStats();
   const streak=lbGetStreak();
-  return{avg:+avg.toFixed(1),paperCount:papers.length,studyMins:totalMins,last3,subjAvgs,streak,
+  // Emoji travels inside the freeform stats JSON so friends see the latest pick
+  // after the next lbPublish (called by frPickEmoji and on every paper/study
+  // log). No schema change required.
+  const emoji=localStorage.getItem('st_lb_emoji')||'';
+  return{avg:+avg.toFixed(1),paperCount:papers.length,studyMins:totalMins,last3,subjAvgs,streak,emoji,
     weeklyStudyMins:weekly.studyMins,weeklyAvg:weekly.weeklyAvg,weeklyPapers:weekly.weeklyPapers,weekKey:weekly.weekKey};
 }
 
@@ -7902,37 +7989,67 @@ async function lbClaimUsername(){
   else lbMsg('Save failed — check your connection.','#e53e3e');
 }
 
+// Owner badge — appears next to the owner's name everywhere it renders. Keyed
+// off Supabase user_id (UUID) instead of the username string so it can't be
+// spoofed by claiming a particular handle.
+const OWNER_USER_ID='5a5de371-81dd-4e3b-8ae7-ac83a4d78f2b';
+function ownerBadge(uid){
+  return uid&&String(uid)===OWNER_USER_ID
+    ?'<span class="owner-badge" title="Stream owner">★ Owner</span>'
+    :'';
+}
+
+// Sequence guards: any stale response from a slower in-flight query is ignored
+// once a newer query has fired. Prevents typing-flicker.
+let _lbSearchSeq=0;
+let _lbSearchT=null;
+let _lbModalSearchSeq=0;
+let _lbModalSearchT=null;
+
+function lbSearchDebounced(){
+  if(_lbSearchT)clearTimeout(_lbSearchT);
+  _lbSearchT=setTimeout(lbSearch,160);
+}
+function lbSearchModalDebounced(){
+  if(_lbModalSearchT)clearTimeout(_lbModalSearchT);
+  _lbModalSearchT=setTimeout(lbSearchModal,160);
+}
+
 async function lbSearch(){
   const inp=document.getElementById('lb-search-inp');if(!inp)return;
+  const resultEl=document.getElementById('lb-search-result');if(!resultEl)return;
   const q=inp.value.trim().toLowerCase().replace(/^@/,'');
-  if(!q){lbMsg2('Enter a username to search.','#e53e3e');return;}
-  if(!sbUserId){lbMsg2('Sign in first.','#e53e3e');return;}
-  const resultEl=document.getElementById('lb-search-result');
+  if(!q){resultEl.innerHTML='';return;}
+  if(!sbUserId){resultEl.innerHTML='<span style="font-size:12px;color:var(--t3)">Sign in to search.</span>';return;}
+  const seq=++_lbSearchSeq;
   resultEl.innerHTML='<span style="font-size:12px;color:var(--t3)">Searching…</span>';
-  const r=await sbFetch(`/rest/v1/leaderboard?username=eq.${encodeURIComponent(q)}&select=user_id,username,stats`);
-  if(!r.ok){resultEl.innerHTML='';lbMsg2('Search failed.','#e53e3e');return;}
-  const rows=await r.json();
-  if(!rows.length){resultEl.innerHTML='<span style="font-size:12px;color:var(--t3)">No user found.</span>';return;}
-  const u=rows[0];
-  if(u.user_id===sbUserId){resultEl.innerHTML='<span style="font-size:12px;color:var(--t3)">That\'s you!</span>';return;}
-  const alreadyFriend=lbFriends.some(f=>f.user_id===u.user_id);
+  // PostgREST ilike with a trailing '*' wildcard = case-insensitive prefix match
+  const r=await sbFetch(`/rest/v1/leaderboard?username=ilike.${encodeURIComponent(q+'*')}&select=user_id,username,stats&order=username.asc&limit=8`);
+  if(seq!==_lbSearchSeq)return; // a newer query fired while we were waiting
+  if(!r.ok){resultEl.innerHTML='<span style="font-size:12px;color:var(--t3)">Search failed.</span>';return;}
+  const rows=(await r.json()).filter(u=>u.user_id!==sbUserId);
+  if(seq!==_lbSearchSeq)return;
+  if(!rows.length){resultEl.innerHTML='<span style="font-size:12px;color:var(--t3)">No matching users.</span>';return;}
   const sent=JSON.parse(localStorage.getItem('st_fr_sent')||'[]');
-  const alreadySent=sent.some(s=>s.to_id===u.user_id);
-  const avgStr=u.stats?.avg!=null?`${u.stats.avg}% avg`:'no data yet';
-  let actionBtn='';
-  if(alreadyFriend)actionBtn='<span style="font-size:11px;font-family:\'Geist Mono\',monospace;color:var(--t3)">friends ✓</span>';
-  else if(alreadySent)actionBtn='<span style="font-size:11px;font-family:\'Geist Mono\',monospace;color:var(--t3)">requested ✓</span>';
-  else actionBtn=`<button class="btn bd fr-send-btn" onclick="lbSendRequest('${u.user_id}','${esc(u.username)}')">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-    Request
-  </button>`;
-  resultEl.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.5);border-radius:10px;border:1px solid var(--border);margin-top:6px">
-    <div style="flex:1;min-width:0">
-      <div style="font-size:13px;font-weight:500">@${esc(u.username)}</div>
-      <div style="font-size:10px;font-family:'Geist Mono',monospace;color:var(--t3);margin-top:2px">${avgStr} · ${u.stats?.paperCount||0} papers</div>
-    </div>
-    ${actionBtn}
-  </div>`;
+  resultEl.innerHTML=rows.map(u=>{
+    const alreadyFriend=lbFriends.some(f=>f.user_id===u.user_id);
+    const alreadySent=sent.some(s=>s.to_id===u.user_id);
+    const avgStr=u.stats?.avg!=null?`${u.stats.avg}% avg`:'no data yet';
+    let actionBtn;
+    if(alreadyFriend)actionBtn='<span style="font-size:11px;font-family:\'Geist Mono\',monospace;color:var(--t3)">friends ✓</span>';
+    else if(alreadySent)actionBtn='<span style="font-size:11px;font-family:\'Geist Mono\',monospace;color:var(--t3)">requested ✓</span>';
+    else actionBtn=`<button class="btn bd fr-send-btn" onclick="lbSendRequest('${u.user_id}','${esc(u.username)}')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+      Request
+    </button>`;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.5);border-radius:10px;border:1px solid var(--border);margin-top:6px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:500">@${esc(u.username)}${ownerBadge(u.user_id)}</div>
+        <div style="font-size:10px;font-family:'Geist Mono',monospace;color:var(--t3);margin-top:2px">${avgStr} · ${u.stats?.paperCount||0} papers</div>
+      </div>
+      ${actionBtn}
+    </div>`;
+  }).join('');
 }
 
 function lbAddFriend(user_id,username){
@@ -7942,10 +8059,17 @@ function lbAddFriend(user_id,username){
   sv('st_friends',lbFriends);
 }
 
-function lbRemoveFriend(user_id){
+async function lbRemoveFriend(user_id){
   lbFriends=lbFriends.filter(f=>f.user_id!==user_id);
   sv('st_friends',lbFriends);
   renderLB();
+  // Delete the symmetric friend_request row so the removal propagates to the
+  // other user — without this, they'd still see this user as a friend forever.
+  if(sbUserId&&user_id){
+    try{
+      await sbFetch(`/rest/v1/friend_requests?or=(and(from_id.eq.${sbUserId},to_id.eq.${user_id}),and(from_id.eq.${user_id},to_id.eq.${sbUserId}))`,{method:'DELETE'});
+    }catch{}
+  }
 }
 
 async function lbFetchFriendStats(){
@@ -8050,7 +8174,9 @@ function renderLBSection(mode, entries){
     return s?`<span class="fr-streak"><span class="fr-streak-fire">🔥</span>${s}d</span>`:'';
   }
   function avContent(e){
-    const em=e.me?localStorage.getItem('st_lb_emoji'):'';
+    // Emoji now travels through the leaderboard row's stats JSON, so we read
+    // the same field for self and friends — friends see each other's choice.
+    const em=e.stats?.emoji||'';
     return em||((e.username||'?').slice(0,2).toUpperCase());
   }
 
@@ -8069,7 +8195,7 @@ function renderLBSection(mode, entries){
     podHTML+=`<div class="${podClasses[pi]}${e.me?' fr-pod-me':''}" onclick="frShowDetail('${e.user_id}')" style="cursor:none;--pod-delay:${pi*0.07}s">
       ${rank===1?`<div class="fr-pod-crown">${crownSVG}</div>`:''}
       <div class="fr-pod-avatar" style="background:hsl(${hue},55%,50%);color:#fff">${avContent(e)}</div>
-      <div class="fr-pod-username">@${esc(e.username)}${e.me?'<span class="fr-pod-you"> you</span>':''}</div>
+      <div class="fr-pod-username">@${esc(e.username)}${ownerBadge(e.user_id)}${e.me?'<span class="fr-pod-you"> you</span>':''}</div>
       ${streakBadge(e)?`<div style="margin:3px 0">${streakBadge(e)}</div>`:''}
       <div class="fr-pod-value">${fmtVal(e)}</div>
       <div class="fr-pod-sub">${fmtSub(e)}</div>
@@ -8089,7 +8215,7 @@ function renderLBSection(mode, entries){
       rowsHTML+=`<div class="fr-row${e.me?' fr-row-me':''}" onclick="frShowDetail('${e.user_id}')" style="cursor:none;--row-delay:${i*0.05}s">
         <div class="fr-row-rank">${rank}</div>
         <div class="fr-row-info">
-          <div class="fr-row-name">@${esc(e.username)}${e.me?' <span class="fr-row-you">you</span>':''}${e.noData?' <span class="fr-row-nd">no data</span>':''}${streakBadge(e)?` ${streakBadge(e)}`:''}</div>
+          <div class="fr-row-name">@${esc(e.username)}${ownerBadge(e.user_id)}${e.me?' <span class="fr-row-you">you</span>':''}${e.noData?' <span class="fr-row-nd">no data</span>':''}${streakBadge(e)?` ${streakBadge(e)}`:''}</div>
           <div class="fr-row-bar"><div class="fr-row-fill" style="width:${Math.max(2,barVal)}%"></div></div>
         </div>
         <div class="fr-row-val">${fmtVal(e)}<div class="fr-row-vsub">${fmtSub(e)}</div></div>
@@ -8109,11 +8235,11 @@ function renderActivityFeed(entries){
     if(!e.stats)return;
     const l3=e.stats.last3||[];
     if(l3.length){
-      items.push({type:'paper',username:e.username,paper:l3[0],me:e.me});
+      items.push({type:'paper',username:e.username,user_id:e.user_id,paper:l3[0],me:e.me});
     }
     const sm=e.stats.studyMins||0;
     if(sm>0){
-      items.push({type:'study',username:e.username,mins:sm,me:e.me});
+      items.push({type:'study',username:e.username,user_id:e.user_id,mins:sm,me:e.me});
     }
   });
   if(!items.length){
@@ -8128,7 +8254,7 @@ function renderActivityFeed(entries){
       return`<div class="fr-feed-item">
         <div class="fr-feed-dot">${grade}</div>
         <div class="fr-feed-body">
-          <div class="fr-feed-who">${it.me?'You':('@'+esc(it.username))}</div>
+          <div class="fr-feed-who">${it.me?'You':('@'+esc(it.username)+ownerBadge(it.user_id))}</div>
           <div class="fr-feed-what">${pct}% on ${esc(it.paper.subj)} · ${esc(it.paper.name||'paper')}</div>
         </div>
       </div>`;
@@ -8137,7 +8263,7 @@ function renderActivityFeed(entries){
       return`<div class="fr-feed-item">
         <div class="fr-feed-dot">⏱</div>
         <div class="fr-feed-body">
-          <div class="fr-feed-who">${it.me?'You':('@'+esc(it.username))}</div>
+          <div class="fr-feed-who">${it.me?'You':('@'+esc(it.username)+ownerBadge(it.user_id))}</div>
           <div class="fr-feed-what">${smStr} studied</div>
         </div>
       </div>`;
@@ -8153,12 +8279,13 @@ function frShowDetail(uid){
   const username=e.username||'?';
   const initials=username.slice(0,2).toUpperCase();
 
-  // Avatar — use stored emoji if this is "me", else initials with hue
+  // Avatar — emoji is read from the entry's stats so friends see each other's
+  // current pick. Falls back to initials when the user hasn't picked one yet.
   const hue=(username.split('').reduce((a,c)=>a+c.charCodeAt(0),0)*47)%360;
   const avEl=document.getElementById('fr-det-av');
-  const myEmoji=e.me?localStorage.getItem('st_lb_emoji'):'';
-  const avContent=myEmoji||initials;
-  const avFontSize=myEmoji?'32px':'22px';
+  const theirEmoji=s.emoji||'';
+  const avContent=theirEmoji||initials;
+  const avFontSize=theirEmoji?'32px':'22px';
   avEl.style.cssText=`background:hsl(${hue},55%,50%);box-shadow:0 0 0 3px hsl(${hue},55%,72%),0 8px 24px rgba(0,0,0,.18);font-size:${avFontSize};position:relative`;
   if(e.me){
     avEl.innerHTML=`${avContent}<div style="position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid var(--bg);pointer-events:none">✏️</div>`;
@@ -8180,7 +8307,7 @@ function frShowDetail(uid){
   rb.className='fr-det-rank-badge'+(rank<=3?` rank-${rank}`:'');
 
   // Name
-  document.getElementById('fr-det-name').textContent='@'+username;
+  document.getElementById('fr-det-name').innerHTML='@'+esc(username)+ownerBadge(e.user_id);
   const youEl=document.getElementById('fr-det-you');
   youEl.style.display=e.me?'block':'none';
 
@@ -8313,8 +8440,9 @@ function frPickEmoji(emoji,hue){
   if(avEl){avEl.textContent=emoji;avEl.style.fontSize='32px';}
   // Update pill avatar
   frRenderPill();
-  // Publish updated stats (emoji travels via st_lb_emoji, not stats)
-  lbPublish();
+  // Publish — emoji is part of stats now, so friends will see the new pick
+  // the next time their leaderboard refreshes.
+  lbPublish().then(()=>lbRefresh());
 }
 
 function lbRenderProfile(){
@@ -8341,7 +8469,7 @@ function lbRenderProfile(){
   const smStr=s.studyMins>=60?Math.floor(s.studyMins/60)+'h':s.studyMins+'m';
   el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
     <div style="flex:1;min-width:0">
-      <div style="font-size:16px;font-weight:500;letter-spacing:-.01em">@${esc(username)}</div>
+      <div style="font-size:16px;font-weight:500;letter-spacing:-.01em">@${esc(username)}${ownerBadge(sbUserId)}</div>
       <div style="font-size:11px;font-family:'Geist Mono',monospace;color:var(--t3);margin-top:1px">your leaderboard handle</div>
     </div>
     <button class="btn bo" onclick="lbChangeUsername()" style="font-size:11px;padding:5px 11px">Change</button>
@@ -8389,7 +8517,10 @@ function initFriendsTab(){
   // Check for incoming/outgoing requests and process accepted ones
   if(sbUserId){
     renderRequestsPanel();
-    lbProcessAccepted();
+    // Fetch the server-authoritative friends list (recovers any friendships that
+    // were lost from this device's st_friends but still exist as accepted
+    // friend_requests). Re-render once it's done.
+    lbFetchFriendsFromServer().then(changed=>{if(changed)lbRefresh();});
     frStartRequestPolling();
   }
 }
@@ -8446,37 +8577,43 @@ async function lbSearchModal(){
   const msg=document.getElementById('fr-modal-msg');
   if(!inp||!res)return;
   const q=inp.value.replace(/^@/,'').trim().toLowerCase();
-  if(!q)return;
+  if(!q){res.innerHTML='';return;}
+  if(!sbUserId){res.innerHTML='<div style="font-size:12px;color:var(--t3)">Sign in to search.</div>';return;}
+  const seq=++_lbModalSearchSeq;
   res.innerHTML='<div style="font-size:12px;color:var(--t3)">Searching…</div>';
   if(msg)msg.textContent='';
   try{
-    const r=await sbFetch(`/rest/v1/leaderboard?username=eq.${encodeURIComponent(q)}&select=user_id,username,stats`);
+    const r=await sbFetch(`/rest/v1/leaderboard?username=ilike.${encodeURIComponent(q+'*')}&select=user_id,username,stats&order=username.asc&limit=8`);
+    if(seq!==_lbModalSearchSeq)return;
     if(!r.ok)throw new Error();
-    const data=await r.json();
-    if(!data.length){res.innerHTML='<div style="font-size:12px;color:var(--t3)">No user found with that username.</div>';return;}
-    const found=data[0];
-    if(found.user_id===sbUserId){res.innerHTML='<div style="font-size:12px;color:var(--t3)">That\'s you!</div>';return;}
-    const already=lbFriends.some(f=>f.user_id===found.user_id);
+    const rows=(await r.json()).filter(u=>u.user_id!==sbUserId);
+    if(seq!==_lbModalSearchSeq)return;
+    if(!rows.length){res.innerHTML='<div style="font-size:12px;color:var(--t3)">No matching users.</div>';return;}
     const sentList=JSON.parse(localStorage.getItem('st_fr_sent')||'[]');
-    const alreadySentModal=sentList.some(s=>s.to_id===found.user_id);
-    const avg=found.stats?.avg??0;
-    const pc=found.stats?.paperCount??0;
-    let modalAction='';
-    if(already)modalAction=`<span style="font-size:11px;color:var(--t3)">Friends ✓</span>`;
-    else if(alreadySentModal)modalAction=`<span style="font-size:11px;font-family:'Geist Mono',monospace;color:var(--t3)">Requested ✓</span>`;
-    else modalAction=`<button class="btn bd fr-send-btn" onclick="lbSendRequest('${found.user_id}','${esc(found.username)}')" style="font-size:11px;padding:5px 12px;display:flex;align-items:center;gap:5px">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-      Request
-    </button>`;
-    res.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--glass);border:1px solid var(--border);border-radius:10px;margin-top:10px">
-      <div style="width:34px;height:34px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">${esc(found.username).slice(0,2).toUpperCase()}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:500">@${esc(found.username)}</div>
-        <div style="font-size:11px;font-family:'Geist Mono',monospace;color:var(--t3)">${avg?avg+'% avg · ':''} ${pc} paper${pc!==1?'s':''}</div>
-      </div>
-      ${modalAction}
-    </div>`;
-  }catch{res.innerHTML='<div style="font-size:12px;color:var(--t3)">Search failed. Try again.</div>';}
+    res.innerHTML=rows.map(found=>{
+      const already=lbFriends.some(f=>f.user_id===found.user_id);
+      const alreadySentModal=sentList.some(s=>s.to_id===found.user_id);
+      const avg=found.stats?.avg??0;
+      const pc=found.stats?.paperCount??0;
+      let modalAction;
+      if(already)modalAction=`<span style="font-size:11px;color:var(--t3)">Friends ✓</span>`;
+      else if(alreadySentModal)modalAction=`<span style="font-size:11px;font-family:'Geist Mono',monospace;color:var(--t3)">Requested ✓</span>`;
+      else modalAction=`<button class="btn bd fr-send-btn" onclick="lbSendRequest('${found.user_id}','${esc(found.username)}')" style="font-size:11px;padding:5px 12px;display:flex;align-items:center;gap:5px">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+        Request
+      </button>`;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--glass);border:1px solid var(--border);border-radius:10px;margin-top:10px">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">${esc(found.username).slice(0,2).toUpperCase()}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:500">@${esc(found.username)}${ownerBadge(found.user_id)}</div>
+          <div style="font-size:11px;font-family:'Geist Mono',monospace;color:var(--t3)">${avg?avg+'% avg · ':''} ${pc} paper${pc!==1?'s':''}</div>
+        </div>
+        ${modalAction}
+      </div>`;
+    }).join('');
+  }catch{
+    if(seq===_lbModalSearchSeq)res.innerHTML='<div style="font-size:12px;color:var(--t3)">Search failed. Try again.</div>';
+  }
 }
 
 async function lbAddFriendFromModal(uid,uname){
@@ -8581,28 +8718,60 @@ async function lbGetOutgoingRequests(){
   return[];
 }
 
-// Check if someone accepted our sent requests → auto-add them
-async function lbProcessAccepted(){
-  if(!sbUserId)return;
+// Server-authoritative friend list. Queries friend_requests in both directions
+// for accepted relationships and unions with whatever is already in lbFriends.
+// This is the durable source of truth — keeping the friend_requests row (we no
+// longer delete on accept) means both endpoints can rebuild the friendship from
+// the server even if their local st_friends gets wiped or never received a push.
+async function lbFetchFriendsFromServer(){
+  if(!sbUserId)return false;
+  // Load whatever is in localStorage first — initFriendsTab may not have run on
+  // this device yet, so the in-memory lbFriends global could still be the
+  // module-scope default of [], even though localStorage holds legacy friends.
   try{
-    const r=await sbFetch(`/rest/v1/friend_requests?from_id=eq.${sbUserId}&status=eq.accepted&select=id,to_id,to_username`);
-    if(!r.ok)return;
-    const rows=await r.json();
-    let changed=false;
-    for(const row of rows){
-      if(!lbFriends.some(f=>f.user_id===row.to_id)){
-        lbFriends.push({user_id:row.to_id,username:row.to_username});
-        changed=true;
+    const stored=JSON.parse(localStorage.getItem('st_friends')||'[]');
+    if(Array.isArray(stored)){
+      for(const f of stored){
+        if(f?.user_id&&!lbFriends.some(m=>m.user_id===f.user_id))lbFriends.push(f);
       }
-      // Delete the accepted notification
-      await sbFetch(`/rest/v1/friend_requests?id=eq.${row.id}`,{method:'DELETE'}).catch(()=>{});
-      // Remove from local sent list
+    }
+  }catch{}
+  try{
+    const [outR,inR]=await Promise.all([
+      sbFetch(`/rest/v1/friend_requests?from_id=eq.${sbUserId}&status=eq.accepted&select=to_id,to_username`),
+      sbFetch(`/rest/v1/friend_requests?to_id=eq.${sbUserId}&status=eq.accepted&select=from_id,from_username`)
+    ]);
+    const out=outR.ok?await outR.json():[];
+    const inc=inR.ok?await inR.json():[];
+    const fromServer=[
+      ...out.filter(r=>r.to_id).map(r=>({user_id:r.to_id,username:r.to_username})),
+      ...inc.filter(r=>r.from_id).map(r=>({user_id:r.from_id,username:r.from_username}))
+    ];
+    // Union with current lbFriends so legacy local-only friendships (from before
+    // friend_requests became durable) are preserved.
+    const merged=[...lbFriends];
+    let changed=false;
+    for(const f of fromServer){
+      if(!merged.some(m=>m.user_id===f.user_id)){merged.push(f);changed=true;}
+    }
+    if(changed){
+      lbFriends=merged;
+      sv('st_friends',lbFriends);
+      // Clear any matching outgoing-pending entries from the local "sent" list
       let sent=JSON.parse(localStorage.getItem('st_fr_sent')||'[]');
-      sent=sent.filter(s=>s.to_id!==row.to_id);
+      sent=sent.filter(s=>!fromServer.some(f=>f.user_id===s.to_id));
       localStorage.setItem('st_fr_sent',JSON.stringify(sent));
     }
-    if(changed){sv('st_friends',lbFriends);lbRefresh();}
-  }catch{}
+    return changed;
+  }catch{return false;}
+}
+
+// Back-compat alias: existing call sites still invoke lbProcessAccepted on a
+// 20-second poll. Route them through the new server-authoritative loader and
+// re-render if anything changed.
+async function lbProcessAccepted(){
+  const changed=await lbFetchFriendsFromServer();
+  if(changed)lbRefresh();
 }
 
 // Toggle the requests panel open/closed
@@ -8650,7 +8819,7 @@ function _updateReqIncoming(incoming){
     return`<div class="fr-req-row" id="fr-req-row-${req.id}" style="animation-delay:${i*0.06}s">
       <div class="fr-req-av" style="background:hsl(${hue},62%,50%)">${initials}</div>
       <div class="fr-req-info">
-        <div class="fr-req-name">@${esc(req.from_username)}</div>
+        <div class="fr-req-name">@${esc(req.from_username)}${ownerBadge(req.from_id)}</div>
         <div class="fr-req-time">${ago}</div>
       </div>
       <div class="fr-req-btns">
@@ -8677,7 +8846,7 @@ function _updateReqOutgoing(outgoing){
     return`<div class="fr-req-out-row" id="fr-req-out-${req.id}" style="animation-delay:${i*0.06}s">
       <div class="fr-req-av" style="background:hsl(${hue},55%,58%);opacity:.8">${initials}</div>
       <div class="fr-req-info">
-        <div class="fr-req-name">@${esc(req.to_username)}</div>
+        <div class="fr-req-name">@${esc(req.to_username)}${ownerBadge(req.to_id)}</div>
         <div class="fr-req-time">${ago} · pending</div>
       </div>
       <button class="fr-req-cancel" onclick="lbCancelRequest('${req.id}','${req.to_id}',document.getElementById('fr-req-out-${req.id}'))">Cancel</button>
@@ -9612,6 +9781,8 @@ async function sbActivateSession(sess){
   sbAuthToken=sess.access_token;
   sbUserId=sess.user?.id;
   localStorage.setItem('sb_session',JSON.stringify(sess));
+  // Push any pending edits from a previous (signed-in) session before reading remote.
+  await _sbReplayDirty();
   const remote=await sbLoadAll();
   const hasRemote=remote&&Object.keys(remote).length>0;
   if(hasRemote){
@@ -10895,18 +11066,22 @@ function syncMobileNav(){
     applyFancyCursor(fancyCursor);
     if(notifEnabled&&Notification.permission==='granted')scheduleNotifications();
     mhInit();
-    sbGetSession().then(sess=>{
+    sbGetSession().then(async sess=>{
       if(sess?.access_token){
         sbAuthToken=sess.access_token;
         sbUserId=sess.user?.id;
         setSyncStatus(true,sess.user?.email);
-        sbLoadAll().then(remote=>{
-          if(remote&&Object.keys(remote).length>0){
-            applyRemoteData(remote);
-            renderDash();renderTT();renderRems();renderHW();
-            cddSyncAll();
-          }
-        });
+        // 1. Push any dirty edits from the previous session FIRST so the remote
+        //    reflects every local change before we read it back.
+        await _sbReplayDirty();
+        // 2. Pull only keys whose remote updated_at is strictly newer than our
+        //    last confirmed push. sbSilentPull also re-renders on apply.
+        await sbSilentPull();
+        // 3. Reconcile friends from the server-authoritative friend_requests
+        //    table. This rebuilds the friendship list even if local st_friends
+        //    is empty/stale on this device.
+        if(typeof lbFetchFriendsFromServer==='function')await lbFetchFriendsFromServer();
+        cddSyncAll();
         sbStartAutoSync();
       }
     });
@@ -10915,6 +11090,7 @@ function syncMobileNav(){
     setTimeout(()=>{document.getElementById('ob-name').focus();cddInit();},100);
   }
 })();
+
 </script>
 <script>
 // ── PWA SERVICE WORKER REGISTRATION ──────────────────────
