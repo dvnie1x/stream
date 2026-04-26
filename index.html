@@ -8038,7 +8038,7 @@ async function lbSearch(){
     let actionBtn;
     if(alreadyFriend)actionBtn='<span style="font-size:11px;font-family:\'Geist Mono\',monospace;color:var(--t3)">friends ✓</span>';
     else if(alreadySent)actionBtn='<span style="font-size:11px;font-family:\'Geist Mono\',monospace;color:var(--t3)">requested ✓</span>';
-    else actionBtn=`<button class="btn bd fr-send-btn" onclick="lbSendRequest('${u.user_id}','${esc(u.username)}')">
+    else actionBtn=`<button class="btn bd fr-send-btn" data-uid="${u.user_id}" onclick="lbSendRequest('${u.user_id}','${esc(u.username)}')">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
       Request
     </button>`;
@@ -8598,7 +8598,7 @@ async function lbSearchModal(){
       let modalAction;
       if(already)modalAction=`<span style="font-size:11px;color:var(--t3)">Friends ✓</span>`;
       else if(alreadySentModal)modalAction=`<span style="font-size:11px;font-family:'Geist Mono',monospace;color:var(--t3)">Requested ✓</span>`;
-      else modalAction=`<button class="btn bd fr-send-btn" onclick="lbSendRequest('${found.user_id}','${esc(found.username)}')" style="font-size:11px;padding:5px 12px;display:flex;align-items:center;gap:5px">
+      else modalAction=`<button class="btn bd fr-send-btn" data-uid="${found.user_id}" onclick="lbSendRequest('${found.user_id}','${esc(found.username)}')" style="font-size:11px;padding:5px 12px;display:flex;align-items:center;gap:5px">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
         Request
       </button>`;
@@ -8643,11 +8643,15 @@ async function lbSendRequest(to_id,to_username){
       localStorage.setItem('st_fr_sent',JSON.stringify(sent));
       lbMsg2(`Request sent to @${to_username} ✓`,'#16a34a');
       lbMsgModal(`Request sent to @${to_username} ✓`,'#16a34a');
-      // Dim send buttons in both results
-      ['lb-search-result','fr-modal-result'].forEach(id=>{
-        document.getElementById(id)?.querySelectorAll('button.fr-send-btn').forEach(b=>{
-          b.textContent='Requested ✓';b.disabled=true;b.style.opacity='.55';
-        });
+      // Dim only the send button(s) for the user we just requested. Searching
+      // both result containers covers the case where the same user appears in
+      // both the sidebar and the modal at the same time.
+      document.querySelectorAll(`button.fr-send-btn[data-uid="${to_id}"]`).forEach(b=>{
+        b.textContent='Requested ✓';
+        b.disabled=true;
+        b.style.opacity='.55';
+        b.style.pointerEvents='none';
+        b.onclick=null;
       });
     }else{
       const body=await r.json().catch(()=>({}));
