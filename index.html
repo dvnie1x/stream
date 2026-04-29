@@ -1673,6 +1673,8 @@ body.night .fr-pod-3 .fr-pod-avatar{background:rgba(234,88,12,.2);color:#fed7aa}
 .fr-pod-you{font-size:9px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--t3)}
 .owner-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;margin-left:6px;font-size:9px;font-family:'Geist Mono',monospace;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;border-radius:4px;vertical-align:middle;box-shadow:0 1px 2px rgba(0,0,0,.15);white-space:nowrap}
 body.night .owner-badge{box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.ambassador-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;margin-left:6px;font-size:9px;font-family:'Geist Mono',monospace;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:linear-gradient(135deg,#94a3b8,#64748b);color:#fff;border-radius:4px;vertical-align:middle;box-shadow:0 1px 2px rgba(0,0,0,.15);white-space:nowrap}
+body.night .ambassador-badge{box-shadow:0 1px 3px rgba(0,0,0,.4)}
 .fr-pod-value{font-size:30px;font-weight:200;letter-spacing:-.05em;line-height:1;color:var(--text);margin:6px 0 2px}
 .fr-pod-unit{font-size:13px;color:var(--t3);font-weight:400}
 .fr-pod-sub{font-size:10px;font-family:'Geist Mono',monospace;color:var(--t3);margin-bottom:10px}
@@ -7989,14 +7991,18 @@ async function lbClaimUsername(){
   else lbMsg('Save failed — check your connection.','#e53e3e');
 }
 
-// Owner badge — appears next to the owner's name everywhere it renders. Keyed
-// off Supabase user_id (UUID) instead of the username string so it can't be
-// spoofed by claiming a particular handle.
-const OWNER_USER_ID='5a5de371-81dd-4e3b-8ae7-ac83a4d78f2b';
+// Role badges — keyed off Supabase user_id (UUID) so they can't be spoofed by
+// claiming a particular handle. Add new roles by extending USER_ROLE_BADGES.
+// Function name kept as ownerBadge for back-compat with all the call sites.
+const USER_ROLE_BADGES={
+  '5a5de371-81dd-4e3b-8ae7-ac83a4d78f2b':{cls:'owner-badge',label:'★ Owner',title:'Stream owner'},
+  'fdeb0757-5ca9-4763-8be9-97e85589c0b7':{cls:'ambassador-badge',label:'★ Ambassador',title:'Stream ambassador'}
+};
 function ownerBadge(uid){
-  return uid&&String(uid)===OWNER_USER_ID
-    ?'<span class="owner-badge" title="Stream owner">★ Owner</span>'
-    :'';
+  if(!uid)return'';
+  const r=USER_ROLE_BADGES[String(uid)];
+  if(!r)return'';
+  return`<span class="${r.cls}" title="${r.title}">${r.label}</span>`;
 }
 
 // Sequence guards: any stale response from a slower in-flight query is ignored
