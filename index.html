@@ -1347,6 +1347,416 @@ body.night #sw-float{background:rgba(20,22,28,.80);border-color:rgba(255,255,255
 body.night .sw-float-btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.1)}
 body.night #sw-cancel-btn{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.14)!important;color:var(--t2)!important}
 body.night .sw-float-btn:hover{background:rgba(255,255,255,.16)}
+
+/* ── Zen mode trigger — anchored to the timer's bottom-right corner ── */
+.home-timer-frame{
+  position:relative;
+  display:inline-block;
+}
+.home-timer-frame .home-timer{width:auto;display:block}
+#zen-btn{
+  position:absolute;
+  bottom:14px;
+  left:calc(100% + 10px);
+  width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.5);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(0,0,0,.06);
+  border-radius:8px;
+  color:var(--t3);padding:0;cursor:none;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  transition:color .15s,background .15s,transform .15s,box-shadow .15s,border-color .15s;
+}
+#zen-btn:hover{
+  color:var(--text);
+  background:rgba(255,255,255,.85);
+  border-color:rgba(0,0,0,.1);
+  box-shadow:0 4px 10px rgba(0,0,0,.07);
+  transform:translateY(-1px);
+}
+/* Night mode — blend in: no background, ghost icon, subtle hover */
+body.night #zen-btn{
+  background:transparent;
+  border-color:transparent;
+  color:rgba(255,255,255,.28);
+  box-shadow:none;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+}
+body.night #zen-btn:hover{
+  background:rgba(255,255,255,.06);
+  border-color:rgba(255,255,255,.08);
+  color:rgba(255,255,255,.85);
+  box-shadow:none;
+}
+#zen-btn svg{width:13px;height:13px;display:block}
+@media (max-width:640px){#zen-btn{display:none!important}}
+
+/* ── Zen confirm modal ── reuses .modal-bg/.modal-box base, with a hero icon */
+#zen-confirm .zen-confirm-icon{
+  width:62px;height:62px;margin:0 auto 18px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,rgba(96,165,250,.12),rgba(99,102,241,.18));
+  border:1px solid rgba(99,102,241,.18);
+  border-radius:18px;
+  color:#6366f1;
+  box-shadow:0 8px 24px rgba(99,102,241,.18),0 1px 0 rgba(255,255,255,.6) inset;
+}
+body.night #zen-confirm .zen-confirm-icon{
+  background:linear-gradient(135deg,rgba(96,165,250,.16),rgba(99,102,241,.22));
+  border-color:rgba(99,102,241,.28);
+  color:#a5b4fc;
+  box-shadow:0 8px 24px rgba(0,0,0,.4),0 1px 0 rgba(255,255,255,.06) inset;
+}
+#zen-confirm .zen-confirm-h{
+  font-size:19px;font-weight:600;letter-spacing:-.02em;color:var(--text);
+  text-align:center;margin-bottom:8px;
+}
+#zen-confirm .zen-confirm-p{
+  font-size:13px;color:var(--t2);line-height:1.55;text-align:center;margin-bottom:6px;
+}
+#zen-confirm .zen-confirm-hint{
+  font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--t3);
+  text-align:center;letter-spacing:.06em;margin-bottom:22px;
+}
+#zen-confirm .zen-confirm-hint kbd{
+  font-family:'Geist Mono',monospace;font-size:10px;
+  padding:2px 6px;margin:0 2px;
+  background:rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.08);
+  border-radius:5px;color:var(--t2);
+}
+body.night #zen-confirm .zen-confirm-hint kbd{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12)}
+#zen-confirm .zen-confirm-actions{display:flex;gap:10px}
+#zen-confirm .zen-confirm-actions button{
+  flex:1;padding:11px 18px;
+  font-family:'Geist',sans-serif;font-size:13px;font-weight:500;letter-spacing:-.01em;
+  border-radius:11px;cursor:none;border:1px solid var(--border);
+  transition:background .15s,color .15s,transform .12s,box-shadow .15s;
+}
+#zen-confirm .zen-confirm-cancel{
+  background:transparent;color:var(--t2);
+}
+#zen-confirm .zen-confirm-cancel:hover{background:rgba(0,0,0,.04);color:var(--text)}
+body.night #zen-confirm .zen-confirm-cancel:hover{background:rgba(255,255,255,.06)}
+#zen-confirm .zen-confirm-go{
+  background:linear-gradient(135deg,#6366f1,#4f46e5);
+  color:#fff;border-color:rgba(99,102,241,.5);
+  box-shadow:0 4px 12px rgba(99,102,241,.28);
+}
+#zen-confirm .zen-confirm-go:hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 20px rgba(99,102,241,.36);
+}
+#zen-confirm .zen-confirm-skip{
+  display:flex;align-items:center;gap:8px;justify-content:center;
+  margin-top:14px;cursor:none;user-select:none;
+  font-size:10.5px;font-family:'Geist Mono',monospace;
+  color:var(--t3);letter-spacing:.08em;text-transform:uppercase;
+  transition:color .15s;
+}
+#zen-confirm .zen-confirm-skip:hover{color:var(--t2)}
+#zen-confirm .zen-confirm-skip input{
+  appearance:none;-webkit-appearance:none;
+  width:14px;height:14px;border-radius:4px;
+  border:1px solid rgba(0,0,0,.18);
+  background:transparent;cursor:none;
+  display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  margin:0;padding:0;position:relative;
+  transition:background .15s,border-color .15s;
+}
+#zen-confirm .zen-confirm-skip input:checked{background:#6366f1;border-color:#6366f1}
+#zen-confirm .zen-confirm-skip input:checked::after{
+  content:'';position:absolute;left:4px;top:1px;
+  width:4px;height:8px;border:solid #fff;border-width:0 1.8px 1.8px 0;
+  transform:rotate(45deg);
+}
+body.night #zen-confirm .zen-confirm-skip input{border-color:rgba(255,255,255,.18)}
+
+/* ── Zen mode fullscreen overlay ── */
+#zen-fs{
+  position:fixed;inset:0;z-index:9998;
+  display:flex;
+  background:var(--bg);
+  color:var(--text);
+  overflow:hidden;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transform:scale(1.04);
+  transition:opacity .42s cubic-bezier(.4,0,.2,1),transform .56s cubic-bezier(.34,1.56,.64,1),visibility 0s linear .42s;
+}
+/* Same multi-radial gradient as body::before so the zen background is
+   visually continuous with the rest of the app. */
+#zen-fs::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 70% 55% at 10% 15%,rgba(185,210,255,0.45) 0%,transparent 65%),
+    radial-gradient(ellipse 55% 65% at 90% 82%,rgba(215,195,255,0.35) 0%,transparent 65%),
+    radial-gradient(ellipse 45% 45% at 55% 40%,rgba(185,250,225,0.25) 0%,transparent 62%),
+    radial-gradient(ellipse 35% 35% at 70% 18%,rgba(255,225,185,0.22) 0%,transparent 58%);
+}
+body.night #zen-fs::before{
+  background:
+    radial-gradient(ellipse 70% 55% at 10% 15%,rgba(50,80,160,0.22) 0%,transparent 65%),
+    radial-gradient(ellipse 55% 65% at 90% 82%,rgba(80,50,160,0.18) 0%,transparent 65%),
+    radial-gradient(ellipse 45% 45% at 55% 40%,rgba(20,80,60,0.12) 0%,transparent 62%),
+    radial-gradient(ellipse 35% 35% at 70% 18%,rgba(100,60,20,0.10) 0%,transparent 58%);
+}
+#zen-fs.open{opacity:1;visibility:visible;pointer-events:auto;transform:scale(1);transition:opacity .42s cubic-bezier(.4,0,.2,1),transform .56s cubic-bezier(.34,1.56,.64,1),visibility 0s}
+#zen-close{
+  position:absolute;top:22px;right:26px;z-index:5;
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:transparent;border:none;cursor:none;
+  color:var(--t3);font-size:18px;line-height:1;
+  transition:color .15s,background .15s;
+}
+#zen-close:hover{color:var(--text);background:rgba(0,0,0,.05)}
+body.night #zen-close:hover{background:rgba(255,255,255,.08)}
+
+/* Left pane: timer wrapper centred, mirrors home-timer-wrap exactly */
+#zen-left{
+  flex:0 0 66.66%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px;position:relative;z-index:1;
+}
+#zen-mode-badge{
+  position:absolute;top:24px;left:30px;
+  font-family:'Geist Mono',monospace;font-size:10px;
+  text-transform:uppercase;letter-spacing:.18em;color:var(--t3);
+  opacity:0;transform:translateY(-6px);
+  transition:opacity .4s ease .35s,transform .4s ease .35s;
+}
+#zen-fs.open #zen-mode-badge{opacity:1;transform:translateY(0)}
+
+/* Reuse home-timer typography (heavy bold, layered shadow, liquid-glass at night) */
+#zen-time{
+  font-size:clamp(120px,18vw,260px);
+  font-weight:700;letter-spacing:-.05em;line-height:1;
+  color:var(--text);font-variant-numeric:tabular-nums;
+  text-shadow:
+    0 2px 0 rgba(255,255,255,.6),
+    0 4px 8px rgba(0,0,0,.13),
+    0 10px 28px rgba(0,0,0,.11),
+    0 24px 56px rgba(60,70,140,.10),
+    0 40px 100px rgba(40,50,120,.07);
+  display:block;width:100%;text-align:center;
+  /* enter animation */
+  opacity:0;transform:translateY(-26px) scale(.985);
+  transition:opacity .55s cubic-bezier(.4,0,.2,1) .12s,transform .7s cubic-bezier(.34,1.4,.64,1) .12s;
+}
+body.night #zen-time{
+  color:transparent;
+  -webkit-background-clip:text;background-clip:text;
+  background-image:linear-gradient(168deg,
+    rgba(255,255,255,0.96) 0%,rgba(240,248,255,0.82) 20%,
+    rgba(210,228,255,0.55) 38%,rgba(190,215,255,0.28) 55%,
+    rgba(170,200,255,0.16) 70%,rgba(150,185,255,0.08) 85%,
+    rgba(130,165,255,0.04) 100%);
+  text-shadow:
+    0 0 50px rgba(180,210,255,0.40),
+    0 0 110px rgba(160,190,255,0.22),
+    0 0 180px rgba(120,160,255,0.14),
+    0 1px 0 rgba(255,255,255,0.12),
+    0 -1px 0 rgba(255,255,255,0.06);
+}
+#zen-fs.open #zen-time{opacity:1;transform:translateY(0) scale(1)}
+
+#zen-meta{
+  display:flex;align-items:baseline;gap:12px;margin-top:18px;justify-content:center;
+  opacity:0;transform:translateY(-10px);
+  transition:opacity .5s ease .28s,transform .5s ease .28s;
+}
+#zen-fs.open #zen-meta{opacity:1;transform:translateY(0)}
+#zen-lbl{font-family:'Geist Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--t3)}
+#zen-per{font-size:17px;font-weight:500;color:var(--text);letter-spacing:-.02em}
+#zen-room{font-family:'Geist Mono',monospace;font-size:13px;color:var(--t2)}
+
+#zen-prog-track{
+  width:min(460px,42vw);height:2px;background:rgba(0,0,0,.09);border-radius:10px;overflow:hidden;
+  margin-top:18px;
+  opacity:0;transform:scaleX(.6);transform-origin:center;
+  transition:opacity .5s ease .35s,transform .55s cubic-bezier(.34,1.4,.64,1) .35s;
+}
+body.night #zen-prog-track{background:rgba(255,255,255,.12)}
+#zen-fs.open #zen-prog-track{opacity:1;transform:scaleX(1)}
+#zen-prog-fill{height:100%;background:var(--text);border-radius:10px;transition:width 1s linear;width:0%}
+body.night #zen-prog-fill{background:rgba(255,255,255,.85)}
+
+#zen-quote{
+  margin-top:24px;text-align:center;max-width:min(480px,40vw);
+  opacity:0;transform:translateY(8px);
+  transition:opacity .55s ease .55s,transform .55s ease .55s;
+}
+#zen-fs.open #zen-quote{opacity:1;transform:translateY(0)}
+#zen-quote-text{font-size:13px;font-weight:300;color:var(--t2);letter-spacing:.01em;line-height:1.55;font-style:italic}
+#zen-quote-author{font-family:'Geist Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--t3);margin-top:6px}
+
+/* Stopwatch controls — only visible while stopwatch is active */
+#zen-sw-controls{
+  display:none;
+  margin-top:24px;gap:10px;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(8px);
+  transition:opacity .5s ease .65s,transform .5s ease .65s;
+}
+#zen-sw-controls.show{display:flex}
+#zen-fs.open #zen-sw-controls.show{opacity:1;transform:translateY(0)}
+.zen-sw-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 22px;border-radius:99px;cursor:none;
+  font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;
+  background:rgba(255,255,255,.55);border:1px solid rgba(0,0,0,.06);
+  color:var(--t2);
+  transition:background .15s,color .15s,transform .15s,border-color .15s;
+}
+.zen-sw-btn:hover{background:rgba(255,255,255,.92);color:var(--text);transform:translateY(-1px);border-color:rgba(0,0,0,.1)}
+body.night .zen-sw-btn{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:var(--t3)}
+body.night .zen-sw-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.2);color:#fff}
+.zen-sw-btn.primary{background:var(--text);border-color:var(--text);color:var(--bg)}
+.zen-sw-btn.primary:hover{background:var(--text);opacity:.85;color:var(--bg)}
+body.night .zen-sw-btn.primary{background:#fff;border-color:#fff;color:#0e0f12}
+.zen-sw-btn.stop{border-color:rgba(220,38,38,.3);color:#dc2626}
+.zen-sw-btn.stop:hover{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.5);color:#dc2626}
+body.night .zen-sw-btn.stop{border-color:rgba(248,113,113,.32);color:#f87171}
+body.night .zen-sw-btn.stop:hover{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.5);color:#fca5a5}
+.zen-sw-btn svg{width:13px;height:13px;display:block}
+
+/* Collapse circle — sits on the divider when sidebar is expanded. */
+#zen-collapse-btn{
+  position:absolute;top:50%;right:33.34%;z-index:11;
+  transform:translate(50%,-50%);
+  width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;padding:0;
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(0,0,0,.06);
+  box-shadow:0 4px 14px rgba(0,0,0,.08),0 1px 0 rgba(255,255,255,.92) inset;
+  color:var(--t2);cursor:none;
+  transition:opacity .22s ease,background .15s,color .15s,box-shadow .15s;
+}
+#zen-collapse-btn:hover{
+  background:rgba(255,255,255,.96);color:var(--text);
+  box-shadow:0 6px 18px rgba(0,0,0,.12);
+}
+body.night #zen-collapse-btn{background:rgba(28,30,40,.92);border-color:rgba(255,255,255,.12);color:var(--t3);box-shadow:0 4px 14px rgba(0,0,0,.4)}
+body.night #zen-collapse-btn:hover{background:rgba(38,40,50,.98);color:#fff}
+#zen-collapse-btn svg{width:14px;height:14px;display:block}
+
+/* Hidden when sidebar is collapsed — quick fade, no scale gymnastics */
+#zen-fs.collapsed #zen-collapse-btn{
+  opacity:0;
+  pointer-events:none;
+}
+
+/* Expand tab — sits on the right edge when collapsed, half-pill. */
+#zen-expand-btn{
+  position:absolute;top:50%;right:0;z-index:11;
+  width:28px;height:60px;
+  border-radius:16px 0 0 16px;
+  display:flex;align-items:center;justify-content:center;padding:0;
+  background:rgba(255,255,255,.82);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(0,0,0,.06);border-right:none;
+  box-shadow:-6px 0 18px rgba(0,0,0,.08);
+  color:var(--t2);cursor:none;
+  opacity:0;transform:translate(100%,-50%);
+  pointer-events:none;
+  transition:opacity .22s ease,transform .26s cubic-bezier(.4,0,.2,1),background .15s,color .15s;
+}
+#zen-expand-btn:hover{background:rgba(255,255,255,.98);color:var(--text)}
+body.night #zen-expand-btn{background:rgba(28,30,40,.95);border-color:rgba(255,255,255,.12);color:var(--t3);box-shadow:-6px 0 18px rgba(0,0,0,.4)}
+body.night #zen-expand-btn:hover{background:rgba(38,40,50,1);color:#fff}
+#zen-expand-btn svg{width:14px;height:14px;display:block}
+
+/* Visible when collapsed — slides in alongside the sidebar leaving, no delay */
+#zen-fs.collapsed #zen-expand-btn{
+  opacity:1;
+  transform:translate(0,-50%);
+  pointer-events:auto;
+}
+
+/* Sidebar slide animation — quick, smooth, no bounce */
+#zen-left{transition:flex-basis .26s cubic-bezier(.4,0,.2,1)}
+#zen-fs.collapsed #zen-left{flex-basis:100%}
+#zen-fs.open.collapsed #zen-right{
+  opacity:0;
+  transform:translateX(100%);
+  pointer-events:none;
+}
+
+/* Centiseconds (the .cc tail when stopwatch is the active source) sit smaller
+   and softer than the main mm:ss numbers — same visual hierarchy as the clock
+   widget's seconds. */
+#zen-time-ms{
+  font-size:.42em;font-weight:300;color:var(--t2);
+  letter-spacing:-.01em;margin-left:.05em;
+  vertical-align:baseline;display:inline-block;
+  /* Tabular nums so the digits don't jitter as they tick */
+  font-variant-numeric:tabular-nums;
+}
+body.night #zen-time-ms{color:var(--t3)}
+
+/* Right pane: scrolling tiles */
+#zen-right{
+  flex:1;position:relative;z-index:1;
+  border-left:1px solid rgba(0,0,0,.06);
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 70px,#000 calc(100% - 70px),transparent 100%);
+  mask-image:linear-gradient(180deg,transparent 0,#000 70px,#000 calc(100% - 70px),transparent 100%);
+  opacity:0;transform:translateX(40px);
+  /* One fast transition for entry + collapse + uncollapse — no stagger, no
+     bounce. Symmetric in both directions so toggling feels snappy. */
+  transition:opacity .24s cubic-bezier(.4,0,.2,1),transform .26s cubic-bezier(.4,0,.2,1);
+}
+body.night #zen-right{border-left-color:rgba(255,255,255,.06)}
+#zen-fs.open #zen-right{opacity:1;transform:translateX(0)}
+#zen-track{
+  display:flex;flex-direction:column;gap:16px;
+  padding:36px 36px;
+  will-change:transform;
+  animation:zen-scroll var(--zen-dur,60s) linear infinite;
+}
+#zen-right:hover #zen-track{animation-play-state:paused}
+@keyframes zen-scroll{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
+
+/* Tile = same glass-card aesthetic as the rest of the app */
+.zen-tile{
+  background:rgba(255,255,255,.62);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.88);
+  box-shadow:0 8px 32px rgba(0,0,0,.06),0 1.5px 0 rgba(255,255,255,.92) inset;
+  border-radius:18px;
+  padding:16px 18px;
+  flex-shrink:0;
+}
+body.night .zen-tile{
+  background:rgba(22,23,30,.72);
+  border-color:rgba(255,255,255,.08);
+  box-shadow:0 8px 32px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.06) inset;
+}
+.zen-tile-head{
+  display:flex;align-items:center;gap:8px;margin-bottom:10px;
+  font-family:'Geist Mono',monospace;font-size:10px;color:var(--t3);
+  text-transform:uppercase;letter-spacing:.14em;
+}
+.zen-tile-head .zen-tile-icon{width:6px;height:6px;border-radius:50%;background:#60a5fa}
+.zen-tile-row{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:8px 0;font-size:13.5px;line-height:1.35;color:var(--text);
+  border-top:1px solid rgba(0,0,0,.05);
+}
+body.night .zen-tile-row{border-top-color:rgba(255,255,255,.05)}
+.zen-tile-row:first-of-type{border-top:none;padding-top:2px}
+.zen-tile-meta{
+  font-size:10px;font-family:'Geist Mono',monospace;color:var(--t3);
+  margin-top:2px;letter-spacing:.02em;
+}
+.zen-tile-bullet{
+  width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:7px;background:var(--t3);
+}
+.zen-tile-empty{font-size:12px;color:var(--t3);font-style:italic}
+.zen-tile-overdue{color:#dc2626}
+body.night .zen-tile-overdue{color:#f87171}
+
 #cw-time{
   font-size:30px;font-weight:400;letter-spacing:-.04em;line-height:1;
   font-variant-numeric:tabular-nums;color:var(--text);
@@ -1381,6 +1791,7 @@ body.night .sw-float-btn:hover{background:rgba(255,255,255,.16)}
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
   width:100%;
+  position:relative;
 }
 /* Big centred countdown */
 .home-timer{
@@ -2371,18 +2782,6 @@ body.night .sw-fs-btn:hover{background:rgba(255,255,255,.14);color:var(--text)}
 .ffs-done-btn:hover{background:rgba(255,255,255,.22);color:#fff}
 
 /* ── STOPWATCH FULLSCREEN ─────────────────────────────── */
-#sw-fs{position:fixed;inset:0;z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(9,10,14,.97);-webkit-backdrop-filter:blur(40px);backdrop-filter:blur(40px)}
-#sw-fs.open{display:flex}
-#sw-fs-subj{font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:.18em;color:rgba(255,255,255,.28);text-transform:uppercase;margin-bottom:16px}
-#sw-fs-time{font-size:clamp(80px,14vw,170px);font-weight:200;letter-spacing:-.06em;font-variant-numeric:tabular-nums;color:#fff;line-height:1}
-#sw-fs-status{font-size:10px;font-family:'Geist Mono',monospace;letter-spacing:.2em;color:rgba(255,255,255,.2);text-transform:uppercase;margin-top:14px;margin-bottom:32px}
-#sw-fs-controls{display:flex;gap:10px;align-items:center}
-.swfs-btn{display:flex;align-items:center;gap:7px;padding:10px 22px;border-radius:40px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);cursor:none;font-size:11px;font-family:'Geist Mono',monospace;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.1em;transition:all .18s}
-.swfs-btn:hover{background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.28)}
-.swfs-btn.primary{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.28);color:rgba(255,255,255,.85)}
-.swfs-btn.stop-log{border-color:rgba(80,200,120,.3);color:rgba(120,220,150,.8)}
-.swfs-btn.stop-log:hover{background:rgba(80,200,120,.1);border-color:rgba(80,200,120,.5);color:#86efac}
-.swfs-esc{position:absolute;top:22px;right:26px;font-size:10px;font-family:'Geist Mono',monospace;letter-spacing:.12em;color:rgba(255,255,255,.18);text-transform:uppercase}
 
 /* HOMEWORK */
 .hw-filters{display:flex;gap:4px;margin-bottom:12px}
@@ -2739,6 +3138,26 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
   </div>
 </div>
 
+<!-- ZEN MODE CONFIRM MODAL -->
+<div id="zen-confirm" class="modal-bg">
+  <div class="modal-box" style="max-width:380px">
+    <div class="zen-confirm-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M3 9V3h6"/><path d="M21 9V3h-6"/><path d="M3 15v6h6"/><path d="M21 15v6h-6"/></svg>
+    </div>
+    <div class="zen-confirm-h">Enter Zen mode?</div>
+    <div class="zen-confirm-p">Stream will go fullscreen with a focus timer on the left and your reminders, homework, events and exams scrolling on the right — designed to keep on your screen during class.</div>
+    <div class="zen-confirm-hint">Press <kbd>Esc</kbd> any time to exit.</div>
+    <div class="zen-confirm-actions">
+      <button class="zen-confirm-cancel" type="button" id="zen-confirm-cancel">Not now</button>
+      <button class="zen-confirm-go" type="button" id="zen-confirm-go">Enter Zen mode</button>
+    </div>
+    <label class="zen-confirm-skip" for="zen-confirm-skip-cb">
+      <input type="checkbox" id="zen-confirm-skip-cb" />
+      <span>Don't show this again</span>
+    </label>
+  </div>
+</div>
+
 <!-- RESET CONFIRM MODAL -->
 <div id="reset-modal" class="modal-bg">
   <div class="modal-box" style="text-align:center;max-width:340px">
@@ -2873,6 +3292,44 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
 <div id="clock-widget">
   <div id="cw-time">00:00<span id="cw-secs">:00</span></div>
   <div id="cw-date">Tuesday</div>
+</div>
+
+<!-- Zen mode fullscreen overlay -->
+<div id="zen-fs">
+  <button id="zen-close" type="button" title="Exit Zen mode (Esc)">✕</button>
+  <button id="zen-collapse-btn" type="button" title="Hide widgets" aria-label="Collapse sidebar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+  </button>
+  <button id="zen-expand-btn" type="button" title="Show widgets" aria-label="Expand sidebar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+  </button>
+  <div id="zen-left">
+    <div id="zen-mode-badge">zen mode</div>
+    <div id="zen-time"><span id="zen-time-main">--:--</span><span id="zen-time-ms"></span></div>
+    <div id="zen-meta">
+      <div id="zen-lbl">—</div>
+      <div id="zen-per">—</div>
+      <div id="zen-room"></div>
+    </div>
+    <div id="zen-prog-track"><div id="zen-prog-fill"></div></div>
+    <div id="zen-quote">
+      <div id="zen-quote-text"></div>
+      <div id="zen-quote-author"></div>
+    </div>
+    <div id="zen-sw-controls">
+      <button class="zen-sw-btn primary" id="zen-sw-toggle" type="button">
+        <svg viewBox="0 0 24 24" fill="currentColor" id="zen-sw-toggle-icon"><polygon points="5,3 19,12 5,21"/></svg>
+        <span id="zen-sw-toggle-lbl">Resume</span>
+      </button>
+      <button class="zen-sw-btn stop" id="zen-sw-stop" type="button">
+        <svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="1.5"/></svg>
+        Stop &amp; log
+      </button>
+    </div>
+  </div>
+  <div id="zen-right">
+    <div id="zen-track"></div>
+  </div>
 </div>
 
 <!-- Floating stopwatch widget — appears when SW is running and user leaves study page -->
@@ -3225,7 +3682,12 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
       <div class="h-name" id="h-name">Daniel.</div>
     </div>
     <div class="home-timer-wrap">
-      <div class="home-timer" id="h-timer">--:--</div>
+      <div class="home-timer-frame">
+        <div class="home-timer" id="h-timer">--:--</div>
+        <button id="zen-btn" type="button" title="Zen mode (fullscreen)" aria-label="Activate Zen mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9V3h6"/><path d="M21 9V3h-6"/><path d="M3 15v6h6"/><path d="M21 15v6h-6"/></svg>
+        </button>
+      </div>
       <div class="h-meta-row">
         <div class="h-meta-label" id="h-lbl">next period</div>
         <div class="h-meta-period" id="h-per">—</div>
@@ -4404,7 +4866,7 @@ function drawCursor(t,scale){
     dCtx.closePath();
   }
 
-  const fsOpen=document.getElementById('focus-fs')?.classList.contains('open')||document.getElementById('sw-fs')?.classList.contains('open');
+  const fsOpen=document.getElementById('focus-fs')?.classList.contains('open');
   const cursorColor=fsOpen?'rgba(255,255,255,0.85)':document.body.classList.contains('night')?'rgba(240,240,255,1)':'rgba(15,15,15,1)';
   dCtx.fillStyle=cursorColor;
   dCtx.fill();
@@ -4449,7 +4911,7 @@ function drawCursor(t,scale){
     // Width: thicker when moving fast, thinner when slow
     const maxW=Math.min(5.5,1.8+speed*0.18);
     // Night mode: white trail; day: dark trail
-    const _fsOpen=document.getElementById('focus-fs')?.classList.contains('open')||document.getElementById('sw-fs')?.classList.contains('open');
+    const _fsOpen=document.getElementById('focus-fs')?.classList.contains('open');
     const trailRGB=_fsOpen?'255,255,255':document.body.classList.contains('night')?'245,245,255':'15,15,15';
 
     // Draw trail as a series of line segments with lineWidth tapering head→tail
@@ -4666,6 +5128,7 @@ function tick(){
   }
   if(curPage==='cal')renderExamList();
   updateTabTitle();
+  if(typeof zenSyncTimer==='function')zenSyncTimer();
 }
 setInterval(tick,1000);
 
@@ -6830,60 +7293,14 @@ function swSetMode(mode,el){
   curSwMode=mode;
 }
 
-/* ════ STOPWATCH FULLSCREEN ════════════════════════════ */
-let swFsOpen=false,swFsTimer=null;
+/* The stopwatch widget's "fullscreen" icon now launches Zen mode directly —
+   the legacy sw-fs overlay was retired in favour of the unified Zen view, which
+   already shows live stopwatch state via zenSyncTimer + the in-zen control row. */
 function swOpenFs(){
   if(curSwMode==='focus'){ftBegin();return;}
-  const el=document.getElementById('sw-fs');
-  if(!el)return;
-  swFsOpen=true;
-  el.classList.add('open');
-  document.body.style.overflow='hidden';
-  swFsSyncAll();
-  if(swFsTimer)clearInterval(swFsTimer);
-  swFsTimer=setInterval(swFsSyncAll,500);
-}
-function swCloseFs(){
-  const el=document.getElementById('sw-fs');
-  if(!el)return;
-  swFsOpen=false;
-  el.classList.remove('open');
-  document.body.style.overflow='';
-  if(swFsTimer){clearInterval(swFsTimer);swFsTimer=null;}
-  // sync back to card
-  swFloatSync();
-}
-function swFsSyncAll(){
-  const ms=swElapsed+(swRunning?Date.now()-swStart:0);
-  const s=Math.floor(ms/1000),m=Math.floor(s/60),h=Math.floor(m/60);
-  const pad=n=>String(n).padStart(2,'0');
-  document.getElementById('sw-fs-time').textContent=`${pad(h)}:${pad(m%60)}:${pad(s%60)}`;
-  document.getElementById('sw-fs-status').textContent=swRunning?'running':ms>0?'paused':'ready';
-  const subj=document.getElementById('lg-subj')?document.getElementById('lg-subj').value:'';
-  document.getElementById('sw-fs-subj').textContent=subj||'';
-  const icon=document.getElementById('sw-fs-icon');
-  const lbl=document.getElementById('sw-fs-lbl');
-  if(swRunning){
-    if(icon)icon.innerHTML='<rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/>';
-    if(lbl)lbl.textContent='Pause';
-  }else{
-    if(icon)icon.innerHTML='<polygon points="5,3 19,12 5,21"/>';
-    if(lbl)lbl.textContent=ms>0?'Resume':'Start';
-  }
-  const stopBtn=document.getElementById('sw-fs-stop-btn');
-  if(stopBtn)stopBtn.style.display=ms>0?'':'none';
-}
-function swFsToggle(){
-  swToggle();swFsSyncAll();
-}
-function swFsStop(){
-  swStop();
-  // Sync display
-  document.getElementById('sw-fs-time').textContent='00:00:00';
-  document.getElementById('sw-fs-status').textContent='ready';
-  const icon=document.getElementById('sw-fs-icon');if(icon)icon.innerHTML='<polygon points="5,3 19,12 5,21"/>';
-  const lbl=document.getElementById('sw-fs-lbl');if(lbl)lbl.textContent='Start';
-  const stopBtn=document.getElementById('sw-fs-stop-btn');if(stopBtn)stopBtn.style.display='none';
+  // Skip the confirm dialog here — the user is already actively studying, so
+  // friction from another modal isn't useful. zenEnter handles fullscreen + UI.
+  zenEnter();
 }
 
 /* ════ FOCUS TIMER ══════════════════════════════════════ */
@@ -7800,7 +8217,6 @@ document.addEventListener('keydown',e=>{
   const modalOpen=document.getElementById('qm').classList.contains('open')||document.getElementById('rm').classList.contains('open')||document.getElementById('hw-modal').classList.contains('open');
   if(e.key==='Escape'){
     if(document.getElementById('focus-fs').classList.contains('open')){ftEnd();return;}
-    if(document.getElementById('sw-fs').classList.contains('open')){swCloseFs();return;}
     if(document.getElementById('settings-overlay')?.classList.contains('open')){closeSettings();return;}
     if(document.getElementById('fr-detail')?.classList.contains('open')){frCloseDetail();return;}
     if(document.getElementById('fr-add-modal')?.classList.contains('open')){frCloseAdd();return;}
@@ -11101,6 +11517,450 @@ function syncMobileNav(){
   }
 })();
 
+/* ════ ZEN MODE ══════════════════════════════════════════
+   Fullscreen overlay: big timer left, auto-scrolling tiles
+   right. The timer routes between focus timer / stopwatch /
+   period countdown — whichever is currently active. The
+   tile column is duplicated so the CSS marquee loops
+   seamlessly; the per-second tick keeps the timer fresh.
+═════════════════════════════════════════════════════════ */
+// var (not let) so these bindings are hoisted + pre-initialized to undefined.
+// tick() is called synchronously during boot — before the script reaches this
+// line — and tick reads _zenActive via zenSyncTimer; with let it'd hit a TDZ
+// ReferenceError on every early tick.
+var _zenActive=false;
+var _zenLastTilesHash='';
+var _zenTilesT=null;
+
+function zenEnter(){
+  try{
+    if(_zenActive)return;
+    _zenActive=true;
+    const fs=document.getElementById('zen-fs');if(!fs)return;
+    // Sidebar defaults to hidden — only expand if the user previously chose to.
+    try{
+      const stored=localStorage.getItem('st_zen_collapsed');
+      const wasCollapsed=(stored==null)?true:(stored==='1');
+      fs.classList.toggle('collapsed',wasCollapsed);
+    }catch{fs.classList.add('collapsed');}
+    try{_zenSetQuote();}catch{}
+    try{zenSyncTimer();}catch{}
+    try{zenRenderTiles(true);}catch{}
+    // Add .open on the next frame so the transition runs from the initial
+    // (closed) styles → open styles instead of snapping.
+    requestAnimationFrame(()=>fs.classList.add('open'));
+    // Request browser fullscreen. Must be invoked from the synchronous click
+    // gesture stack; wrapped in try/catch since iframes / locked-down contexts
+    // may reject it.
+    try{
+      const el=document.documentElement;
+      const req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen||el.msRequestFullscreen;
+      const already=document.fullscreenElement||document.webkitFullscreenElement;
+      if(req&&!already){const r=req.call(el);if(r&&r.catch)r.catch(()=>{});}
+    }catch{}
+    // Periodic re-render — picks up new homework / reminders / events without
+    // wiring sv() into a bus. 12s is rare enough that the animation reset isn't
+    // distracting and frequent enough that the column stays current.
+    if(_zenTilesT)clearInterval(_zenTilesT);
+    _zenTilesT=setInterval(()=>{try{zenRenderTiles(false);}catch{}},12000);
+  }catch(err){
+    console.error('zenEnter failed:',err);
+  }
+}
+
+// Confirm modal helpers — open/close use the existing .modal-bg/.open pattern
+// so the same blur+scale-in animation as every other modal in Stream applies.
+function zenOpenConfirm(){
+  // If user previously ticked "Don't show this again", bypass the modal and
+  // launch zen directly. The flag is set on the same click that confirms.
+  try{
+    if(localStorage.getItem('st_zen_skip_confirm')==='1'){zenEnter();return;}
+  }catch{}
+  const m=document.getElementById('zen-confirm');if(!m)return;
+  // Reset the checkbox each time so a stray previous tick doesn't carry over
+  const cb=document.getElementById('zen-confirm-skip-cb');if(cb)cb.checked=false;
+  m.classList.add('open');
+  // Focus the primary button so Enter/Space immediately confirms
+  setTimeout(()=>{const b=document.getElementById('zen-confirm-go');if(b)b.focus();},80);
+}
+function zenCloseConfirm(){
+  const m=document.getElementById('zen-confirm');if(!m)return;
+  m.classList.remove('open');
+}
+
+// Wire all zen-related controls via addEventListener (more robust than inline
+// onclick when other global click handlers fire first, e.g. fancy-cursor).
+(function _zenWireBtn(){
+  const wire=()=>{
+    const btn=document.getElementById('zen-btn');
+    if(btn&&!btn._zenWired){
+      btn._zenWired=true;
+      btn.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();zenOpenConfirm();});
+    }
+    const close=document.getElementById('zen-close');
+    if(close&&!close._zenWired){
+      close._zenWired=true;
+      close.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();zenExit();});
+    }
+    const go=document.getElementById('zen-confirm-go');
+    if(go&&!go._zenWired){
+      go._zenWired=true;
+      go.addEventListener('click',ev=>{
+        ev.preventDefault();ev.stopPropagation();
+        // Persist "don't show again" preference if the user ticked it
+        const cb=document.getElementById('zen-confirm-skip-cb');
+        if(cb&&cb.checked){try{localStorage.setItem('st_zen_skip_confirm','1');}catch{}}
+        zenCloseConfirm();
+        zenEnter();
+      });
+    }
+    const cancel=document.getElementById('zen-confirm-cancel');
+    if(cancel&&!cancel._zenWired){
+      cancel._zenWired=true;
+      cancel.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();zenCloseConfirm();});
+    }
+    // Click on backdrop (outside the .modal-box) dismisses too
+    const m=document.getElementById('zen-confirm');
+    if(m&&!m._zenWired){
+      m._zenWired=true;
+      m.addEventListener('click',ev=>{if(ev.target===m)zenCloseConfirm();});
+    }
+    const collapseBtn=document.getElementById('zen-collapse-btn');
+    if(collapseBtn&&!collapseBtn._zenWired){
+      collapseBtn._zenWired=true;
+      collapseBtn.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();zenToggleCollapse();});
+    }
+    const expandBtn=document.getElementById('zen-expand-btn');
+    if(expandBtn&&!expandBtn._zenWired){
+      expandBtn._zenWired=true;
+      expandBtn.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();zenToggleCollapse();});
+    }
+    const swToggleBtn=document.getElementById('zen-sw-toggle');
+    if(swToggleBtn&&!swToggleBtn._zenWired){
+      swToggleBtn._zenWired=true;
+      swToggleBtn.addEventListener('click',ev=>{
+        ev.preventDefault();ev.stopPropagation();
+        if(typeof swToggle==='function')swToggle();
+        _zenSyncSwControls();
+      });
+    }
+    const swStopBtn=document.getElementById('zen-sw-stop');
+    if(swStopBtn&&!swStopBtn._zenWired){
+      swStopBtn._zenWired=true;
+      swStopBtn.addEventListener('click',ev=>{
+        ev.preventDefault();ev.stopPropagation();
+        if(typeof swStop==='function')swStop();
+        _zenSyncSwControls();
+      });
+    }
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);
+  else wire();
+})();
+
+function zenExit(){
+  if(!_zenActive)return;
+  _zenActive=false;
+  const fs=document.getElementById('zen-fs');if(fs)fs.classList.remove('open');
+  if(_zenTilesT){clearInterval(_zenTilesT);_zenTilesT=null;}
+  _zenStopSwTick();
+  // Leave browser fullscreen if we entered it. Wrapped in try/catch since it
+  // throws when nothing is fullscreen, and ignore the promise rejection that
+  // some browsers fire if user already exited via ESC.
+  try{
+    const exit=document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen||document.msExitFullscreen;
+    const inFs=document.fullscreenElement||document.webkitFullscreenElement;
+    if(exit&&inFs){const r=exit.call(document);if(r&&r.catch)r.catch(()=>{});}
+  }catch{}
+}
+
+document.addEventListener('keydown',ev=>{
+  if(ev.key!=='Escape')return;
+  if(_zenActive){zenExit();return;}
+  const m=document.getElementById('zen-confirm');
+  if(m&&m.classList.contains('open')){zenCloseConfirm();}
+});
+
+// If the user leaves browser fullscreen (ESC or other) while zen is open,
+// close zen too so the overlay doesn't linger on a non-fullscreen window.
+['fullscreenchange','webkitfullscreenchange'].forEach(ev=>{
+  document.addEventListener(ev,()=>{
+    const inFs=!!(document.fullscreenElement||document.webkitFullscreenElement);
+    if(!inFs&&_zenActive)zenExit();
+  });
+});
+
+function _zenPad(n){return String(n).padStart(2,'0');}
+function _zenFmtMs(ms){
+  const s=Math.max(0,Math.floor(ms/1000));
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+  return h>0?`${h}:${_zenPad(m)}:${_zenPad(sec)}`:`${_zenPad(m)}:${_zenPad(sec)}`;
+}
+
+// Pick the right "big timer" source: focus timer if running, else stopwatch
+// if running, else countdown to next period — same priority as updateTabTitle.
+// Updates the timer (main + ms spans), the meta row, and the progress bar to
+// mirror the home screen exactly. Also toggles the in-zen stopwatch controls
+// + the centisecond raf tick based on whether the stopwatch is active.
+function zenSyncTimer(){
+  if(!_zenActive)return;
+  const mainEl=document.getElementById('zen-time-main');
+  const msEl=document.getElementById('zen-time-ms');
+  const lblEl=document.getElementById('zen-lbl');
+  const perEl=document.getElementById('zen-per');
+  const roomEl=document.getElementById('zen-room');
+  const progEl=document.getElementById('zen-prog-fill');
+  if(!mainEl||!msEl||!lblEl||!perEl||!roomEl||!progEl)return;
+  // Show stopwatch controls only when the stopwatch is running OR has paused
+  // time on the clock. When it's freshly reset / hasn't started, hide them.
+  _zenSyncSwControls();
+  // 1. Focus timer
+  if(typeof ftRunning!=='undefined'&&ftRunning){
+    const remSecs=(typeof ftRemSecs!=='undefined'?ftRemSecs:0);
+    const m=Math.floor(remSecs/60),s=remSecs%60;
+    mainEl.textContent=`${_zenPad(m)}:${_zenPad(s)}`;
+    msEl.textContent='';
+    lblEl.textContent=ftPaused?'focus · paused':'focus remaining';
+    perEl.textContent='';roomEl.textContent='';
+    const total=(typeof ftTotalSecs!=='undefined'?ftTotalSecs:1)||1;
+    progEl.style.width=Math.min(100,((total-remSecs)/total)*100)+'%';
+    _zenStopSwTick();
+    return;
+  }
+  // 2. Stopwatch — needs centisecond updates, so kick off the raf loop.
+  //    The raf loop also writes the spans for sub-second precision; we just
+  //    seed an immediate update here so the display isn't stale.
+  if(typeof swRunning!=='undefined'&&(swRunning||(typeof swElapsed!=='undefined'&&swElapsed>0))){
+    _zenWriteSwTime();
+    lblEl.textContent=swRunning?'studying':'studying · paused';
+    perEl.textContent='';roomEl.textContent='';
+    progEl.style.width='0%';
+    if(swRunning)_zenStartSwTick();else _zenStopSwTick();
+    return;
+  }
+  _zenStopSwTick();
+  msEl.textContent='';
+  // 3. Period countdown — mirrors the dashboard tick logic precisely
+  try{
+    const{cur,nxt,weekend}=getCurNxt();
+    const now=new Date(),nm=toM(now.getHours(),now.getMinutes())+now.getSeconds()/60;
+    if(weekend){
+      mainEl.textContent='—';lblEl.textContent='no school';perEl.textContent='Weekend';
+      roomEl.textContent='';progEl.style.width='0%';return;
+    }
+    const ib=p=>!p||!p.subj;
+    if(cur){
+      const pe=toM(...cur.e),rem=pe-nm;
+      const rm=Math.floor(rem),rs=Math.round((rem-rm)*60);
+      const tot=pe-toM(...cur.s),el=nm-toM(...cur.s);
+      mainEl.textContent=`${_zenPad(rm)}:${_zenPad(rs)}`;
+      lblEl.textContent=ib(cur)?cur.l:'in session';
+      perEl.textContent=ib(cur)?cur.l:cur.subj;
+      roomEl.textContent=ib(cur)?'':(cur.room||'');
+      progEl.style.width=Math.min(el/tot*100,100)+'%';
+      return;
+    }
+    if(nxt){
+      const ps=toM(...nxt.s),rem=ps-nm;
+      const rm=Math.floor(rem),rs=Math.round((rem-rm)*60);
+      mainEl.textContent=`${_zenPad(rm)}:${_zenPad(rs)}`;
+      lblEl.textContent=ib(nxt)?'next up':'next period';
+      perEl.textContent=ib(nxt)?nxt.l:nxt.subj;
+      roomEl.textContent=ib(nxt)?'':(nxt.room||'');
+      progEl.style.width='0%';
+      return;
+    }
+    mainEl.textContent='done';lblEl.textContent='school ended';perEl.textContent='See you tomorrow';
+    roomEl.textContent='';progEl.style.width='100%';
+  }catch{
+    mainEl.textContent='--:--';lblEl.textContent='—';perEl.textContent='';roomEl.textContent='';
+    progEl.style.width='0%';
+  }
+}
+
+// Centisecond raf loop — runs only while the stopwatch is running. Writes the
+// main + ms spans every animation frame for buttery sub-second precision.
+var _zenSwRaf=null;
+function _zenWriteSwTime(){
+  const main=document.getElementById('zen-time-main');
+  const ms=document.getElementById('zen-time-ms');
+  if(!main||!ms)return;
+  if(typeof swRunning==='undefined')return;
+  const elapsed=(typeof swElapsed!=='undefined'?swElapsed:0);
+  const total=elapsed+(swRunning?(Date.now()-(typeof swStart!=='undefined'?swStart:0)):0);
+  const totalMs=Math.max(0,Math.floor(total));
+  const cs=Math.floor(totalMs/10)%100;
+  const totalS=Math.floor(totalMs/1000);
+  const s=totalS%60,m=Math.floor(totalS/60)%60,h=Math.floor(totalS/3600);
+  const pad=n=>String(n).padStart(2,'0');
+  main.textContent=h>0?`${h}:${pad(m)}:${pad(s)}`:`${pad(m)}:${pad(s)}`;
+  ms.textContent=`.${pad(cs)}`;
+}
+function _zenStartSwTick(){
+  if(_zenSwRaf)return;
+  const loop=()=>{
+    if(!_zenActive||typeof swRunning==='undefined'||!swRunning){_zenSwRaf=null;return;}
+    _zenWriteSwTime();
+    _zenSwRaf=requestAnimationFrame(loop);
+  };
+  _zenSwRaf=requestAnimationFrame(loop);
+}
+function _zenStopSwTick(){
+  if(_zenSwRaf){cancelAnimationFrame(_zenSwRaf);_zenSwRaf=null;}
+}
+
+// Sync the in-zen stopwatch control row: visible only when stopwatch has
+// non-zero state. Updates the play/pause button label + icon to match the
+// running/paused state.
+function _zenSyncSwControls(){
+  const ctrl=document.getElementById('zen-sw-controls');
+  if(!ctrl)return;
+  const running=(typeof swRunning!=='undefined')&&swRunning;
+  const elapsed=(typeof swElapsed!=='undefined')?swElapsed:0;
+  const ms=elapsed+(running?Date.now()-(typeof swStart!=='undefined'?swStart:0):0);
+  const active=running||ms>0;
+  ctrl.classList.toggle('show',!!active);
+  if(!active)return;
+  const icon=document.getElementById('zen-sw-toggle-icon');
+  const lbl=document.getElementById('zen-sw-toggle-lbl');
+  if(running){
+    if(icon)icon.innerHTML='<rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/>';
+    if(lbl)lbl.textContent='Pause';
+  }else{
+    if(icon)icon.innerHTML='<polygon points="5,3 19,12 5,21"/>';
+    if(lbl)lbl.textContent='Resume';
+  }
+}
+
+// Toggle whether the right-column widgets are visible. Persists to localStorage
+// so the preference survives across sessions.
+function zenToggleCollapse(){
+  const fs=document.getElementById('zen-fs');if(!fs)return;
+  const collapsed=!fs.classList.contains('collapsed');
+  fs.classList.toggle('collapsed',collapsed);
+  try{localStorage.setItem('st_zen_collapsed',collapsed?'1':'0');}catch{}
+  // After collapsing/expanding, the right track measures differently — recompute
+  // the marquee duration so it stays smooth.
+  if(!collapsed){requestAnimationFrame(()=>{try{zenRenderTiles(true);}catch{}});}
+}
+
+// Pick a random quote for the zen overlay. Same QUOTES array used by the home
+// screen — we just sample independently each entry so it's a fresh moment.
+function _zenSetQuote(){
+  if(typeof QUOTES==='undefined')return;
+  const q=QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  const t=document.getElementById('zen-quote-text');
+  const a=document.getElementById('zen-quote-author');
+  if(t)t.textContent=`"${q.q}"`;
+  if(a)a.textContent=`— ${q.a}`;
+}
+
+// Build the right-column track. Render once into a string, hash it, and only
+// swap if it actually changed — keeps the marquee continuous when the data
+// hasn't moved.
+function zenRenderTiles(forceReplace){
+  const track=document.getElementById('zen-track');if(!track)return;
+  const html=_zenBuildTilesHTML();
+  if(html===_zenLastTilesHash&&!forceReplace)return;
+  _zenLastTilesHash=html;
+  // Duplicate content so translateY(-50%) lands at the start of the second copy
+  track.innerHTML=html+html;
+  // Restart animation (style recalc forces CSS to pick up new keyframe range)
+  requestAnimationFrame(()=>{
+    const half=track.scrollHeight/2;
+    const px_per_sec=32;
+    const dur=Math.max(25,Math.round(half/px_per_sec));
+    track.style.setProperty('--zen-dur',dur+'s');
+    track.style.animation='none';
+    void track.offsetHeight;
+    track.style.animation='';
+  });
+}
+
+function _zenBuildTilesHTML(){
+  const out=[];
+  const today=new Date(),td=today.toISOString().split('T')[0];
+  // Today's schedule
+  const dow=today.getDay();
+  if(dow>=1&&dow<=5&&typeof TT!=='undefined'){
+    const day=TT[DKEYS[dow]]||[];
+    const nm=toM(today.getHours(),today.getMinutes());
+    const upcoming=day.filter(p=>p.subj&&p.subj!=='roll call'&&toM(...p.e)>=nm);
+    const rows=upcoming.map(p=>{
+      const isNow=nm>=toM(...p.s)&&nm<toM(...p.e);
+      return`<div class="zen-tile-row${isNow?'':''}">
+        <div class="zen-tile-bullet" style="background:${isNow?'#60a5fa':'rgba(255,255,255,.4)'}"></div>
+        <div style="flex:1;min-width:0">
+          <div>${esc(p.subj)}</div>
+          <div class="zen-tile-meta">${p.s[0]}:${_zenPad(p.s[1])} – ${p.e[0]}:${_zenPad(p.e[1])}${p.room?' · '+esc(p.room):''}${isNow?' · now':''}</div>
+        </div>
+      </div>`;
+    }).join('');
+    out.push(`<div class="zen-tile">
+      <div class="zen-tile-head"><span class="zen-tile-icon"></span>today's schedule</div>
+      ${rows||'<div class="zen-tile-empty">No more periods today.</div>'}
+    </div>`);
+  }
+  // Reminders
+  const remsList=(typeof rems!=='undefined'?rems:[]).filter(r=>!r.done).slice(0,8);
+  out.push(`<div class="zen-tile">
+    <div class="zen-tile-head"><span class="zen-tile-icon" style="background:#f59e0b"></span>reminders</div>
+    ${remsList.length?remsList.map(r=>`<div class="zen-tile-row">
+      <div class="zen-tile-bullet" style="background:#f59e0b"></div>
+      <div style="flex:1;min-width:0">${esc(r.text||r.task||'')}</div>
+    </div>`).join(''):'<div class="zen-tile-empty">All clear.</div>'}
+  </div>`);
+  // Homework
+  const hwList=(typeof hw!=='undefined'?hw:[]).filter(h=>!h.done).slice(0,8);
+  out.push(`<div class="zen-tile">
+    <div class="zen-tile-head"><span class="zen-tile-icon" style="background:#16a34a"></span>homework</div>
+    ${hwList.length?hwList.map(h=>{
+      const overdue=h.due&&h.due<td;
+      return`<div class="zen-tile-row">
+        <div class="zen-tile-bullet" style="background:#16a34a"></div>
+        <div style="flex:1;min-width:0">
+          <div>${esc(h.task||'')}</div>
+          ${h.due?`<div class="zen-tile-meta${overdue?' zen-tile-overdue':''}">${overdue?'overdue · ':'due '}${esc(h.due)}${h.subj?' · '+esc(h.subj):''}</div>`:h.subj?`<div class="zen-tile-meta">${esc(h.subj)}</div>`:''}
+        </div>
+      </div>`;
+    }).join(''):'<div class="zen-tile-empty">Nothing pending.</div>'}
+  </div>`);
+  // Today's events
+  if(typeof getEventsForDate==='function'){
+    const todayEvs=getEventsForDate(td).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+    out.push(`<div class="zen-tile">
+      <div class="zen-tile-head"><span class="zen-tile-icon" style="background:#9333ea"></span>today's events</div>
+      ${todayEvs.length?todayEvs.map(e=>`<div class="zen-tile-row">
+        <div class="zen-tile-bullet" style="background:${e.color||'#9333ea'}"></div>
+        <div style="flex:1;min-width:0">
+          <div>${esc(e.name||'')}</div>
+          <div class="zen-tile-meta">${e.time||'all day'}${e.subj?' · '+esc(e.subj):''}</div>
+        </div>
+      </div>`).join(''):'<div class="zen-tile-empty">Nothing on today.</div>'}
+    </div>`);
+  }
+  // Upcoming exams
+  const upcomingExams=(typeof exams!=='undefined'?exams:[])
+    .filter(ex=>new Date(ex.date+'T09:00:00')>=today)
+    .sort((a,b)=>a.date.localeCompare(b.date))
+    .slice(0,5);
+  out.push(`<div class="zen-tile">
+    <div class="zen-tile-head"><span class="zen-tile-icon" style="background:#dc2626"></span>upcoming exams</div>
+    ${upcomingExams.length?upcomingExams.map(ex=>{
+      const dt=new Date(ex.date+'T09:00:00');
+      const days=Math.ceil((dt-today)/86400000);
+      return`<div class="zen-tile-row">
+        <div class="zen-tile-bullet" style="background:#dc2626"></div>
+        <div style="flex:1;min-width:0">
+          <div>${esc(ex.subj||ex.name||'exam')}</div>
+          <div class="zen-tile-meta">${days<=0?'today':days===1?'tomorrow':days+' days'} · ${esc(ex.date)}</div>
+        </div>
+      </div>`;
+    }).join(''):'<div class="zen-tile-empty">No exams coming up.</div>'}
+  </div>`);
+  return out.join('');
+}
+
 </script>
 <script>
 // ── PWA SERVICE WORKER REGISTRATION ──────────────────────
@@ -11174,26 +12034,5 @@ if('serviceWorker' in navigator){
   </div>
 </div>
 
-<!-- ── STOPWATCH FULLSCREEN ──────────────────────────── -->
-<div id="sw-fs">
-  <div class="swfs-esc">esc to exit</div>
-  <div id="sw-fs-subj"></div>
-  <div id="sw-fs-time">00:00:00</div>
-  <div id="sw-fs-status">ready</div>
-  <div id="sw-fs-controls">
-    <div class="swfs-btn primary" id="sw-fs-toggle-btn" onclick="swFsToggle()">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14" id="sw-fs-icon"><polygon points="5,3 19,12 5,21"/></svg>
-      <span id="sw-fs-lbl">Start</span>
-    </div>
-    <div class="swfs-btn stop-log" id="sw-fs-stop-btn" onclick="swFsStop()" style="display:none">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
-      Stop &amp; Log
-    </div>
-    <div class="swfs-btn" onclick="swCloseFs()">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="13" height="13"><path stroke-linecap="round" d="M9 9l6 6m0-6l-6 6m13-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      Minimise
-    </div>
-  </div>
-</div>
 </body>
 </html>
