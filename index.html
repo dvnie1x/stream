@@ -5045,6 +5045,15 @@ const SIC={
 const TT={monday:[],tuesday:[],wednesday:[],thursday:[],friday:[]};
 const DKEYS=['','monday','tuesday','wednesday','thursday','friday'];
 function toM(h,m){return h*60+m;}
+// MM:SS under an hour; H:MM:SS once it crosses 60 minutes. Hours unpadded so
+// "1:15:30" reads naturally instead of "01:15:30". Floors to whole seconds.
+function fmtCountdown(remSec){
+  let s=Math.max(0,Math.floor(remSec));
+  const h=Math.floor(s/3600);s-=h*3600;
+  const m=Math.floor(s/60);s-=m*60;
+  const p=n=>String(n).padStart(2,'0');
+  return h>0?`${h}:${p(m)}:${p(s)}`:`${p(m)}:${p(s)}`;
+}
 function getCurNxt(){
   const now=new Date(),nm=toM(now.getHours(),now.getMinutes())+now.getSeconds()/60,dow=now.getDay();
   if(dow<1||dow>5)return{cur:null,nxt:null,weekend:true};
@@ -5076,9 +5085,8 @@ function updateTabTitle(){
     if(!weekend&&nxt){
       const now=new Date(),nm=toM(now.getHours(),now.getMinutes())+now.getSeconds()/60;
       const rem=toM(...nxt.s)-nm;
-      const rm=Math.floor(rem),rs=Math.round((rem-rm)*60);
       const label=nxt.subj||nxt.l||'next period';
-      document.title=`${pad(rm)}:${pad(rs)} to ${label} | stream.`;
+      document.title=`${fmtCountdown(rem*60)} to ${label} | stream.`;
       return;
     }
   }catch(e){}
@@ -5103,25 +5111,50 @@ function tick(){
   const T=document.getElementById('h-timer'),L=document.getElementById('h-lbl'),P=document.getElementById('h-per'),R=document.getElementById('h-room'),G=document.getElementById('h-prog');
   if(!T)return;
   const{cur,nxt,weekend}=getCurNxt();
+  // Outside school (weekend or no periods left today): defer to calendar event
+  // countdown if an event is active or upcoming. School timetable always wins
+  // when in session, so a calendar event labelled "school" is ignored then.
+  if(!cur&&!nxt){
+    const calCd=(typeof getActiveCalCountdown==='function')?getActiveCalCountdown(now):null;
+    if(calCd){
+      const remSec=Math.max(0,calCd.remSec);
+      T.textContent=fmtCountdown(remSec);
+      if(calCd.type==='active'){
+        L.textContent='in progress';
+        P.textContent=calCd.ev.name||'event';
+        R.textContent=calCd.ev.endTime?`until ${calCd.ev.endTime}`:'';
+        const pct=calCd.totalSec>0?Math.max(0,remSec/calCd.totalSec):0;
+        G.style.width=Math.min(100,(1-pct)*100)+'%';
+      }else{
+        L.textContent='until '+(calCd.ev.name||'event');
+        P.textContent=calCd.ev.name||'event';
+        R.textContent=calCd.ev.time||'';
+        G.style.width='0%';
+      }
+      if(!pinnedSubj)updateSubjTile(null);
+      if(curPage==='cal')renderExamList();
+      updateTabTitle();
+      if(typeof zenSyncTimer==='function')zenSyncTimer();
+      return;
+    }
+  }
   if(weekend){T.textContent='—';L.textContent='no school';P.textContent='Weekend';R.textContent='';G.style.width='0%';if(!pinnedSubj)updateSubjTile(null);return;}
   const ib=p=>!p||!p.subj;
   if(cur){
     const pe=toM(...cur.e),rem=pe-nm;
-    const rm=Math.floor(rem),rs=Math.round((rem-rm)*60);
     const tot=pe-toM(...cur.s),el=nm-toM(...cur.s);
     L.textContent=ib(cur)?cur.l:'in session';
     P.textContent=ib(cur)?cur.l:cur.subj;
     R.textContent=ib(cur)?'':(cur.room||'');
-    T.textContent=`${String(rm).padStart(2,'0')}:${String(rs).padStart(2,'0')}`;
+    T.textContent=fmtCountdown(rem*60);
     G.style.width=Math.min(el/tot*100,100)+'%';
     if(!pinnedSubj)updateSubjTile(ib(cur)?null:cur.subj);
   }else if(nxt){
     const ps=toM(...nxt.s),rem=ps-nm;
-    const rm=Math.floor(rem),rs=Math.round((rem-rm)*60);
     L.textContent=ib(nxt)?'next up':'next period';
     P.textContent=ib(nxt)?nxt.l:nxt.subj;
     R.textContent=ib(nxt)?'':(nxt.room||'');
-    T.textContent=`${String(rm).padStart(2,'0')}:${String(rs).padStart(2,'0')}`;
+    T.textContent=fmtCountdown(rem*60);
     G.style.width='0%';if(!pinnedSubj)updateSubjTile(null);
   }else{
     T.textContent='done';L.textContent='school ended';P.textContent='See you tomorrow';R.textContent='';G.style.width='100%';if(!pinnedSubj)updateSubjTile(null);
@@ -5993,6 +6026,44 @@ function getEventsForDate(ds){
     }
   }
   return result;
+}
+
+// Outside-school countdown: returns the most relevant timed calendar event for
+// today — currently active (between start/end) takes precedence over upcoming.
+// Skips homework/exam markers (those have time:''). Callers must only invoke
+// when school is NOT in session (no current/next period) so timetable always
+// beats a calendar entry like "school" that overlaps school hours.
+function getActiveCalCountdown(now){
+  if(!now)now=new Date();
+  if(typeof getEventsForDate!=='function')return null;
+  const ds=(typeof localDateStr==='function')?localDateStr(now):
+    (now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'));
+  const todayEvs=getEventsForDate(ds).filter(e=>e.time&&!e.hwId&&!e.examId);
+  if(!todayEvs.length)return null;
+  const nm=toM(now.getHours(),now.getMinutes())+now.getSeconds()/60;
+  const parseHM=s=>{const[h,m]=String(s).split(':').map(Number);return h*60+(m||0);};
+  let active=null,activeEm=Infinity;
+  for(const e of todayEvs){
+    if(!e.endTime)continue;
+    const sm=parseHM(e.time),em=parseHM(e.endTime);
+    if(em<=sm)continue;
+    if(nm>=sm&&nm<em&&em<activeEm){active=e;activeEm=em;}
+  }
+  if(active){
+    const sm=parseHM(active.time),em=parseHM(active.endTime);
+    return{ev:active,type:'active',startM:sm,endM:em,totalSec:(em-sm)*60,remSec:(em-nm)*60};
+  }
+  let upcoming=null,upSm=Infinity;
+  for(const e of todayEvs){
+    const sm=parseHM(e.time);
+    if(sm>nm&&sm<upSm){upcoming=e;upSm=sm;}
+  }
+  if(upcoming){
+    const sm=parseHM(upcoming.time);
+    const em=upcoming.endTime?parseHM(upcoming.endTime):sm;
+    return{ev:upcoming,type:'upcoming',startM:sm,endM:em,totalSec:Math.max(0,(em-sm)*60),remSec:(sm-nm)*60};
+  }
+  return null;
 }
 
 /* ════ WEEK VIEW ════════════════════════════════════════ */
@@ -10995,6 +11066,30 @@ function mhUpdateCountdown(){
   const nm=toM(now.getHours(),now.getMinutes())+now.getSeconds()/60;
   const {cur,nxt,weekend}=getCurNxt();
 
+  // Outside school (weekend or no periods left today): defer to calendar event
+  // countdown if an event is active or upcoming. School timetable always wins
+  // when in session, so a calendar event labelled "school" is ignored then.
+  if(!cur&&!nxt){
+    const calCd=(typeof getActiveCalCountdown==='function')?getActiveCalCountdown(now):null;
+    if(calCd){
+      const remSec=Math.max(0,calCd.remSec);
+      timerEl.textContent=fmtCountdown(remSec);
+      if(calCd.type==='active'){
+        if(labelEl)labelEl.textContent=calCd.ev.name||'event';
+        if(subEl)subEl.textContent='in progress';
+        const pct=calCd.totalSec>0?Math.max(0,remSec/calCd.totalSec):0;
+        if(arcEl)arcEl.style.strokeDashoffset=(628*(1-pct)).toFixed(1);
+      }else{
+        if(labelEl)labelEl.textContent='until '+(calCd.ev.name||'event');
+        if(subEl)subEl.textContent=calCd.ev.time?`starts ${calCd.ev.time}`:'';
+        const pct=Math.min(1,remSec/3600);
+        if(arcEl)arcEl.style.strokeDashoffset=(628*pct).toFixed(1);
+      }
+      if(nextEl)nextEl.textContent='';
+      return;
+    }
+  }
+
   if(weekend){
     timerEl.textContent='——';
     if(labelEl)labelEl.textContent='weekend';
@@ -11007,9 +11102,7 @@ function mhUpdateCountdown(){
   if(cur){
     const totalMin=toM(...cur.e)-toM(...cur.s);
     const remSec=(toM(...cur.e)-nm)*60;
-    const remMin=Math.floor(remSec/60);
-    const remSecR=Math.floor(remSec%60);
-    timerEl.textContent=`${String(remMin).padStart(2,'0')}:${String(remSecR).padStart(2,'0')}`;
+    timerEl.textContent=fmtCountdown(remSec);
     if(labelEl)labelEl.textContent=cur.subj||'Current period';
     if(subEl)subEl.textContent=cur.room?`Room ${cur.room}`:'';
     const pct=Math.max(0,remSec/(totalMin*60));
@@ -11020,9 +11113,7 @@ function mhUpdateCountdown(){
     }
   }else if(nxt){
     const diffSec=(toM(...nxt.s)-nm)*60;
-    const diffMin=Math.floor(diffSec/60);
-    const diffSecR=Math.floor(diffSec%60);
-    timerEl.textContent=`${String(diffMin).padStart(2,'0')}:${String(diffSecR).padStart(2,'0')}`;
+    timerEl.textContent=fmtCountdown(diffSec);
     if(labelEl)labelEl.textContent='until next period';
     if(subEl)subEl.textContent=nxt.subj||'—';
     const pct=Math.min(1,diffSec/3600);
@@ -11393,7 +11484,7 @@ function syncMobileNav(){
   });
 }
 
-// Swipe detection on page-stack
+// Swipe detection on page-stackka
 (function(){
   let tx=0,ty=0,swiping=false;
   const PGS=['dash','cal','tt','study','friends'];
@@ -11744,6 +11835,27 @@ function zenSyncTimer(){
   try{
     const{cur,nxt,weekend}=getCurNxt();
     const now=new Date(),nm=toM(now.getHours(),now.getMinutes())+now.getSeconds()/60;
+    // Outside school: defer to calendar event countdown (mirrors tick).
+    if(!cur&&!nxt){
+      const calCd=(typeof getActiveCalCountdown==='function')?getActiveCalCountdown(now):null;
+      if(calCd){
+        const remSec=Math.max(0,calCd.remSec);
+        mainEl.textContent=fmtCountdown(remSec);
+        if(calCd.type==='active'){
+          lblEl.textContent='in progress';
+          perEl.textContent=calCd.ev.name||'event';
+          roomEl.textContent=calCd.ev.endTime?`until ${calCd.ev.endTime}`:'';
+          const pct=calCd.totalSec>0?Math.max(0,remSec/calCd.totalSec):0;
+          progEl.style.width=Math.min(100,(1-pct)*100)+'%';
+        }else{
+          lblEl.textContent='until '+(calCd.ev.name||'event');
+          perEl.textContent=calCd.ev.name||'event';
+          roomEl.textContent=calCd.ev.time||'';
+          progEl.style.width='0%';
+        }
+        return;
+      }
+    }
     if(weekend){
       mainEl.textContent='—';lblEl.textContent='no school';perEl.textContent='Weekend';
       roomEl.textContent='';progEl.style.width='0%';return;
@@ -11751,9 +11863,8 @@ function zenSyncTimer(){
     const ib=p=>!p||!p.subj;
     if(cur){
       const pe=toM(...cur.e),rem=pe-nm;
-      const rm=Math.floor(rem),rs=Math.round((rem-rm)*60);
       const tot=pe-toM(...cur.s),el=nm-toM(...cur.s);
-      mainEl.textContent=`${_zenPad(rm)}:${_zenPad(rs)}`;
+      mainEl.textContent=fmtCountdown(rem*60);
       lblEl.textContent=ib(cur)?cur.l:'in session';
       perEl.textContent=ib(cur)?cur.l:cur.subj;
       roomEl.textContent=ib(cur)?'':(cur.room||'');
@@ -11762,8 +11873,7 @@ function zenSyncTimer(){
     }
     if(nxt){
       const ps=toM(...nxt.s),rem=ps-nm;
-      const rm=Math.floor(rem),rs=Math.round((rem-rm)*60);
-      mainEl.textContent=`${_zenPad(rm)}:${_zenPad(rs)}`;
+      mainEl.textContent=fmtCountdown(rem*60);
       lblEl.textContent=ib(nxt)?'next up':'next period';
       perEl.textContent=ib(nxt)?nxt.l:nxt.subj;
       roomEl.textContent=ib(nxt)?'':(nxt.room||'');
