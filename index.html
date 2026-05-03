@@ -4518,7 +4518,7 @@ function renderTT(){
 ════════════════════════════════════════════════════════ */
 const SB_URL='https://wbbiqcdmkmydwshzvize.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiYmlxY2Rta215ZHdzaHp2aXplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDc1MzMsImV4cCI6MjA4OTkyMzUzM30.EACRq05DU5NErRKl8NY6MvrQNnDv9HbgqGDIX5-Wan8';
-const SB_SYNC_KEYS=['st_r5','st_e5','st_l5','st_p5','st_x5','st_hw','st_mb1','st_name','st_ics','st_friends','st_deleted_ids'];
+const SB_SYNC_KEYS=['st_r5','st_e5','st_l5','st_p5','st_x5','st_hw','st_mb1','st_name','st_ics','st_friends','st_deleted_ids','st_ical_creds','st_ical_home','st_ical_ov'];
 let sbUserId=null;
 let sbAuthToken=null;
 
@@ -4720,6 +4720,38 @@ function applyRemoteData(remote){
     }
     lbFriends=merged;
     localStorage.setItem('st_friends',JSON.stringify(lbFriends));
+  }
+  // Auto-restore Apple Calendar credentials from cloud
+  const remIcalCreds=get('st_ical_creds');
+  const remIcalHome=get('st_ical_home');
+  const remIcalOv=get('st_ical_ov');
+  if(remIcalOv){localStorage.setItem('st_ical_ov',JSON.stringify(remIcalOv));}
+  if(remIcalCreds&&remIcalCreds.appleId&&remIcalCreds.password){
+    const alreadySame=icalState==='connected'&&icalCreds&&icalCreds.appleId===remIcalCreds.appleId;
+    if(!alreadySame){
+      icalCreds=remIcalCreds;
+      icalHomeUrl=remIcalHome||'';
+      localStorage.setItem('st_ical_creds',JSON.stringify(icalCreds));
+      if(icalHomeUrl)localStorage.setItem('st_ical_home',icalHomeUrl);
+      icalState='connected';
+      // Fetch events in background — don't block render
+      setTimeout(()=>{
+        icalFetchCalendars().then(()=>icalFetchAllEvents()).then(()=>{
+          renderCal();if(calView==='week')renderWeekView();else if(calView==='day')renderDayView();
+          icalStartAutoRefresh();updateICalUI();
+          showToast('Apple Calendar restored');
+        }).catch(e=>{
+          console.warn('iCloud auto-restore failed:',e);
+          icalState='error';icalCreds=null;updateICalUI();
+        });
+      },800);
+    }
+  }else if(remIcalCreds===null&&icalState==='connected'){
+    // Disconnected on another device — silently clear here too
+    icalCreds=null;icalState='disconnected';icalCalendars=[];icalHomeUrl='';
+    localStorage.removeItem('st_ical_creds');localStorage.removeItem('st_ical_home');
+    evs=evs.filter(e=>!e.icalUid);sv('st_e5',evs);
+    updateICalUI();_icalUpdatePill(false);
   }
   if(window.innerWidth<=640){mhRenderHeroPanel();mhRenderRems();mhRenderHW();mhRenderCal();mhRenderExams();mhRenderTodayEvs();}
 }
@@ -6205,6 +6237,8 @@ async function icalConnect(appleId,password){
 
     localStorage.setItem('st_ical_creds',JSON.stringify(icalCreds));
     localStorage.setItem('st_ical_home',icalHomeUrl);
+    sbSet('st_ical_creds',icalCreds);
+    sbSet('st_ical_home',icalHomeUrl);
     icalState='connected';updateICalUI();icalStartAutoRefresh();
     renderCal();if(calView==='week')renderWeekView();else if(calView==='day')renderDayView();
     showToast('Connected to iCloud — '+evs.filter(e=>e.icalUid).length+' events imported');
@@ -6233,6 +6267,7 @@ function icalSaveOverride(icalUid,fields){
   const ov=JSON.parse(localStorage.getItem('st_ical_ov')||'{}');
   ov[icalUid]=Object.assign(ov[icalUid]||{},fields);
   localStorage.setItem('st_ical_ov',JSON.stringify(ov));
+  sbSet('st_ical_ov',ov);
 }
 function icalApplyOverrides(){
   const ov=JSON.parse(localStorage.getItem('st_ical_ov')||'{}');
@@ -6380,6 +6415,7 @@ function icalDisconnect(){
   if(!confirm('Disconnect Apple Calendar? iCloud events will be removed from stream.'))return;
   icalCreds=null;icalState='disconnected';icalCalendars=[];icalHomeUrl='';
   localStorage.removeItem('st_ical_creds');localStorage.removeItem('st_ical_home');
+  sbSet('st_ical_creds',null);sbSet('st_ical_home','');
   evs=evs.filter(e=>!e.icalUid);sv('st_e5',evs);
   updateICalUI();_icalUpdatePill(false);renderCal();if(calView==='week')renderWeekView();else if(calView==='day')renderDayView();
 }
