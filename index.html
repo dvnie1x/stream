@@ -3819,8 +3819,9 @@ body.night .sc-keys kbd{background:rgba(255,255,255,.09);border-color:rgba(255,2
     <div id="sync-title" style="font-weight:500;font-size:13px">Sync across devices</div>
     <div id="sync-sub" style="font-size:11px;color:var(--t3);margin-top:2px">Sign in to sync your data</div>
   </div>
-  <button id="manual-sync-btn" class="btn bd" onclick="manualSync()" style="flex-shrink:0;padding:7px 14px;font-size:12px;display:none">Sync</button>
-  <button class="btn bd" onclick="sbOpenModal()" style="flex-shrink:0;padding:7px 14px;font-size:12px">Sign in</button>
+  <button id="export-btn" class="btn bd" onclick="sbExportNow()" style="flex-shrink:0;padding:7px 12px;font-size:12px;display:none">↑ Export</button>
+  <button id="import-btn" class="btn bd" onclick="sbImportNow()" style="flex-shrink:0;padding:7px 12px;font-size:12px;display:none">↓ Import</button>
+  <button id="sync-badge-auth-btn" class="btn bd" onclick="sbOpenModal()" style="flex-shrink:0;padding:7px 14px;font-size:12px">Sign in</button>
   <div class="db" onclick="closeSyncBadge()" style="flex-shrink:0">✕</div>
 </div>
 
@@ -4755,16 +4756,52 @@ async function sbPushMissing(){
   }
 }
 
-async function manualSync(){
-  const btn=document.getElementById('manual-sync-btn');
-  if(btn){btn.disabled=true;btn.textContent='Syncing…';}
+async function sbExportNow(){
+  if(!sbUserId){sbOpenModal();return;}
+  const btn=document.getElementById('export-btn');
+  const imp=document.getElementById('import-btn');
+  if(btn){btn.disabled=true;btn.textContent='Exporting…';}
+  if(imp)imp.disabled=true;
   try{
-    await sbPushAll();
+    // Force-push every sync key, including calendar (st_ics/st_e5) and all data
+    for(const k of SB_SYNC_KEYS){
+      const raw=localStorage.getItem(k);if(!raw)continue;
+      let val;try{val=JSON.parse(raw);}catch(e){val=raw;}
+      await sbSet(k,val);
+    }
+    showToast('Exported to cloud ✓');
+    if(btn){btn.textContent='Exported ✓';setTimeout(()=>{btn.textContent='↑ Export';btn.disabled=false;},2000);}
+  }catch{
+    showToast('Export failed');
+    if(btn){btn.textContent='↑ Export';btn.disabled=false;}
+  }
+  if(imp)imp.disabled=false;
+}
+
+async function sbImportNow(){
+  if(!sbUserId){sbOpenModal();return;}
+  const btn=document.getElementById('import-btn');
+  const exp=document.getElementById('export-btn');
+  if(btn){btn.disabled=true;btn.textContent='Importing…';}
+  if(exp)exp.disabled=true;
+  try{
     const remote=await sbLoadAll();
-    if(remote)applyRemoteData(remote);
-    renderDash();renderTT();renderRems();renderHW();
-    if(btn){btn.textContent='Synced ✓';setTimeout(()=>{btn.textContent='Sync';btn.disabled=false;},2000);}
-  }catch{if(btn){btn.textContent='Failed';setTimeout(()=>{btn.textContent='Sync';btn.disabled=false;},2000);}}}
+    if(remote&&Object.keys(remote).length){
+      applyRemoteData(remote);
+      renderDash();renderTT();renderRems();renderHW();
+      if(curPage==='cal')renderCal();
+      showToast('Imported from cloud ✓');
+      if(btn){btn.textContent='Imported ✓';setTimeout(()=>{btn.textContent='↓ Import';btn.disabled=false;},2000);}
+    }else{
+      showToast('Nothing to import');
+      if(btn){btn.textContent='↓ Import';btn.disabled=false;}
+    }
+  }catch{
+    showToast('Import failed');
+    if(btn){btn.textContent='↓ Import';btn.disabled=false;}
+  }
+  if(exp)exp.disabled=false;
+}
 
 /* ════ STATE ════════════════════════════════════════════ */
 let rems=JSON.parse(localStorage.getItem('st_r5')||'[]');
@@ -9482,8 +9519,9 @@ function setSyncStatus(connected,email){
   const dot=document.getElementById('sync-dot');
   const title=document.getElementById('sync-title');
   const sub=document.getElementById('sync-sub');
-  const manualBtn=document.getElementById('manual-sync-btn');
-  const syncBadgeSignBtn=document.getElementById('sync-badge')?.querySelector('.btn:not(#manual-sync-btn)');
+  const exportBtn=document.getElementById('export-btn');
+  const importBtn=document.getElementById('import-btn');
+  const authBtn=document.getElementById('sync-badge-auth-btn');
   const sb=document.getElementById('syncbtn');
   const mobileSyncDot=document.getElementById('mobile-sync-dot');
   const mobileSyncBtn=document.getElementById('mobile-syncbtn');
@@ -9493,8 +9531,9 @@ function setSyncStatus(connected,email){
     if(dot)dot.className='sync-dot green';
     if(title)title.textContent='Synced';
     if(sub)sub.textContent=email||'Data syncs across your devices';
-    if(manualBtn)manualBtn.style.display='';
-    if(syncBadgeSignBtn){syncBadgeSignBtn.textContent='Sign out';syncBadgeSignBtn.onclick=sbSignOut;}
+    if(exportBtn)exportBtn.style.display='';
+    if(importBtn)importBtn.style.display='';
+    if(authBtn){authBtn.textContent='Sign out';authBtn.onclick=sbSignOut;}
     if(sb){sb.style.color='#16a34a';}
     if(mobileSyncDot){mobileSyncDot.style.opacity='1';mobileSyncDot.style.background='#16a34a';}
     if(mobileSyncBtn)mobileSyncBtn.style.color='#16a34a';
@@ -9504,8 +9543,9 @@ function setSyncStatus(connected,email){
     if(dot)dot.className='sync-dot grey';
     if(title)title.textContent='Sync across devices';
     if(sub)sub.textContent='Sign in to sync your data';
-    if(manualBtn)manualBtn.style.display='none';
-    if(syncBadgeSignBtn){syncBadgeSignBtn.textContent='Sign in';syncBadgeSignBtn.onclick=sbOpenModal;}
+    if(exportBtn)exportBtn.style.display='none';
+    if(importBtn)importBtn.style.display='none';
+    if(authBtn){authBtn.textContent='Sign in';authBtn.onclick=sbOpenModal;}
     if(sb){sb.style.color='';}
     if(mobileSyncDot){mobileSyncDot.style.opacity='0';mobileSyncDot.style.background='';}
     if(mobileSyncBtn)mobileSyncBtn.style.color='';

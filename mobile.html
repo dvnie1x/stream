@@ -357,7 +357,13 @@ body{font-family:'Geist',sans-serif;font-size:14px;background:var(--bg);color:va
 <header id="app-header">
   <div class="app-logo">stream<span class="app-logo-dot">.</span><span class="companion-tag">companion</span></div>
   <div class="header-actions">
-    <button class="hdr-btn" id="sync-btn" onclick="handleSyncBtn()" title="Sync">
+    <button class="hdr-btn" id="export-btn" onclick="handleExportBtn()" title="Export to cloud" style="display:none">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4M4 20h16"/></svg>
+    </button>
+    <button class="hdr-btn" id="import-btn" onclick="handleImportBtn()" title="Import from cloud" style="display:none">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v12m0 0l-4-4m4 4l4-4M4 4h16"/></svg>
+    </button>
+    <button class="hdr-btn" id="sync-btn" title="Sync status">
       <div class="hdr-sync-dot" id="sync-dot"></div>
     </button>
     <button class="hdr-btn" onclick="openAuth()" title="Account">
@@ -751,6 +757,13 @@ function applyRemoteData(remote){
   applyList('st_r5','st_r5');applyList('st_hw','st_hw');applyList('st_x5','st_x5');applyList('st_e5','st_e5');
   applyList('st_l5','st_l5');applyList('st_p5','st_p5');
 
+  // Apply timetable/ICS data
+  const icsRaw=get('st_ics');
+  if(icsRaw!==undefined){
+    const ics=typeof icsRaw==='string'?JSON.parse(icsRaw):icsRaw;
+    localStorage.setItem('st_ics',JSON.stringify(ics));
+  }
+
   const name=get('st_name');if(name)localStorage.setItem('st_name',name);
 
   // Friends union-merge
@@ -842,6 +855,10 @@ async function sbSignOutMobile(){
 function setSyncStatus(on,email){
   const dot=document.getElementById('sync-dot');
   if(dot)dot.classList.toggle('on',on);
+  const exportBtn=document.getElementById('export-btn');
+  const importBtn=document.getElementById('import-btn');
+  if(exportBtn)exportBtn.style.display=on?'':'none';
+  if(importBtn)importBtn.style.display=on?'':'none';
   const signinView=document.getElementById('auth-signed-in-view');
   const formView=document.getElementById('auth-form-view');
   const emailDisp=document.getElementById('auth-email-display');
@@ -858,20 +875,52 @@ function setSyncStatus(on,email){
   }
 }
 
-async function handleSyncBtn(){
+async function handleExportBtn(){
   if(!sbUserId){openAuth();return;}
+  const btn=document.getElementById('export-btn');
+  const imp=document.getElementById('import-btn');
   const dot=document.getElementById('sync-dot');
   if(dot){dot.style.background='#f59e0b';dot.style.animation='spin .6s linear infinite';}
+  if(btn)btn.style.opacity='0.5';
+  if(imp)imp.style.pointerEvents='none';
   try{
-    await sbPushAll();
-    await sbSilentPull();
-    renderFeed();updateGreeting();
-    if(curPage==='lb')renderLBPage();
-    if(curPage==='cal')renderCalPage();
-    showToast('Synced ✓');
+    for(const k of SB_DATA_KEYS){
+      const raw=localStorage.getItem(k);if(!raw)continue;
+      let val;try{val=JSON.parse(raw);}catch(e){val=raw;}
+      await sbSet(k,val);
+    }
+    showToast('Exported to cloud ✓');
     setSyncStatus(true,null);
-  }catch{showToast('Sync failed');}
-  if(dot){dot.style.animation='';}
+  }catch{showToast('Export failed');}
+  if(dot){dot.style.animation='';dot.style.background='';}
+  if(btn)btn.style.opacity='';
+  if(imp)imp.style.pointerEvents='';
+}
+
+async function handleImportBtn(){
+  if(!sbUserId){openAuth();return;}
+  const btn=document.getElementById('import-btn');
+  const exp=document.getElementById('export-btn');
+  const dot=document.getElementById('sync-dot');
+  if(dot){dot.style.background='#f59e0b';dot.style.animation='spin .6s linear infinite';}
+  if(btn)btn.style.opacity='0.5';
+  if(exp)exp.style.pointerEvents='none';
+  try{
+    const remote=await sbLoadAll();
+    if(remote&&Object.keys(remote).length){
+      applyRemoteData(remote);
+      renderFeed();updateGreeting();
+      if(curPage==='cal')renderCalPage();
+      if(curPage==='lb')renderLBPage();
+      showToast('Imported from cloud ✓');
+      setSyncStatus(true,null);
+    }else{
+      showToast('Nothing to import');
+    }
+  }catch{showToast('Import failed');}
+  if(dot){dot.style.animation='';dot.style.background='';}
+  if(btn)btn.style.opacity='';
+  if(exp)exp.style.pointerEvents='';
 }
 
 /* ═══════════════════════════════════════════════
