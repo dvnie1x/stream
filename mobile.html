@@ -20,7 +20,24 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="stream.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23f2f3f6'/><text x='8' y='24' font-family='Arial,sans-serif' font-size='22' font-weight='700' fill='%230f0f0f'>s</text><circle cx='25.5' cy='22' r='3' fill='%236366f1'/></svg>">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<script>
+(function(){
+  try{
+    var c=document.createElement('canvas');c.width=c.height=180;
+    var ctx=c.getContext('2d');
+    ctx.fillStyle='#f2f3f6';
+    ctx.beginPath();ctx.roundRect(0,0,180,180,40);ctx.fill();
+    ctx.fillStyle='#0f0f0f';
+    ctx.font='bold 134px Arial,sans-serif';
+    ctx.fillText('s',33,122);
+    ctx.fillStyle='#6366f1';
+    ctx.beginPath();ctx.arc(130,109,17,0,Math.PI*2);ctx.fill();
+    var l=document.createElement('link');
+    l.rel='apple-touch-icon';l.href=c.toDataURL('image/png');
+    document.head.appendChild(l);
+  }catch(e){}
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@200;300;400;500;600;700;800;900&family=Geist+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
