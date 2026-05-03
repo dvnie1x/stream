@@ -2,6 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+(function(){
+  var ua=navigator.userAgent;
+  var isPhone=/iPhone/i.test(ua)||(/Android/i.test(ua)&&/Mobile/i.test(ua));
+  var isNarrow=window.innerWidth<=768;
+  if(isPhone||isNarrow)window.location.replace('mobile.html');
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>stream.</title>
 <!-- PWA -->
